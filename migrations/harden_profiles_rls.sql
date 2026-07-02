@@ -5,17 +5,32 @@
 -- (free paid access) or someone else's email. API routes now use the auth-verified
 -- email for Stripe lookups, but the table itself should also refuse bad rows.
 --
--- The only client-side writes in the app are: SELECT own row, and the signup INSERT
--- with plan_type='free' and the user's own email. Everything else (plan changes,
--- usage counters, promo grants) goes through API routes using the service role,
--- which bypasses RLS and these grants.
+-- The only client-side writes in the app are: SELECT own row, and the signup /
+-- lazy-create INSERT with plan_type='free' and the user's own email. Everything else
+-- (plan changes, usage counters, promo grants) goes through API routes using the
+-- service role, which bypasses RLS and these grants.
+--
+-- This drops ALL existing policies on profiles FIRST. Postgres combines permissive
+-- policies with OR, so a leftover default policy (e.g. Supabase's "Enable insert for
+-- authenticated users") would silently defeat the restrictive policies below. We
+-- recreate exactly the two the app needs.
 --
 -- Apply in the Supabase SQL editor. Run the verification query at the bottom after.
 
 alter table public.profiles enable row level security;
 
--- Signup insert: own id, own (auth-verified) email, free plan only.
-drop policy if exists "profiles self insert free only" on public.profiles;
+do $$
+declare pol record;
+begin
+  for pol in
+    select policyname from pg_policies
+    where schemaname = 'public' and tablename = 'profiles'
+  loop
+    execute format('drop policy if exists %I on public.profiles', pol.policyname);
+  end loop;
+end $$;
+
+-- Signup / lazy-create insert: own id, own (auth-verified) email, free plan only.
 create policy "profiles self insert free only"
   on public.profiles for insert
   to authenticated
@@ -26,7 +41,6 @@ create policy "profiles self insert free only"
   );
 
 -- Users read their own profile.
-drop policy if exists "profiles self select" on public.profiles;
 create policy "profiles self select"
   on public.profiles for select
   to authenticated
@@ -35,6 +49,8 @@ create policy "profiles self select"
 -- No client-side updates or deletes at all (nothing in the app does them).
 revoke update, delete on table public.profiles from anon, authenticated;
 
--- NOTE: if an older permissive insert/select policy exists with a different name,
--- drop it too — list them with:
---   select policyname, cmd, qual, with_check from pg_policies where tablename = 'profiles';
+-- Verify: expect exactly two rows — the insert and select policies above.
+--   select policyname, cmd, roles, qual, with_check
+--   from pg_policies
+--   where schemaname = 'public' and tablename = 'profiles'
+--   order by cmd;
