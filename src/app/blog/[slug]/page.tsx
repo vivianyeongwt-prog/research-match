@@ -2,6 +2,10 @@ import Link from "next/link";
 import { posts } from "../posts";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { siteOrigin } from "@/lib/site-url";
+import { serializeJsonLd } from "@/lib/json-ld";
+
+const SITE = siteOrigin();
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -76,7 +80,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: post.title,
       description: post.description,
       type: "article",
-      url: `https://www.researchmatch.site/blog/${post.slug}`,
+      url: `${SITE}/blog/${post.slug}`,
       publishedTime: post.datePublished,
       authors: ["Jace"],
       siteName: "Research Match",
@@ -112,20 +116,20 @@ export default async function BlogPost({ params }: Props) {
     publisher: {
       "@type": "Organization",
       name: "Research Match",
-      url: "https://www.researchmatch.site",
+      url: SITE,
     },
     datePublished: post.datePublished,
     dateModified: post.datePublished,
-    url: `https://www.researchmatch.site/blog/${post.slug}`,
-    mainEntityOfPage: `https://www.researchmatch.site/blog/${post.slug}`,
+    url: `${SITE}/blog/${post.slug}`,
+    mainEntityOfPage: `${SITE}/blog/${post.slug}`,
   };
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.researchmatch.site/" },
-      { "@type": "ListItem", position: 2, name: "Blog", item: "https://www.researchmatch.site/blog" },
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE}/blog` },
       { "@type": "ListItem", position: 3, name: post.title },
     ],
   };
@@ -134,11 +138,11 @@ export default async function BlogPost({ params }: Props) {
     <div className="blog-shell blog-post-shell">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
       <div className="blog-post-container">
         {/* Nav */}

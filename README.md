@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Research Match
 
-## Getting Started
+Research Match is a Next.js application that helps students find relevant professors, understand recent papers, evaluate public research activity, locate public contact information, and improve outreach drafts.
 
-First, run the development server:
+## Local setup
+
+Requirements: Node.js 22 LTS, npm, a Supabase project, and credentials for the providers listed in `.env.example`.
 
 ```bash
+npm ci
+cp .env.example .env.local
+npm run check
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For a brand-new Supabase project with no production data, apply
+`migrations/00000000_core_schema.sql` first, then the remaining migrations in
+filename order. Do not use that greenfield sequence before importing an existing
+project backup; restore the source schema and data first, as described in
+`TRANSFER.md`. `migrations/20260720_sale_readiness.sql` contains the durable API
+usage ledger and atomic Buddy Pass reward used by the current server routes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npm audit --omit=dev
+```
 
-## Learn More
+The detailed operational and ownership checklist is in [TRANSFER.md](./TRANSFER.md).
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js App Router hosts the public site, account workspace, and server API routes.
+- Supabase provides authentication and PostgreSQL data storage.
+- Stripe provides checkout, subscriptions, the billing portal, refunds, and webhook events.
+- OpenAlex and ORCID provide public research metadata.
+- Groq and Anthropic power AI-assisted search expansion, summaries, and email tools.
+- Serper supports public faculty-page discovery for the paid email finder.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Never expose `SUPABASE_SERVICE_ROLE_KEY`, Stripe secret keys, webhook secrets, AI-provider keys, or `RATE_LIMIT_SECRET` to browser code.

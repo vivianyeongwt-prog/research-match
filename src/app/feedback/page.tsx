@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef, startTransition } from "react
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/client-fetch";
 
 interface FeedbackItem {
   id: string;
@@ -14,7 +15,10 @@ interface FeedbackItem {
   resolved: boolean;
 }
 
-const ADMIN_EMAIL = "thomasjacekim@gmail.com";
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
 const CATEGORIES = ["Feature Request", "Bug Report", "General Feedback"];
 
@@ -47,7 +51,7 @@ export default function FeedbackPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [voteBounce, setVoteBounce] = useState<string | null>(null);
   const { user } = useAuth();
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = !!user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -68,7 +72,7 @@ export default function FeedbackPage() {
     const seq = ++fetchSeqRef.current;
     setLoading(true);
     try {
-      const res = await fetch(`/api/feedback?sort=${sort}`);
+      const res = await apiFetch(`/api/feedback?sort=${sort}`);
       const data = await res.json();
       if (seq !== fetchSeqRef.current) return;
       if (Array.isArray(data)) startTransition(() => setItems(data));
@@ -84,7 +88,7 @@ export default function FeedbackPage() {
     if (!content.trim() || submitting) return;
     setSubmitting(true);
     try {
-      const res = await fetch("/api/feedback", {
+      const res = await apiFetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, category, author_name: authorName }),
@@ -123,7 +127,7 @@ export default function FeedbackPage() {
     setItems((prev) => prev.map((item) => item.id === id ? { ...item, upvotes: item.upvotes + 1 } : item));
 
     try {
-      const res = await fetch("/api/feedback", {
+      const res = await apiFetch("/api/feedback", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -154,7 +158,7 @@ export default function FeedbackPage() {
         return;
       }
 
-      const res = await fetch("/api/feedback", {
+      const res = await apiFetch("/api/feedback", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

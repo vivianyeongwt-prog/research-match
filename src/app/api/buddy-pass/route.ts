@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { generateReferralCode } from "@/lib/buddy-pass";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-async function authenticatedUserId(req: NextRequest) {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token) return null;
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error) return null;
-  return data.user?.id ?? null;
-}
+import { allowRequestRate, requestAccess, supabaseAdmin } from "@/lib/server-access";
+import { siteOrigin } from "@/lib/site-url";
 
 async function ensureReferralCode(userId: string, currentCode?: string | null) {
   if (currentCode) return currentCode;
@@ -31,9 +18,13 @@ async function ensureReferralCode(userId: string, currentCode?: string | null) {
 
 export async function GET(req: NextRequest) {
   try {
-    const userId = await authenticatedUserId(req);
-    if (!userId) {
+    const access = await requestAccess(req);
+    if (!access.user) {
       return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
+    }
+    const userId = access.user.id;
+    if (!(await allowRequestRate(req, "buddy-pass-read", 12, userId))) {
+      return NextResponse.json({ error: "Too many Buddy Pass checks." }, { status: 429 });
     }
 
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -50,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     const { data: referrals } = await supabaseAdmin
       .from("buddy_pass_referrals")
-      .select("id, referred_user_id, created_at, reward_weeks, discount_percent, status")
+      .select("id, created_at, reward_weeks, discount_percent, status")
       .eq("referrer_id", userId)
       .eq("status", "rewarded")
       .order("created_at", { ascending: false })
@@ -62,32 +53,12 @@ export async function GET(req: NextRequest) {
       .eq("referrer_id", userId)
       .eq("status", "rewarded");
 
-    const referredIds = [...new Set((referrals ?? [])
-      .map((referral) => referral.referred_user_id)
-      .filter(Boolean))] as string[];
-
-    let emailsById = new Map<string, string>();
-    if (referredIds.length > 0) {
-      const { data: referredProfiles } = await supabaseAdmin
-        .from("profiles")
-        .select("id, email")
-        .in("id", referredIds);
-
-      emailsById = new Map(
-        (referredProfiles ?? []).map((referredProfile) => [
-          referredProfile.id,
-          referredProfile.email,
-        ])
-      );
-    }
-
-    const origin = req.nextUrl.origin || "https://www.researchmatch.site";
     const activeUntil = profile.buddy_pass_active_until;
     const active = activeUntil ? new Date(activeUntil).getTime() > Date.now() : false;
 
     return NextResponse.json({
       referralCode,
-      referralUrl: `${origin}/app?buddy=${encodeURIComponent(referralCode)}`,
+      referralUrl: `${siteOrigin()}/app?buddy=${encodeURIComponent(referralCode)}`,
       weeksAvailable: profile.buddy_pass_weeks_available ?? 0,
       weeksEarned: profile.buddy_pass_weeks_earned ?? 0,
       weeksUsed: profile.buddy_pass_weeks_used ?? 0,
@@ -96,9 +67,7 @@ export async function GET(req: NextRequest) {
       successfulReferrals: referralCount ?? referrals?.length ?? 0,
       referrals: (referrals ?? []).map((referral) => ({
         id: referral.id,
-        friendEmail: referral.referred_user_id
-          ? emailsById.get(referral.referred_user_id) ?? "Friend"
-          : "Friend",
+        friendEmail: "Friend",
         createdAt: referral.created_at,
         rewardWeeks: referral.reward_weeks,
         discountPercent: referral.discount_percent,
@@ -112,9 +81,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const userId = await authenticatedUserId(req);
-    if (!userId) {
+    const access = await requestAccess(req);
+    if (!access.user) {
       return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
+    }
+    const userId = access.user.id;
+    if (!(await allowRequestRate(req, "buddy-pass-activate", 4, userId, 600))) {
+      return NextResponse.json({ error: "Too many activation attempts." }, { status: 429 });
     }
 
     const { action } = await req.json();

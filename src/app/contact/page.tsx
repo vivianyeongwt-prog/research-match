@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { apiFetch } from "@/lib/client-fetch";
 
 export default function ContactPage() {
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -15,7 +17,7 @@ export default function ContactPage() {
     setSubmitting(true);
     setSubmitError("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await apiFetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message }),
@@ -52,12 +54,12 @@ export default function ContactPage() {
           </p>
 
           {/* Email link */}
-          <a
-            href="mailto:thomasjacekim@gmail.com"
+          {supportEmail && <a
+            href={`mailto:${supportEmail}`}
             className="contact-email-link"
           >
-            thomasjacekim@gmail.com
-          </a>
+            {supportEmail}
+          </a>}
 
           <div style={{ height: "1px", background: "rgba(101, 153, 131,0.15)", marginBottom: "28px" }} />
 

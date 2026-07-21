@@ -35,7 +35,7 @@ export const TARGET_MIN = 8;
 export const TARGET_MAX = 12;
 const RECENT_YEARS = 3;
 const MIN_RECENT_WORKS = 3;
-const MAILTO = "jace@researchmatch.net";
+const MAILTO = process.env.NEXT_PUBLIC_OPENALEX_MAILTO || "contact@researchmatch.site";
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import Link from "next/link";
@@ -10,6 +10,8 @@ import { track } from "@/lib/analytics";
 import { foldName, looksLikePersonName, nameMatches } from "@/lib/author-normalize";
 import { useMobile } from "@/lib/use-mobile";
 import { oaUrl } from "@/lib/openalex";
+import { signupSuccessMessage } from "@/lib/auth-copy";
+import { apiFetch } from "@/lib/client-fetch";
 
 // OpenAlex can occasionally hang; without a timeout a single stalled request
 // freezes the search spinner forever. oaFetch bounds every client OpenAlex call
@@ -488,6 +490,8 @@ function AppPageInner() {
   const [authModalCopy, setAuthModalCopy] = useState("");
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const authModalRef = useRef<HTMLDivElement>(null);
 
   const PLACEHOLDER_EXAMPLES = [
     "e.g. neuroscience", "e.g. organic chemistry", "e.g. political science",
@@ -506,6 +510,7 @@ function AppPageInner() {
   const [emailTarget, setEmailTarget] = useState<Author | null>(null);
   const [emailDraft, setEmailDraft] = useState("");
   const [emailFlags, setEmailFlags] = useState<EmailFlag[]>([]);
+  const [emailTotalFlags, setEmailTotalFlags] = useState(0);
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
   const [showFramework, setShowFramework] = useState(false);
@@ -545,7 +550,6 @@ function AppPageInner() {
   const isPaid = hasPaidAccess(profile);
   const isFree = !isPaid;
   const planLabel = planLabelFor(profile);
-  const hasEmailChecker = isPaid; // every paid plan (incl. weekly) gets the email checker
 
   // Tag helpers
   function addQueryTag() {
@@ -573,19 +577,6 @@ function AppPageInner() {
       setFreeEmailCheckUsed(false);
     }
   }, [user?.id]);
-
-  // When an anonymous visitor signs up while a gated taste result is on screen,
-  // reveal it in full — that revealed check is their one free full check, so the
-  // next email hits the paywall. Read localStorage directly to avoid races with
-  // the effect above.
-  useEffect(() => {
-    if (!user?.id || !hasChecked || !resultGated) return;
-    setResultGated(false);
-    if (localStorage.getItem(`rm-email-check-${user.id}`) !== "1") {
-      localStorage.setItem(`rm-email-check-${user.id}`, "1");
-    }
-    setFreeEmailCheckUsed(true);
-  }, [user?.id, hasChecked, resultGated]);
 
   // Handle ?upgrade=true or ?upgrade=lifetime or ?upgrade=weekly from landing page
   useEffect(() => {
@@ -629,12 +620,16 @@ function AppPageInner() {
     }
   }, [authLoading2, user, searchParams]);
 
-  async function startCheckout(priceId: string) {
+  async function startCheckout(priceId: string | undefined) {
+    if (!priceId) {
+      setCheckoutError("Checkout is not configured for this plan.");
+      return;
+    }
     // Funnel: user clicked an upgrade/checkout button on the paywall.
     const plan =
-      priceId === (process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY || "price_1TMxDSFINW44xCyFWrm6ZTOo") ? "weekly" :
-      priceId === (process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER || "price_1TIuAlFINW44xCyFcxqgQpeV") ? "semester" :
-      priceId === (process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME || "price_1TIuBBFINW44xCyFoSCtUpFN") ? "lifetime" :
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY ? "weekly" :
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER ? "semester" :
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME ? "lifetime" :
       "unknown";
     track("upgrade_clicked", { plan });
 
@@ -651,7 +646,7 @@ function AppPageInner() {
       if (!session?.access_token) throw new Error("Missing auth session");
 
       const cleanReferralCode = normalizeReferralCode(checkoutReferralCode);
-      const res = await fetch("/api/checkout", {
+      const res = await apiFetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({
@@ -688,7 +683,8 @@ function AppPageInner() {
     }
   }, [searchParams, autoSearched]);
 
-  // Close hamburger menu on outside click
+  // Close the hamburger menu on outside click or Escape. Returning focus to
+  // the trigger keeps keyboard and switch-control navigation predictable.
   useEffect(() => {
     if (!showMenu) return;
     function handleOutside(e: MouseEvent) {
@@ -696,9 +692,70 @@ function AppPageInner() {
         setShowMenu(false);
       }
     }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      setShowMenu(false);
+      window.requestAnimationFrame(() => menuButtonRef.current?.focus());
+    }
     document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [showMenu]);
+
+  useEffect(() => {
+    if (!showAuthModal && !showUpgradeModal && !emailTarget) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusTimer = window.setTimeout(() => {
+      const first = authModalRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+      );
+      first?.focus();
+    }, 0);
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        if (showAuthModal) setShowAuthModal(false);
+        else if (showUpgradeModal) setShowUpgradeModal(false);
+        else if (emailTarget) {
+          setEmailTarget(null);
+          setEmailDraft("");
+          setEmailFlags([]);
+          setEmailTotalFlags(0);
+          setHasChecked(false);
+        }
+        return;
+      }
+      if (event.key !== "Tab" || !showAuthModal || !authModalRef.current) return;
+      const focusable = Array.from(authModalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [showAuthModal, showUpgradeModal, emailTarget]);
 
   // Grand reveal / welcome back
   const [revealPhase, setRevealPhase] = useState<"curtain" | "content" | "done">("curtain");
@@ -827,6 +884,77 @@ function AppPageInner() {
     setTimeout(() => setToast(null), duration);
   }, []);
 
+  async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (authLoading) return;
+    setAuthLoading(true);
+    setAuthError("");
+    try {
+      if (authMode === "signup") {
+        const { error: signUpError, promoApplied, promoPending, confirmationRequired } = await signUp(
+          authEmail,
+          authPassword,
+          authPromoCode || undefined
+        );
+        if (signUpError) {
+          setAuthError(signUpError.message);
+        } else {
+          setShowAuthModal(false);
+          setAuthPromoCode("");
+          showToast(signupSuccessMessage({ promoApplied, promoPending, confirmationRequired }));
+        }
+      } else {
+        const { error: signInError } = await signIn(authEmail, authPassword);
+        if (signInError) {
+          setAuthError(signInError.message);
+        } else {
+          setShowAuthModal(false);
+          showToast("Welcome back!");
+        }
+      }
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function sendPasswordReset() {
+    const email = authEmail.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setAuthError("Enter your email address first.");
+      return;
+    }
+    if (authLoading) return;
+    setAuthLoading(true);
+    setAuthError("");
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/profile?reset=1`,
+    });
+    setAuthLoading(false);
+    if (resetError) {
+      setAuthError(resetError.message);
+      return;
+    }
+    setShowAuthModal(false);
+    showToast("Password reset link sent. Check your email.", 3500);
+  }
+
+  async function logSearch(researchInterest: string, searchedUniversity: string | null) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      await apiFetch("/api/log-search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ research_interest: researchInterest, university: searchedUniversity }),
+        keepalive: true,
+      });
+    } catch { /* analytics must never interrupt a search */ }
+  }
+
   // Opens the upgrade/paywall modal and records which free-tier limit triggered it.
   const hitPaywall = useCallback((limitType: "summary" | "email_checker" | "professor_results") => {
     track("paywall_hit", { limit_type: limitType });
@@ -901,9 +1029,9 @@ function AppPageInner() {
     setPaperRange([0, MAX_PAPERS]);
     setCurrentPage(1);
     // Log search (fire and forget)
-    fetch("/api/log-search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ research_interest: allTopics.join(", "), university: allUnis.join(", "), is_authenticated: !!user }) }).catch(() => {});
+    void logSearch(allTopics.join(", "), allUnis.join(", ") || null);
     try {
-      const resolveRes = await fetch("/api/resolve", {
+      const resolveRes = await apiFetch("/api/resolve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topics: allTopics, universities: allUnis }),
@@ -1081,7 +1209,7 @@ function AppPageInner() {
         try {
           // Drastically reduce OpenAlex API bottleneck by only scoring top 20 candidates
           const authorsToScore = authors.slice(0, 20);
-          const scoreRes = await fetch("/api/score-authors", {
+          const scoreRes = await apiFetch("/api/score-authors", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1122,13 +1250,13 @@ function AppPageInner() {
       // Fetch responsiveness badges in background
       if (authors.length > 0) fetchResponsiveness(authors);
       // Fetch nearby professors — only when searching a single institution
-      if (authors.length > 0 && institutionIds.length === 1 && institutionNames.length === 1) {
+      if (isPaid && authors.length > 0 && institutionIds.length === 1 && institutionNames.length === 1) {
         setNearbyProfs([]);
         setNearbyLoading(true);
         const resolveTopicId = topicIds[0] ?? await oaFetch(`https://api.openalex.org/topics?search=${encodeURIComponent(allTopics[0])}&per_page=1`)
           .then(r => r.json()).then(d => d.results?.[0]?.id?.split("/").pop() ?? null).catch(() => null);
         if (resolveTopicId) {
-          fetchNearby(resolveTopicId, institutionNames[0], authors.map(a => a.id));
+          fetchNearby(resolveTopicId, institutionNames[0], authors.map(a => a.id), runId);
         } else {
           setNearbyLoading(false);
           setNearbyProfs([]);
@@ -1140,17 +1268,22 @@ function AppPageInner() {
     finally { if (runId === searchRunIdRef.current) setLoading(false); }
   }
 
-  async function fetchNearby(topicId: string, institutionName: string, excludeIds: string[]) {
+  async function fetchNearby(topicId: string, institutionName: string, excludeIds: string[], runId: number) {
     try {
-      const res = await fetch("/api/nearby-authors", {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await apiFetch("/api/nearby-authors", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ institutionName, topicId, excludeIds }),
       });
+      if (!res.ok || runId !== searchRunIdRef.current) return;
       const data = await res.json();
-      setNearbyProfs(data.authors ?? []);
+      if (runId === searchRunIdRef.current) setNearbyProfs(data.authors ?? []);
     } catch { /* ignore nearby failures */ }
-    finally { setNearbyLoading(false); }
+    finally { if (runId === searchRunIdRef.current) setNearbyLoading(false); }
   }
 
   async function fetchResponsiveness(authors: Author[]) {
@@ -1165,13 +1298,14 @@ function AppPageInner() {
         const twoYearsAgo = currentYear - 2;
 
         const worksRes = await oaFetch(
-          `https://api.openalex.org/works?filter=author.id:${authorId},publication_year:>${threeYearsAgo}&per_page=50&select=authorships,publication_year`
+          `https://api.openalex.org/works?filter=author.id:${authorId},publication_year:>${threeYearsAgo}&per_page=50&select=publication_year`
         );
+        if (!worksRes.ok) continue;
         const worksData = await worksRes.json();
         const works = (worksData.results ?? []) as OpenAlexWork[];
 
         if (works.length === 0) {
-          setResponsiveness(prev => ({ ...prev, [authorId]: { level: "red", label: "Inactive lab", tooltip: "No papers found in the last 3 years. This lab may be inactive or retired" } }));
+          setResponsiveness(prev => ({ ...prev, [authorId]: { level: "red", label: "No recent publications", tooltip: "OpenAlex lists no papers in this three-year window. This measures publication activity, not whether the lab has openings." } }));
           continue;
         }
 
@@ -1184,70 +1318,24 @@ function AppPageInner() {
         if (last2YearWorks.length === 0) {
           const lastYear = Math.max(...works.map((w) => w.publication_year ?? 0));
           const yearsAgo = currentYear - lastYear;
-          setResponsiveness(prev => ({ ...prev, [authorId]: { level: "red", label: "Inactive lab", tooltip: `Last published in ${lastYear} (${yearsAgo} year${yearsAgo !== 1 ? "s" : ""} ago). Lab appears to be winding down` } }));
+          setResponsiveness(prev => ({ ...prev, [authorId]: { level: "red", label: "No recent publications", tooltip: `The latest OpenAlex paper in this window is from ${lastYear}, ${yearsAgo} year${yearsAgo !== 1 ? "s" : ""} ago. This does not indicate whether the lab has openings.` } }));
           continue;
         }
-
-        // Count unique co-authors and identify likely students (low publication count at same institution)
-        const coAuthorIds = new Set<string>();
-        const newStudentCoAuthors = new Set<string>();
-        const profInstId = author.last_known_institutions?.[0]?.id;
-
-        for (const w of works) {
-          for (const a of (w.authorships ?? [])) {
-            const coId = a.author?.id;
-            if (!coId || coId === `https://openalex.org/${authorId}`) continue;
-            coAuthorIds.add(coId);
-
-            // Check if co-author is at same institution and likely a student
-            const coInst = a.institutions?.[0]?.id;
-            if (profInstId && coInst === profInstId) {
-              // We'll check works_count via a simple heuristic: new co-authors appearing in recent papers
-              newStudentCoAuthors.add(coId);
-            }
-          }
-        }
-
-        // Estimate student co-authors: sample up to 5 unique co-authors from same institution.
-        // Collect booleans then count — `studentCount++` inside concurrent async
-        // callbacks interleaves across awaits and silently loses increments, which
-        // could flip the recruiting badge color.
-        const samplesToCheck = Array.from(newStudentCoAuthors).slice(0, 5);
-        const studentChecks = await Promise.all(samplesToCheck.map(async (coId) => {
-          try {
-            const cId = coId.split("/").pop();
-            const r = await oaFetch(`https://api.openalex.org/authors/${cId}?select=works_count`, { signal: AbortSignal.timeout(3000) });
-            const d = await r.json();
-            return d.works_count < 5;
-          } catch { return false; }
-        }));
-        const studentCount = studentChecks.filter(Boolean).length;
 
         let level: "green" | "yellow" | "red";
         let label: string;
         let tooltip: string;
 
-        if (studentCount >= 2 && publishedRecently) {
+        if (publishedRecently) {
           level = "green";
-          label = "Likely takes students";
-          tooltip = `Published ${recentWorks.length} paper${recentWorks.length !== 1 ? "s" : ""} in the last year with ${studentCount} likely student co-author${studentCount !== 1 ? "s" : ""} at their institution`;
-        } else if (studentCount === 1 && publishedRecently) {
-          // Close to threshold — probably still recruiting
-          level = "green";
-          label = "Probably takes students";
-          tooltip = `Published recently but only 1 apparent student co-author found. Likely still has capacity, worth reaching out`;
-        } else if (!publishedRecently) {
-          level = "yellow";
-          label = "May not take students";
-          const lastYear = Math.max(...works.map((w) => w.publication_year ?? 0));
-          const yearsAgo = currentYear - lastYear;
-          tooltip = yearsAgo >= 2
-            ? `Last published ${yearsAgo} years ago. Lab may not be actively recruiting`
-            : `Hasn't published in the last year. May not be actively recruiting right now`;
+          label = "Recently active";
+          tooltip = `OpenAlex lists ${recentWorks.length} paper${recentWorks.length !== 1 ? "s" : ""} from the last two calendar years. This measures publication activity, not whether the lab has openings.`;
         } else {
           level = "yellow";
-          label = "May not take students";
-          tooltip = `No apparent student co-authors found in recent papers. Lab may not have open positions`;
+          label = "Limited recent activity";
+          const lastYear = Math.max(...works.map((w) => w.publication_year ?? 0));
+          const yearsAgo = currentYear - lastYear;
+          tooltip = `The most recent OpenAlex paper in this three-year window is from ${lastYear}, ${yearsAgo} year${yearsAgo !== 1 ? "s" : ""} ago. This does not indicate whether the lab has openings.`;
         }
 
         if (runId !== searchRunIdRef.current) return; // results changed during the awaits above
@@ -1269,14 +1357,14 @@ function AppPageInner() {
     setResolvedTopic("");
     setResolvedInstitution("");
     setShowSaved(false);
-    fetch("/api/log-search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ research_interest: profName, university: profUniversity || null, is_authenticated: !!user }) }).catch(() => {});
+    void logSearch(profName, profUniversity || null);
     try {
       // Optional university narrows common-name collisions and surfaces the right
       // affiliation (when OpenAlex's record for that person actually has it).
       let fullInstIds: string[] = [];
       if (profUniversity.trim()) {
         try {
-          const r = await fetch("/api/resolve", {
+          const r = await apiFetch("/api/resolve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ universities: [profUniversity] }),
@@ -1309,7 +1397,7 @@ function AppPageInner() {
       const { data: { session } } = await supabase.auth.getSession();
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
-      const res = await fetch("/api/summarize", { method: "POST", headers, body: JSON.stringify({ authorId: id }) });
+      const res = await apiFetch("/api/summarize", { method: "POST", headers, body: JSON.stringify({ authorId: id }) });
       if (res.status === 403) {
         if (!user) {
           // Anon hit server limit — sync local state so locked overlay appears, no modal
@@ -1359,7 +1447,7 @@ function AppPageInner() {
   function openEmailDraft(author: Author) {
     const id = author.id.split("/").pop()!;
     if (!summaries[id]) loadSummary(author);
-    setEmailTarget(author); setEmailDraft(""); setEmailFlags([]); setHasChecked(false); setResultGated(false);
+    setEmailTarget(author); setEmailDraft(""); setEmailFlags([]); setEmailTotalFlags(0); setHasChecked(false); setResultGated(false);
   }
 
   // Opens signup from the gated taste result ("create a free account to see them all").
@@ -1414,7 +1502,7 @@ function AppPageInner() {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
 
-      const res = await fetch("/api/email", {
+      const res = await apiFetch("/api/email", {
         method: "POST",
         headers,
         body: JSON.stringify({ draft: emailDraft, professorName: emailTarget.display_name, institution: emailTarget.last_known_institutions?.[0]?.display_name || "", topics: emailTarget.topics?.slice(0, 4).map((t) => t.display_name), highlights: summary?.highlights || [], questions: summary?.questions || [] }),
@@ -1425,6 +1513,10 @@ function AppPageInner() {
       // (and doesn't wrongly consume the free check).
       if (emailTargetIdRef.current !== id) return;
       if (!res.ok) {
+        if (data.error === "signup_required") {
+          openCheckerSignup();
+          return;
+        }
         if (data.error === "upgrade_required") {
           setEmailTarget(null);
           setShowUpgradeModal(true);
@@ -1437,6 +1529,7 @@ function AppPageInner() {
       }
       const flags = data.flags ?? [];
       setEmailFlags(flags);
+      setEmailTotalFlags(Number.isFinite(data.totalFlags) ? data.totalFlags : flags.length);
       setHasChecked(true);
 
       // Entitlement for THIS result:
@@ -1444,17 +1537,15 @@ function AppPageInner() {
       //  - signed-in free, first check: full reveal; consume their one free check
       //    so the next email hits the paywall.
       //  - anonymous: a gated taste (top flag + count shown, rest behind signup).
-      if (isPaid) {
-        setResultGated(false);
-      } else if (user?.id) {
+      if (data.gated === true) {
+        setResultGated(true);
+      } else if (user?.id && !isPaid) {
         setResultGated(false);
         if (!freeEmailCheckUsed) {
           localStorage.setItem(`rm-email-check-${user.id}`, "1");
           setFreeEmailCheckUsed(true);
         }
-      } else {
-        setResultGated(true);
-      }
+      } else setResultGated(false);
 
       // Perfect email celebration!
       if (flags.length === 0) {
@@ -1495,9 +1586,13 @@ function AppPageInner() {
     if (emailLookup[id] || emailLookupLoading[id]) return;
     setEmailLookupLoading(prev => ({ ...prev, [id]: true }));
     try {
-      const res = await fetch("/api/find-email", {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await apiFetch("/api/find-email", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({
           authorId: id,
           authorName: author.display_name,
@@ -1507,6 +1602,10 @@ function AppPageInner() {
       // A transient failure (429 rate limit, 5xx) must NOT be cached as a result —
       // the guard above would then present it as "no email found" for the rest of
       // the session with no way to retry.
+      if (res.status === 403) {
+        setShowUpgradeModal(true);
+        return;
+      }
       if (!res.ok) {
         showToast(res.status === 429 ? "Email lookup is busy — try again in a minute." : "Email lookup failed. Try again.");
         return;
@@ -1558,7 +1657,7 @@ function AppPageInner() {
   // ── Email sheet: close + pull-down-to-dismiss (mobile bottom sheet) ──────────
   // Closing just unmounts the overlay, so the professor list underneath is revealed
   // exactly where it was left.
-  const closeEmailModal = () => { setEmailTarget(null); setEmailDraft(""); setEmailFlags([]); setHasChecked(false); };
+  const closeEmailModal = () => { setEmailTarget(null); setEmailDraft(""); setEmailFlags([]); setEmailTotalFlags(0); setHasChecked(false); };
   const emailSheetRef = useRef<HTMLDivElement | null>(null);
   const emailDragStartY = useRef<number | null>(null);
   const emailDragDY = useRef(0);
@@ -1743,9 +1842,13 @@ function AppPageInner() {
 
           {/* Hamburger */}
           <button
+            ref={menuButtonRef}
+            type="button"
             className={`rm-hamburger${showMenu ? " rm-hamburger-open" : ""}`}
             onClick={() => setShowMenu(v => !v)}
             aria-label="Menu"
+            aria-expanded={showMenu}
+            aria-controls="research-match-menu"
           >
             <span className="rm-hamburger-line" />
             <span className="rm-hamburger-line" />
@@ -1811,7 +1914,7 @@ function AppPageInner() {
           )}
 
           {/* Dropdown menu */}
-          <div className={`rm-nav-dropdown${showMenu ? " rm-nav-dropdown-open" : ""}`}>
+          <div id="research-match-menu" aria-hidden={!showMenu} inert={!showMenu} className={`rm-nav-dropdown${showMenu ? " rm-nav-dropdown-open" : ""}`}>
             <div className="rm-nav-dropdown-inner">
 
               {/* ── Tools ── */}
@@ -2389,8 +2492,8 @@ function AppPageInner() {
                   </>
                 )}
 
-                {/* Professor Email Finder — unlocked for paid or after summarizing */}
-                {(isPaid || !!summaries[id]) ? (() => {
+                {/* Professor Email Finder — paid plans only; the API enforces this too. */}
+                {isPaid ? (() => {
                   const lookup = emailLookup[id];
                   const isLookingUp = emailLookupLoading[id];
                   return (
@@ -2466,7 +2569,7 @@ function AppPageInner() {
                 })() : (
                   <div className="rm-locked-row rm-feature-lock" style={{ marginTop: "18px" }}>
                     <span style={{ fontSize: "0.85rem", color: "#6b7280", flex: 1 }}>Professor email finder</span>
-                    <span className="rm-locked-tag">Summarize to unlock</span>
+                    <span className="rm-locked-tag">Paid plans</span>
                   </div>
                 )}
 
@@ -2845,8 +2948,8 @@ function AppPageInner() {
             <p key={i} style={{ fontSize: "0.8rem", color: "#6b7280", paddingLeft: "14px", borderLeft: "2px solid #9dbfb1", marginBottom: "12px", lineHeight: 1.6 }}>{q}</p>
           );
           return (
-            <div className="modal-bg rm-modal-overlay">
-              <div className="modal-glass rm-modal" ref={emailSheetRef}>
+            <div className="modal-bg rm-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEmailModal(); }}>
+              <div className="modal-glass rm-modal" ref={emailSheetRef} role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
                 {/* Drag handle — pull down to dismiss (mobile bottom sheet) */}
                 <div className="rm-modal-grab" aria-hidden="true" onTouchStart={onSheetDragStart} onTouchMove={onSheetDragMove} onTouchEnd={onSheetDragEnd}>
                   <span className="rm-modal-grab-bar" />
@@ -2864,7 +2967,7 @@ function AppPageInner() {
                 </div>
                 <div className={`rm-modal-left${mobileEmailTab === "reference" ? " rm-modal-panel-hidden" : ""}`}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                    <h2 className="rm-modal-title">Email to {emailTarget.display_name}</h2>
+                    <h2 id="email-modal-title" className="rm-modal-title">Email to {emailTarget.display_name}</h2>
                     <button onClick={closeEmailModal} aria-label="Close" style={{ flexShrink: 0, width: "36px", height: "36px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", lineHeight: 1, color: "#6b7280", background: "none", border: "none", borderRadius: "999px", cursor: "pointer", transition: "background 0.15s ease, color 0.15s ease" }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(101,153,131,0.12)"; e.currentTarget.style.color = "#2d5a47"; }} onMouseLeave={e => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#6b7280"; }}>&times;</button>
                   </div>
 
@@ -3003,7 +3106,7 @@ function AppPageInner() {
                     </span>
                   </div>
                   {hasChecked && (() => {
-                    const total = emailFlags.length;
+                    const total = emailTotalFlags;
                     const gated = resultGated; // anonymous taste
                     const FlagCard = (flag: EmailFlag, i: number) => (
                       <div key={i} className={`flag-enter ${flag.type === "error" ? "flag-error" : "flag-warning"}`} style={{ padding: "16px 20px" }}>
@@ -3032,7 +3135,7 @@ function AppPageInner() {
                     }
 
                     const visible = gated ? emailFlags.slice(0, 1) : emailFlags;
-                    const hidden = gated ? emailFlags.slice(1) : [];
+                    const hiddenCount = gated ? Math.max(0, total - visible.length) : 0;
 
                     return (
                       <div style={{ marginTop: "20px" }}>
@@ -3046,17 +3149,22 @@ function AppPageInner() {
                         </div>
 
                         {/* Gated: blur the rest behind a signup overlay */}
-                        {hidden.length > 0 && (
+                        {hiddenCount > 0 && (
                           <div style={{ position: "relative", marginTop: "10px" }}>
                             <div aria-hidden="true" style={{ display: "flex", flexDirection: "column", gap: "10px", filter: "blur(6px)", userSelect: "none", pointerEvents: "none" }}>
-                              {hidden.map((flag, i) => FlagCard(flag, i))}
+                              {Array.from({ length: Math.min(hiddenCount, 3) }, (_, i) => (
+                                <div key={i} className="flag-enter flag-warning" style={{ padding: "16px 20px" }}>
+                                  <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#a8853e" }}>● Additional issue</span>
+                                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginTop: "4px" }}>Create an account to reveal the complete review.</p>
+                                </div>
+                              ))}
                             </div>
                             <div
                               onClick={openCheckerSignup}
                               style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", cursor: "pointer", background: "linear-gradient(to bottom, rgba(245,240,230,0.55) 0%, rgba(245,240,230,0.96) 55%)", padding: "16px", borderRadius: "12px" }}
                             >
                               <p style={{ fontSize: "0.92rem", fontWeight: 700, color: "#2d5a47", marginBottom: "4px" }}>
-                                {hidden.length} more {hidden.length === 1 ? "issue" : "issues"} found
+                                {hiddenCount} more {hiddenCount === 1 ? "issue" : "issues"} found
                               </p>
                               <p style={{ fontSize: "0.82rem", color: "#6b7280", marginBottom: "12px" }}>Create a free account to see them all.</p>
                               <span className="btn-cta" style={{ padding: "10px 24px", fontSize: "0.88rem" }}>Create free account &rarr;</span>
@@ -3065,7 +3173,7 @@ function AppPageInner() {
                         )}
 
                         {/* Gated single-flag (nothing to blur): push the account ask to the next email */}
-                        {gated && hidden.length === 0 && (
+                        {gated && hiddenCount === 0 && (
                           <div style={{ marginTop: "14px", padding: "12px 16px", background: "rgba(101, 153, 131,0.055)", border: "1px solid rgba(101, 153, 131,0.13)", borderRadius: "12px" }}>
                             <p style={{ fontSize: "0.85rem", color: "#2d5a47", fontWeight: 500, margin: 0 }}>Clean otherwise. Checking your next email needs a free account.</p>
                             {accountBtn}
@@ -3150,35 +3258,31 @@ function AppPageInner() {
       {/* AUTH MODAL */}
       {showAuthModal && (
         <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245,240,230,0.85)", backdropFilter: "blur(12px)" }} onClick={() => setShowAuthModal(false)}>
-          <div className="glass-card rm-modal-card" style={{ padding: "40px", maxWidth: "400px", width: "90%" }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: "1.4rem", fontWeight: 700, color: "#2d5a47", marginBottom: "8px" }}>
+          <div ref={authModalRef} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" className="glass-card rm-modal-card" style={{ padding: "40px", maxWidth: "400px", width: "90%", position: "relative" }} onClick={(e) => e.stopPropagation()}>
+            <button type="button" aria-label="Close account dialog" onClick={() => setShowAuthModal(false)} style={{ position: "absolute", top: "14px", right: "14px", width: "36px", height: "36px", border: 0, borderRadius: "999px", background: "rgba(101,153,131,0.08)", color: "#2d5a47", cursor: "pointer", fontSize: "1.25rem" }}>×</button>
+            <h3 id="auth-modal-title" style={{ fontSize: "1.4rem", fontWeight: 700, color: "#2d5a47", marginBottom: "8px" }}>
               {authMode === "signup" ? "Create your free account" : "Welcome back"}
             </h3>
             <p style={{ fontSize: "0.9rem", color: "#6b7280", marginBottom: "24px" }}>
               {authModalCopy || (authMode === "signup" ? "Free access to research summaries, email checker, and more." : "Log in to your account.")}
             </p>
-            {authError && <p style={{ fontSize: "0.85rem", color: "#c45c5c", marginBottom: "16px", background: "rgba(196, 92, 92,0.08)", padding: "10px 14px", borderRadius: "10px" }}>{authError}</p>}
-            <input type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "12px", outline: "none" }} />
-            <input type="password" placeholder="Password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "12px", outline: "none" }} />
-            {authMode === "signup" && (
-              <input type="text" placeholder="Promo code (optional)" value={authPromoCode} onChange={(e) => setAuthPromoCode(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "20px", outline: "none" }} />
-            )}
-            {authMode !== "signup" && <div style={{ marginBottom: "8px" }} />}
-            <button disabled={authLoading} onClick={async () => {
-              setAuthLoading(true); setAuthError("");
-              try {
-                if (authMode === "signup") {
-                  const { error, promoApplied } = await signUp(authEmail, authPassword, authPromoCode || undefined);
-                  if (error) { setAuthError(error.message); } else { setShowAuthModal(false); setAuthPromoCode(""); showToast(promoApplied ? "Account created with Student access! Check your email to confirm." : "Account created! Check your email to confirm."); }
-                } else {
-                  const { error } = await signIn(authEmail, authPassword);
-                  if (error) { setAuthError(error.message); } else { setShowAuthModal(false); showToast("Welcome back!"); }
-                }
-              } catch (err: unknown) { setAuthError(err instanceof Error ? err.message : "Something went wrong"); }
-              finally { setAuthLoading(false); }
-            }} className="btn-cta rm-search-btn" style={{ width: "100%", padding: "14px", fontSize: "1rem" }}>
-              {authLoading ? "Loading..." : authMode === "signup" ? "Sign up" : "Log in"}
-            </button>
+            <form onSubmit={handleAuthSubmit}>
+              {authError && <p role="alert" style={{ fontSize: "0.85rem", color: "#c45c5c", marginBottom: "16px", background: "rgba(196, 92, 92,0.08)", padding: "10px 14px", borderRadius: "10px" }}>{authError}</p>}
+              <input aria-label="Email address" autoComplete="email" required type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "12px", outline: "none" }} />
+              <input aria-label="Password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} required minLength={6} type="password" placeholder="Password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "12px", outline: "none" }} />
+              {authMode === "signup" && (
+                <input aria-label="Promo code (optional)" autoComplete="off" type="text" placeholder="Promo code (optional)" value={authPromoCode} onChange={(e) => setAuthPromoCode(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "20px", outline: "none" }} />
+              )}
+              {authMode !== "signup" && <div style={{ marginBottom: "8px" }} />}
+              <button type="submit" disabled={authLoading} className="btn-cta rm-search-btn" style={{ width: "100%", padding: "14px", fontSize: "1rem" }}>
+                {authLoading ? "Loading..." : authMode === "signup" ? "Sign up" : "Log in"}
+              </button>
+              {authMode === "login" && (
+                <button type="button" disabled={authLoading} onClick={sendPasswordReset} style={{ display: "block", margin: "12px auto 0", color: "#2d5a47", fontWeight: 600, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "0.82rem" }}>
+                  Forgot password?
+                </button>
+              )}
+            </form>
             <p style={{ fontSize: "0.85rem", color: "#6b7280", textAlign: "center", marginTop: "16px" }}>
               {authMode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
               <button onClick={() => { setAuthMode(authMode === "signup" ? "login" : "signup"); setAuthError(""); }} style={{ color: "#2d5a47", fontWeight: 600, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "0.85rem" }}>
@@ -3192,8 +3296,9 @@ function AppPageInner() {
       {/* UPGRADE MODAL */}
       {showUpgradeModal && (
         <div className="rm-upgrade-backdrop" onClick={() => setShowUpgradeModal(false)}>
-          <div className="glass-card rm-modal-card rm-upgrade-card" style={{ padding: "32px" }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#2d5a47", marginBottom: "4px" }}>{upgradeModalTitle || "Unlock the full toolkit"}</h3>
+          <div role="dialog" aria-modal="true" aria-labelledby="upgrade-modal-title" className="glass-card rm-modal-card rm-upgrade-card" style={{ padding: "32px", position: "relative" }} onClick={(e) => e.stopPropagation()}>
+            <button type="button" aria-label="Close upgrade dialog" onClick={() => setShowUpgradeModal(false)} style={{ position: "absolute", top: "12px", right: "12px", width: "34px", height: "34px", border: 0, borderRadius: "999px", background: "rgba(101,153,131,0.08)", color: "#2d5a47", cursor: "pointer", fontSize: "1.2rem" }}>×</button>
+            <h3 id="upgrade-modal-title" style={{ fontSize: "1.25rem", fontWeight: 700, color: "#2d5a47", marginBottom: "4px", paddingRight: "32px" }}>{upgradeModalTitle || "Unlock the full toolkit"}</h3>
             <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "20px" }}>{upgradeModalSubtitle || "Every finding, every question, the email checker, and the professor email finder."}</p>
             <details
               open={Boolean(checkoutReferralCode)}
@@ -3294,12 +3399,12 @@ function AppPageInner() {
                 ))}
               </ul>
               <button onClick={async () => {
-                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY || "price_1TMxDSFINW44xCyFWrm6ZTOo";
+                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY;
                 await startCheckout(priceId);
               }} className="btn-cta rm-search-btn" style={{ width: "100%", padding: "13px", fontSize: "0.95rem", background: "linear-gradient(135deg, #659983, #557f6c)", boxShadow: "0 8px 24px rgba(101, 153, 131,0.3)", textShadow: "0 1px 2px rgba(18, 54, 39,0.24)" }}>
                 Start Weekly for $7
               </button>
-              <p style={{ fontSize: "0.74rem", color: "#9b7d40", textAlign: "center", marginTop: "8px", fontWeight: 600 }}>No professor reply in 30 days, full refund.</p>
+              <p style={{ fontSize: "0.74rem", color: "#9b7d40", textAlign: "center", marginTop: "8px", fontWeight: 600 }}>Cancel recurring plans from your profile.</p>
             </div>
 
             {/* Semester — secondary option */}
@@ -3312,7 +3417,7 @@ function AppPageInner() {
                 </div>
               </div>
               <button onClick={async () => {
-                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER || "price_1TIuAlFINW44xCyFcxqgQpeV";
+                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER;
                 await startCheckout(priceId);
               }} className="btn-cta" style={{ padding: "10px 22px", fontSize: "0.85rem", background: "rgba(101, 153, 131, 0.1)", color: "#2d5a47", border: "none", whiteSpace: "nowrap" }}>
                 Get Semester for $29
@@ -3325,7 +3430,7 @@ function AppPageInner() {
                 Prefer to pay once? <strong style={{ color: "#2d5a47", fontWeight: 700 }}>Lifetime for $59</strong>, never pay again.
               </span>
               <button onClick={async () => {
-                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME || "price_1TIuBBFINW44xCyFoSCtUpFN";
+                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME;
                 await startCheckout(priceId);
               }} style={{ fontSize: "0.8rem", fontWeight: 700, color: "#2d5a47", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", textDecoration: "underline", fontFamily: "inherit" }}>
                 Get Lifetime →

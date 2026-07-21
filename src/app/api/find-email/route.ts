@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { foldName } from "@/lib/author-normalize";
-import { withinRateLimit, clientIp } from "@/lib/rate-limit";
 import { isOaAuthorId } from "@/lib/openalex";
+import { allowRequestRate, requestAccess } from "@/lib/server-access";
+import { safeFetchText } from "@/lib/safe-fetch";
 
 // Does an email's local part plausibly belong to this person (not a colleague listed
 // on the same faculty/team page)? Diacritic-aware via foldName (Böckler→boeckler).
@@ -51,8 +52,9 @@ interface EmailResult {
   confidence: "verified" | "likely" | "guess";
 }
 
-const UA =
-  "Mozilla/5.0 (compatible; ResearchMatch/1.0; +https://www.researchmatch.site) academic-contact-lookup";
+const PUBLIC_SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.researchmatch.site";
+const OPENALEX_MAILTO = process.env.NEXT_PUBLIC_OPENALEX_MAILTO || "contact@researchmatch.site";
+const UA = `Mozilla/5.0 (compatible; ResearchMatch/1.0; +${PUBLIC_SITE}) academic-contact-lookup`;
 
 // Multi-label academic TLDs where the registrable domain is the last 3 labels.
 const THREE_LABEL_TLDS = [
@@ -141,9 +143,7 @@ async function searchWeb(query: string, limit = 5): Promise<string[]> {
 
 async function fetchPageEmails(url: string): Promise<string[]> {
   try {
-    const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(4000) });
-    if (!res.ok) return [];
-    return extractEmails(await res.text());
+    return extractEmails(await safeFetchText(url, { "User-Agent": UA }));
   } catch {
     return [];
   }
@@ -152,7 +152,14 @@ async function fetchPageEmails(url: string): Promise<string[]> {
 export async function POST(req: NextRequest) {
   try {
     // Each call burns paid Serper credits plus several outbound fetches.
-    if (!withinRateLimit(`find-email:${clientIp(req)}`, 6)) {
+    const access = await requestAccess(req);
+    if (!access.user) {
+      return NextResponse.json({ error: "Sign in to find professor emails." }, { status: 401 });
+    }
+    if (!access.isPaid) {
+      return NextResponse.json({ error: "upgrade_required" }, { status: 403 });
+    }
+    if (!(await allowRequestRate(req, "find-email", 6, access.user.id))) {
       return NextResponse.json({ error: "Too many lookups. Try again in a minute." }, { status: 429 });
     }
 
@@ -161,6 +168,12 @@ export async function POST(req: NextRequest) {
     // validate the format, don't just check presence.
     if (!isOaAuthorId(authorId)) {
       return NextResponse.json({ error: "authorId required" }, { status: 400 });
+    }
+    if (
+      typeof authorName !== "string" || !authorName.trim() || authorName.length > 200 ||
+      typeof institution !== "string" || institution.length > 300
+    ) {
+      return NextResponse.json({ error: "Professor details are malformed." }, { status: 400 });
     }
 
     const emails: EmailResult[] = [];
@@ -177,7 +190,7 @@ export async function POST(req: NextRequest) {
     // 1. Author record from OpenAlex → ORCID + institution id.
     try {
       const authorRes = await fetch(
-        `https://api.openalex.org/authors/${authorId}?select=orcid,ids,last_known_institutions,display_name&mailto=contact@researchmatch.site`,
+        `https://api.openalex.org/authors/${authorId}?select=orcid,ids,last_known_institutions,display_name&mailto=${encodeURIComponent(OPENALEX_MAILTO)}`,
         { signal: AbortSignal.timeout(5000) }
       );
       if (authorRes.ok) {
@@ -191,7 +204,7 @@ export async function POST(req: NextRequest) {
     if (instId) {
       try {
         const instRes = await fetch(
-          `https://api.openalex.org/institutions/${instId}?select=homepage_url,display_name&mailto=contact@researchmatch.site`,
+          `https://api.openalex.org/institutions/${instId}?select=homepage_url,display_name&mailto=${encodeURIComponent(OPENALEX_MAILTO)}`,
           { signal: AbortSignal.timeout(4000) }
         );
         if (instRes.ok) {
@@ -225,7 +238,7 @@ export async function POST(req: NextRequest) {
           const d = await r.json();
           for (const u of d["researcher-url"] || []) {
             const url = u.url?.value;
-            if (url && /(\.edu|ac\.|faculty|staff|people|profile|directory)/i.test(url)) { homepageUrl = url; break; }
+            if (url && isAcademicProfileUrl(url)) { homepageUrl = url; break; }
           }
         }
       } catch { /* continue */ }
@@ -234,7 +247,7 @@ export async function POST(req: NextRequest) {
     // 4. Corresponding-author email embedded in recent papers.
     try {
       const r = await fetch(
-        `https://api.openalex.org/works?filter=author.id:${authorId}&sort=publication_year:desc&per_page=10&select=corresponding_author_ids,authorships&mailto=contact@researchmatch.site`,
+        `https://api.openalex.org/works?filter=author.id:${authorId}&sort=publication_year:desc&per_page=10&select=corresponding_author_ids,authorships&mailto=${encodeURIComponent(OPENALEX_MAILTO)}`,
         { signal: AbortSignal.timeout(5000) }
       );
       if (r.ok) {
@@ -310,9 +323,11 @@ export async function POST(req: NextRequest) {
     if (emails.length === 0 && nameParts.length >= 2 && guessDom) {
       const first = nameParts[0].toLowerCase().replace(/[^a-z]/g, "");
       const last = nameParts[nameParts.length - 1].toLowerCase().replace(/[^a-z]/g, "");
-      const fi = first[0];
-      for (const p of [`${first}.${last}@${guessDom}`, `${fi}${last}@${guessDom}`, `${last}@${guessDom}`]) {
-        add({ email: p, source: "pattern", confidence: "guess" });
+      if (first && last) {
+        const fi = first[0];
+        for (const p of [`${first}.${last}@${guessDom}`, `${fi}${last}@${guessDom}`, `${last}@${guessDom}`]) {
+          add({ email: p, source: "pattern", confidence: "guess" });
+        }
       }
     }
 
@@ -362,12 +377,21 @@ function guessDomain(institution: string): string | null {
     "university of toronto": "utoronto.ca",
   };
   const instLower = institution.toLowerCase();
-  if (domainMap[instLower]) return domainMap[instLower];
-  const words = instLower
-    .replace(/university of |the /gi, "")
-    .replace(/university|college|institute|school/gi, "")
-    .trim()
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
-  return words.length > 0 ? words[0].replace(/[^a-z]/g, "") + ".edu" : null;
+  return domainMap[instLower] ?? null;
+}
+
+function isAcademicProfileUrl(raw: string) {
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    return (
+      host.endsWith(".edu") ||
+      host.includes(".ac.") ||
+      host.includes(".edu.") ||
+      /(faculty|staff|people|profile|directory)/i.test(url.pathname)
+    );
+  } catch {
+    return false;
+  }
 }

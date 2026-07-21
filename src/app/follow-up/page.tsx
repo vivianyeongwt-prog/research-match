@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { hasPaidAccess } from "@/lib/buddy-pass";
+import { apiFetch } from "@/lib/client-fetch";
 
 const STORAGE_KEY = "rm_followup_used";
 
@@ -39,12 +40,22 @@ export default function FollowUpPage() {
     setLoading(true);
     setResult(null);
     try {
-      const res = await fetch("/api/follow-up", {
+      const { supabase } = await import("@/lib/supabase");
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await apiFetch("/api/follow-up", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ email: originalEmail }),
       });
       const data = await res.json();
+      if (res.status === 403 && data.error === "upgrade_required") {
+        localStorage.setItem(STORAGE_KEY, "true");
+        setFreeUsed(true);
+        throw new Error("You've used your free follow-up. Upgrade for unlimited follow-ups.");
+      }
       if (!res.ok) throw new Error(data.error || "Something went wrong.");
       setResult({
         followUp1: data.followUp1,

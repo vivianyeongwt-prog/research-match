@@ -8,6 +8,8 @@ import {
   getPopulatedFieldSlugs,
   type FieldProfessor,
 } from "@/lib/research-data";
+import { siteOrigin } from "@/lib/site-url";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 // Fully static: pages are pre-rendered at build from precomputed Supabase rows.
 // No data fetching happens on a user request.
@@ -15,7 +17,7 @@ export const dynamic = "force-static";
 export const dynamicParams = false;
 export const revalidate = false;
 
-const SITE = "https://www.researchmatch.site";
+const SITE = siteOrigin();
 
 type Props = { params: Promise<{ "field-slug": string }> };
 
@@ -115,8 +117,8 @@ export default async function ResearchFieldPage({ params }: Props) {
 
   return (
     <div className="blog-shell blog-post-shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
       <div className="blog-post-container">
         {/* Nav */}
         <nav className="blog-nav">

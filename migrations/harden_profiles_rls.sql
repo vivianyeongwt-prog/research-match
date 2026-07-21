@@ -30,7 +30,9 @@ begin
   end loop;
 end $$;
 
--- Signup / lazy-create insert: own id, own (auth-verified) email, free plan only.
+-- Signup / lazy-create insert: own id, own (auth-verified) email, and no
+-- entitlement-bearing values. Checking only plan_type='free' is insufficient:
+-- buddy_pass_active_until can independently grant paid access.
 create policy "profiles self insert free only"
   on public.profiles for insert
   to authenticated
@@ -38,6 +40,15 @@ create policy "profiles self insert free only"
     id = auth.uid()
     and plan_type = 'free'
     and lower(email) = lower(coalesce(auth.email(), ''))
+    and plan_expires_at is null
+    and coalesce(searches_used, 0) = 0
+    and coalesce(summaries_used, 0) between 0 and 2
+    and coalesce(buddy_pass_weeks_available, 0) = 0
+    and coalesce(buddy_pass_weeks_earned, 0) = 0
+    and coalesce(buddy_pass_weeks_used, 0) = 0
+    and buddy_pass_active_until is null
+    and coalesce(framework_used, false) = false
+    and coalesce(email_checker_grandfathered, false) = false
   );
 
 -- Users read their own profile.

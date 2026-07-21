@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { authenticatedUser, customerIdsForUser } from "@/lib/stripe-customers";
+import { allowRequestRate } from "@/lib/server-access";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-02-25.clover",
@@ -15,6 +16,9 @@ export async function POST(req: NextRequest) {
     const user = await authenticatedUser(req);
     if (!user) {
       return NextResponse.json({ error: "You must be signed in to cancel a subscription." }, { status: 401 });
+    }
+    if (!(await allowRequestRate(req, "cancel-subscription", 4, user.id, 600))) {
+      return NextResponse.json({ error: "Too many cancellation attempts." }, { status: 429 });
     }
 
     const customerIds = await customerIdsForUser(stripe, user.id, user.email);

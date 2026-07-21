@@ -4,6 +4,7 @@ import { supabase } from "./supabase";
 import type { User, AuthError } from "@supabase/supabase-js";
 import { generateReferralCode } from "./buddy-pass";
 import { track } from "./analytics";
+import { apiFetch } from "./client-fetch";
 
 // Free summaries allowed across a user's lifetime on the free tier. Shared
 // between the anonymous (pre-account) and free-account states so creating an
@@ -45,6 +46,7 @@ interface Profile {
   id: string;
   email: string;
   plan_type: "free" | "weekly" | "semester" | "student_monthly" | "student_annual" | "lifetime";
+  plan_expires_at: string | null;
   searches_used: number;
   searches_reset_at: string;
   summaries_used: number;
@@ -63,7 +65,12 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, promoCode?: string) => Promise<{ error: AuthError | null; promoApplied?: boolean }>;
+  signUp: (email: string, password: string, promoCode?: string) => Promise<{
+    error: AuthError | null;
+    promoApplied: boolean;
+    promoPending: boolean;
+    confirmationRequired: boolean;
+  }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -73,7 +80,12 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
-  signUp: async () => ({ error: null, promoApplied: false }),
+  signUp: async () => ({
+    error: null,
+    promoApplied: false,
+    promoPending: false,
+    confirmationRequired: false,
+  }),
   signIn: async () => ({ error: null }),
   signOut: async () => {},
   refreshProfile: async () => {},
@@ -123,6 +135,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
+        const pendingPromo = localStorage.getItem("rm-pending-promo");
+        if (pendingPromo && session.access_token) {
+          // Email-confirmation signups do not receive a session immediately. Redeem
+          // their pending code once confirmation produces a verified access token.
+          void apiFetch("/api/promo", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ code: pendingPromo }),
+          }).then(() => {
+            localStorage.removeItem("rm-pending-promo");
+            return fetchProfile(session.user.id);
+          }).catch(() => undefined);
+        }
       } else {
         setProfile(null);
       }
@@ -144,26 +172,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Apply promo code if provided
       let promoApplied = false;
+      let promoPending = false;
       if (promoCode?.trim()) {
-        try {
-          const token = data.session?.access_token;
-          const res = await fetch("/api/promo", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ code: promoCode.trim() }),
-          });
-          const promoData = await res.json();
-          if (promoData.success) promoApplied = true;
-        } catch { /* promo failed silently, user still gets free account */ }
+        const normalizedPromo = promoCode.trim().toUpperCase();
+        const token = data.session?.access_token;
+        if (!token) {
+          localStorage.setItem("rm-pending-promo", normalizedPromo);
+          promoPending = true;
+        } else {
+          try {
+            const res = await apiFetch("/api/promo", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ code: normalizedPromo }),
+            });
+            const promoData = await res.json();
+            if (promoData.success) promoApplied = true;
+          } catch { /* promo failed, user still gets a free account */ }
+        }
       }
 
       await fetchProfile(data.user.id);
-      return { error, promoApplied };
+      return {
+        error,
+        promoApplied,
+        promoPending,
+        confirmationRequired: !data.session,
+      };
     }
-    return { error, promoApplied: false };
+    return {
+      error,
+      promoApplied: false,
+      promoPending: false,
+      confirmationRequired: false,
+    };
   };
 
   const signIn = async (email: string, password: string) => {

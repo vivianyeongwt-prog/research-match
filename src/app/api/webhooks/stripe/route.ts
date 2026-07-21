@@ -1,30 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
+import { generateReferralCode } from "@/lib/buddy-pass";
+import { supabaseAdmin } from "@/lib/server-access";
+import { paidPlanFromPriceId, type PaidPlanType, verifiedUserId } from "@/lib/stripe-plans";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-02-25.clover",
 });
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const WEEKLY_PRICE_IDS = new Set([
-  process.env.STRIPE_PRICE_WEEKLY,
-  process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY,
-  "price_1TQAAIFINW44xCyFF3QP0SRL",
-  "price_1TMxDSFINW44xCyFWrm6ZTOo",
-].filter(Boolean));
-
-function planTypeFromPrice(priceId?: string | null) {
-  return priceId && WEEKLY_PRICE_IDS.has(priceId) ? "weekly" : "semester";
-}
-
 function stripeId(ref: string | { id?: string } | null | undefined): string | null {
   if (!ref) return null;
   return typeof ref === "string" ? ref : ref.id ?? null;
+}
+
+// Stripe moved the subscription reference under `parent.subscription_details`
+// in newer API versions. Keep the optional legacy property so delayed events
+// created on an older API version can still be handled safely.
+type InvoiceWithLegacySubscription = Stripe.Invoice & {
+  subscription?: string | Stripe.Subscription | null;
+};
+
+function subscriptionIdFromInvoice(invoice: InvoiceWithLegacySubscription): string | null {
+  return stripeId(invoice.subscription) ?? stripeId(
+    invoice.parent?.type === "subscription_details"
+      ? invoice.parent.subscription_details?.subscription
+      : null
+  );
 }
 
 // ── Affiliate attribution ─────────────────────────────────────────────────────
@@ -138,8 +139,7 @@ async function recordAffiliateAttribution(session: Stripe.Checkout.Session): Pro
 }
 
 // Recurring commission on a renewal payment. Returns true if it should be retried.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function recordRenewalCommission(invoice: any, subscriptionId: string): Promise<boolean> {
+async function recordRenewalCommission(invoice: InvoiceWithLegacySubscription, subscriptionId: string): Promise<boolean> {
   let needsRetry = false;
   const { data: referral } = await supabaseAdmin
     .from("referrals")
@@ -232,6 +232,48 @@ async function invoiceRefsForPaymentIntent(pi: string | null | undefined): Promi
   }
 }
 
+async function provisionPlan(userId: string, planType: PaidPlanType) {
+  const updateExisting = async () => {
+    let query = supabaseAdmin.from("profiles").update({ plan_type: planType, plan_expires_at: null }).eq("id", userId);
+    if (planType !== "lifetime") query = query.neq("plan_type", "lifetime");
+    return query.select("id, plan_type");
+  };
+
+  let result = await updateExisting();
+  if (result.error) return { error: result.error, keptLifetime: false };
+  if (result.data && result.data.length > 0) return { error: null, keptLifetime: false };
+
+  const { data: current, error: currentError } = await supabaseAdmin
+    .from("profiles")
+    .select("plan_type")
+    .eq("id", userId)
+    .maybeSingle();
+  if (currentError) return { error: currentError, keptLifetime: false };
+  if (current?.plan_type === "lifetime" && planType !== "lifetime") {
+    return { error: null, keptLifetime: true };
+  }
+
+  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(userId);
+  if (authError || !authData.user) {
+    return { error: authError ?? new Error("Auth user not found"), keptLifetime: false };
+  }
+  const { error: insertError } = await supabaseAdmin.from("profiles").insert({
+    id: userId,
+    email: authData.user.email ?? "",
+    plan_type: "free",
+    referral_code: generateReferralCode(userId),
+  });
+  if (insertError && insertError.code !== "23505") {
+    return { error: insertError, keptLifetime: false };
+  }
+
+  result = await updateExisting();
+  if (result.error || !result.data || result.data.length === 0) {
+    return { error: result.error ?? new Error("Profile could not be provisioned"), keptLifetime: false };
+  }
+  return { error: null, keptLifetime: false };
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature")!;
@@ -248,20 +290,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // Idempotency guard — insert FIRST. If the id is already there, a prior delivery
-  // fully succeeded → ack and stop (prevents double commissions / double-counting the
-  // lifetime counter on Stripe retries). If a money-write fails below, we DELETE this
-  // row and return non-2xx so Stripe redelivers and we reprocess cleanly.
-  const { error: guardError } = await supabaseAdmin
-    .from("processed_stripe_events")
-    .insert({ id: event.id });
-  if (guardError?.code === "23505") {
+  // Claim first, but do not call the event complete until every side effect has
+  // succeeded. A failed handler is retryable immediately; a process crash leaves a
+  // time-bounded claim that a later Stripe delivery can recover.
+  const { data: claimState, error: guardError } = await supabaseAdmin
+    .rpc("claim_stripe_event", { p_event_id: event.id });
+  if (claimState === "completed") {
     return NextResponse.json({ received: true, duplicate: true });
   }
-  // Any other guard failure: nothing has been processed yet, so bail and let Stripe
-  // redeliver. Processing without a durable dedup row would let a redelivery re-run
-  // non-idempotent side effects (the lifetime counter).
-  if (guardError) {
+  if (guardError || claimState !== "claimed") {
     console.error("Idempotency guard insert error:", guardError);
     return NextResponse.json({ error: "transient failure, please retry" }, { status: 500 });
   }
@@ -276,21 +313,22 @@ export async function POST(req: NextRequest) {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const lifetimePriceId = process.env.STRIPE_PRICE_LIFETIME || "price_1TIuBBFINW44xCyFoSCtUpFN";
-
-      let planType = "semester";
+      let planType: PaidPlanType | null = null;
       let paidPriceIdForReferral: string | null = null;
 
       if (session.mode === "payment") {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
         const paidPriceId = lineItems.data[0]?.price?.id;
         paidPriceIdForReferral = paidPriceId ?? null;
-        planType = paidPriceId === lifetimePriceId ? "lifetime" : "semester";
+        planType = paidPlanFromPriceId(paidPriceId);
       } else if (session.mode === "subscription" && session.subscription) {
-        const sub = await stripe.subscriptions.retrieve(session.subscription as string);
-        const priceId = sub.items.data[0]?.price.id;
-        paidPriceIdForReferral = priceId ?? null;
-        planType = planTypeFromPrice(priceId);
+        const subscriptionId = stripeId(session.subscription);
+        if (subscriptionId) {
+          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          const priceId = sub.items.data[0]?.price.id;
+          paidPriceIdForReferral = priceId ?? null;
+          planType = paidPlanFromPriceId(priceId);
+        }
       }
 
       // (A) Affiliate attribution — runs regardless of our profile bookkeeping. The
@@ -305,117 +343,78 @@ export async function POST(req: NextRequest) {
         needsRetry = true;
       }
 
-      // (B) Provision the plan. A missing userId / profile is logged but NOT retried
-      // forever (it's deterministic); a real DB error IS retried.
-      const userId = session.metadata?.userId;
+      // (B) Provision the plan. A missing profile is repaired from the verified auth
+      // user, and every unresolved write remains retryable until Stripe redelivers it.
+      const userId = verifiedUserId(session.metadata?.userId) ?? verifiedUserId(session.client_reference_id);
       if (!userId) {
-        console.error("checkout.session.completed has no metadata.userId — plan not provisioned");
+        // An unrelated Stripe checkout can share this webhook endpoint. Without a
+        // verified Research Match user ID, acknowledge it after any affiliate work
+        // rather than touching an account or retrying forever.
+        console.warn("checkout.session.completed has no verified Research Match user ID — access unchanged");
+      } else if (!planType) {
+        // A checkout carrying our user ID but an unknown price is most likely an
+        // environment/legacy-price omission. Fail closed and leave it retryable.
+        console.error(`No access plan is configured for Stripe price ${paidPriceIdForReferral ?? "unknown"}`);
+        needsRetry = true;
       } else {
-        // A purchase never lowers an existing lifetime plan (e.g. a lifetime owner
-        // completing a weekly checkout keeps lifetime).
-        let provision = supabaseAdmin
-          .from("profiles")
-          .update({ plan_type: planType })
-          .eq("id", userId);
-        if (planType !== "lifetime") provision = provision.neq("plan_type", "lifetime");
-        const { error: updateError, data: updatedRows } = await provision.select("id");
+        const provisioned = await provisionPlan(userId, planType);
 
-        if (updateError) {
-          console.error("Supabase update error:", updateError);
+        if (provisioned.error) {
+          console.error("Plan provisioning error:", provisioned.error);
           needsRetry = true;
-        } else if (!updatedRows || updatedRows.length === 0) {
-          console.error(`No profile updated for userId: ${userId} (missing row, or plan is lifetime and was kept)`);
         } else {
-          console.log(`✅ Plan updated to "${planType}" for userId: ${userId}`);
+          console.log(provisioned.keptLifetime
+            ? `↔️  Kept lifetime access for userId: ${userId}`
+            : `✅ Plan updated to "${planType}" for userId: ${userId}`);
+
+          // Lifetime replaces an existing subscription. Cancel it immediately so
+          // the customer cannot be charged again after buying permanent access.
+          if (planType === "lifetime") {
+            try {
+              const subscriptions = await stripe.subscriptions.search({
+                query: `metadata['userId']:'${userId.replace(/'/g, "\\'")}'`,
+                limit: 100,
+              });
+              for (const subscription of subscriptions.data) {
+                if (["active", "trialing", "past_due", "unpaid", "incomplete"].includes(subscription.status)) {
+                  await stripe.subscriptions.cancel(subscription.id);
+                }
+              }
+            } catch (err) {
+              console.error("Could not cancel replaced subscription after lifetime purchase:", err);
+              needsRetry = true;
+            }
+          }
 
           // Buddy Pass referral reward (peer-to-peer; separate from the affiliate program).
           if (
-            session.metadata?.referrerId &&
+            verifiedUserId(session.metadata?.referrerId) &&
             session.metadata?.referralCode &&
             session.metadata?.referredUserId === userId &&
             session.metadata.referrerId !== userId
           ) {
             try {
-              const referrerId = session.metadata.referrerId;
-              const referralCode = session.metadata.referralCode;
-
-              const { data: existingSessionReward } = await supabaseAdmin
-                .from("buddy_pass_referrals")
-                .select("id")
-                .eq("checkout_session_id", session.id)
-                .maybeSingle();
-
-              const { data: existingUserReward } = await supabaseAdmin
-                .from("buddy_pass_referrals")
-                .select("id")
-                .eq("referred_user_id", userId)
-                .eq("status", "rewarded")
-                .limit(1)
-                .maybeSingle();
-
-              if (!existingSessionReward && !existingUserReward) {
-                const { error: insertError } = await supabaseAdmin
-                  .from("buddy_pass_referrals")
-                  .insert({
-                    referrer_id: referrerId,
-                    referred_user_id: userId,
-                    referral_code: referralCode,
-                    checkout_session_id: session.id,
-                    stripe_customer_id: stripeId(session.customer),
-                    price_id: paidPriceIdForReferral,
-                    status: "rewarded",
-                    discount_percent: 25,
-                    reward_weeks: 1,
-                    rewarded_at: new Date().toISOString(),
-                  });
-
-                if (insertError) {
-                  console.error("Buddy Pass referral insert failed:", insertError);
-                } else {
-                  const { error: grantError } = await supabaseAdmin.rpc("grant_buddy_pass_week", {
-                    p_referrer_id: referrerId,
-                    p_weeks: 1,
-                  });
-                  if (grantError) console.error("Buddy Pass reward grant failed:", grantError);
-                  else console.log(`✅ Buddy Pass reward granted to referrerId: ${referrerId}`);
-                }
+              const referrerId = verifiedUserId(session.metadata.referrerId)!;
+              const { data: granted, error: rewardError } = await supabaseAdmin.rpc("record_buddy_pass_reward", {
+                p_referrer_id: referrerId,
+                p_referred_user_id: userId,
+                p_referral_code: session.metadata.referralCode,
+                p_checkout_session_id: session.id,
+                p_stripe_customer_id: stripeId(session.customer),
+                p_price_id: paidPriceIdForReferral,
+              });
+              if (rewardError) {
+                console.error("Buddy Pass reward transaction failed:", rewardError);
+                needsRetry = true;
+              } else if (granted) {
+                console.log(`✅ Buddy Pass reward granted to referrerId: ${referrerId}`);
               }
             } catch (err) {
               console.error("Buddy Pass reward error:", err);
+              needsRetry = true;
             }
           }
 
-          // Increment lifetime-spots counter — only when we're NOT about to retry, so a
-          // redelivery (which re-runs this handler) can't inflate the count. The
-          // insert-first guard makes the success path run exactly once.
-          if (planType === "lifetime" && !needsRetry) {
-            // Optimistic-concurrency increment: re-read and conditionally write so two
-            // distinct lifetime purchases settling at the same instant can't lose an
-            // increment (which would under-count claimed spots and oversell the cap).
-            for (let attempt = 0; attempt < 5; attempt++) {
-              const { data: setting } = await supabaseAdmin
-                .from("settings")
-                .select("value")
-                .eq("key", "lifetime_spots_claimed")
-                .single();
-              if (!setting) {
-                const { error: insertErr } = await supabaseAdmin
-                  .from("settings")
-                  .insert({ key: "lifetime_spots_claimed", value: "1" });
-                if (!insertErr) break;        // first claim recorded
-                continue;                      // lost the insert race — re-read and update
-              }
-              const current = parseInt(setting.value, 10) || 0;
-              const { data: bumped } = await supabaseAdmin
-                .from("settings")
-                .update({ value: String(current + 1) })
-                .eq("key", "lifetime_spots_claimed")
-                .eq("value", setting.value)    // only if unchanged since we read it
-                .select("value");
-              if (bumped && bumped.length > 0) break;   // our increment landed
-              // else another event bumped it first — loop and retry on a fresh read
-            }
-          }
         }
       }
     }
@@ -423,25 +422,25 @@ export async function POST(req: NextRequest) {
     // Helper: look up userId from subscription metadata first, then checkout metadata.
     async function userIdFromSubscription(subscriptionId: string): Promise<string | null> {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      if (subscription.metadata?.userId) {
-        return subscription.metadata.userId;
-      }
+      const metadataUserId = verifiedUserId(subscription.metadata?.userId);
+      if (metadataUserId) return metadataUserId;
       const sessions = await stripe.checkout.sessions.list({
         subscription: subscriptionId,
         limit: 1,
       });
-      return sessions.data[0]?.metadata?.userId ?? null;
+      return verifiedUserId(sessions.data[0]?.metadata?.userId) ??
+        verifiedUserId(sessions.data[0]?.client_reference_id);
     }
 
     // Downgrade a user when a subscription ends — but ONLY the plan this subscription
     // granted. A lifetime purchase, or a promo-granted semester, must survive an old
     // weekly sub expiring. Grant and downgrade both label the sub via
-    // planTypeFromPrice, so exact-match is consistent even for unmapped price ids.
+    // paidPlanFromPriceId, so exact-match is consistent for configured price ids.
     // The .eq guard makes it a single atomic statement, so there's no read/write race.
-    async function downgradeToFree(userId: string, endedPlan: string, reason: string) {
+    async function downgradeToFree(userId: string, endedPlan: PaidPlanType, reason: string) {
       const { error, data } = await supabaseAdmin
         .from("profiles")
-        .update({ plan_type: "free" })
+        .update({ plan_type: "free", plan_expires_at: null })
         .eq("id", userId)
         .eq("plan_type", endedPlan)
         .select("id");
@@ -455,12 +454,64 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    async function revokeAccessForPaymentIntent(paymentIntentId: string | null, reason: string) {
+      if (!paymentIntentId) return;
+      const handledSubscriptions = new Set<string>();
+      const handledPlans = new Set<string>();
+
+      const sessions = await stripe.checkout.sessions.list({
+        payment_intent: paymentIntentId,
+        limit: 10,
+      });
+      for (const session of sessions.data) {
+        const userId = verifiedUserId(session.metadata?.userId) ?? verifiedUserId(session.client_reference_id);
+        if (!userId) continue;
+        if (session.subscription) {
+          const subscriptionId = stripeId(session.subscription);
+          if (!subscriptionId || handledSubscriptions.has(subscriptionId)) continue;
+          handledSubscriptions.add(subscriptionId);
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const endedPlan = paidPlanFromPriceId(subscription.items.data[0]?.price.id);
+          if (!endedPlan) throw new Error(`Cannot revoke unrecognized subscription price for ${subscriptionId}`);
+          if (subscription.status !== "canceled") await stripe.subscriptions.cancel(subscriptionId);
+          await downgradeToFree(userId, endedPlan, reason);
+        } else {
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+          const priceId = lineItems.data[0]?.price?.id;
+          const endedPlan = paidPlanFromPriceId(priceId);
+          if (!endedPlan) throw new Error(`Cannot revoke unrecognized checkout price for ${session.id}`);
+          const key = `${userId}:${endedPlan}`;
+          if (!handledPlans.has(key)) {
+            handledPlans.add(key);
+            await downgradeToFree(userId, endedPlan, reason);
+          }
+        }
+      }
+
+      for (const invoiceId of await invoiceRefsForPaymentIntent(paymentIntentId)) {
+        // Stripe's current Invoice shape nests the subscription reference under
+        // parent.subscription_details; retain the legacy property for older events.
+        const invoice = await stripe.invoices.retrieve(invoiceId) as InvoiceWithLegacySubscription;
+        const subscriptionId = subscriptionIdFromInvoice(invoice);
+        if (!subscriptionId || handledSubscriptions.has(subscriptionId)) continue;
+        handledSubscriptions.add(subscriptionId);
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const userId = await userIdFromSubscription(subscriptionId);
+        const endedPlan = paidPlanFromPriceId(subscription.items.data[0]?.price.id);
+        if (userId && !endedPlan) throw new Error(`Cannot revoke unrecognized subscription price for ${subscriptionId}`);
+        if (subscription.status !== "canceled") await stripe.subscriptions.cancel(subscriptionId);
+        if (userId && endedPlan) await downgradeToFree(userId, endedPlan, reason);
+      }
+    }
+
     // Subscription deleted (cancelled / reached end of billing period)
     if (event.type === "customer.subscription.deleted") {
       const sub = event.data.object as Stripe.Subscription;
       const userId = await userIdFromSubscription(sub.id);
       if (userId) {
-        await downgradeToFree(userId, planTypeFromPrice(sub.items?.data?.[0]?.price?.id), "Subscription deleted");
+        const endedPlan = paidPlanFromPriceId(sub.items?.data?.[0]?.price?.id);
+        if (!endedPlan) throw new Error(`Unrecognized deleted subscription price for ${sub.id}`);
+        await downgradeToFree(userId, endedPlan, "Subscription deleted");
       }
     }
 
@@ -478,7 +529,9 @@ export async function POST(req: NextRequest) {
       if (downgradeStatuses.includes(sub.status)) {
         const userId = await userIdFromSubscription(sub.id);
         if (userId) {
-          await downgradeToFree(userId, planTypeFromPrice(sub.items?.data?.[0]?.price?.id), `Subscription status "${sub.status}"`);
+          const endedPlan = paidPlanFromPriceId(sub.items?.data?.[0]?.price?.id);
+          if (!endedPlan) throw new Error(`Unrecognized updated subscription price for ${sub.id}`);
+          await downgradeToFree(userId, endedPlan, `Subscription status "${sub.status}"`);
         }
       }
     }
@@ -486,30 +539,24 @@ export async function POST(req: NextRequest) {
     // Invoice payment succeeded — re-grant plan on renewal + record the recurring
     // affiliate commission for this cycle.
     if (event.type === "invoice.paid") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const invoice = event.data.object as any;
+      const invoice = event.data.object as InvoiceWithLegacySubscription;
       if (invoice.billing_reason === "subscription_cycle") {
-        const subscriptionId: string | undefined =
-          typeof invoice.subscription === "string"
-            ? invoice.subscription
-            : invoice.subscription?.id ??
-              (invoice.parent?.type === "subscription_details"
-                ? invoice.parent?.subscription_details?.subscription
-                : undefined);
+        const subscriptionId = subscriptionIdFromInvoice(invoice);
         if (subscriptionId) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId);
           if (!sub.cancel_at_period_end) {
             const userId = await userIdFromSubscription(subscriptionId);
             if (userId) {
               const priceId = sub.items.data[0]?.price.id;
-              const planType = planTypeFromPrice(priceId);
+              const planType = paidPlanFromPriceId(priceId);
+              if (!planType) throw new Error(`Unrecognized renewal price for ${subscriptionId}`);
               // A renewal must never lower the plan: a weekly renewal can't overwrite
               // a (promo-granted) semester or a lifetime; a semester renewal can't
               // overwrite a lifetime.
               const outranking = planType === "weekly" ? '("lifetime","semester")' : '("lifetime")';
               const { error: renewError } = await supabaseAdmin
                 .from("profiles")
-                .update({ plan_type: planType })
+                .update({ plan_type: planType, plan_expires_at: null })
                 .eq("id", userId)
                 .not("plan_type", "in", outranking);
               if (renewError) {
@@ -534,15 +581,8 @@ export async function POST(req: NextRequest) {
 
     // Invoice payment failed — keep access through the grace window; just log.
     if (event.type === "invoice.payment_failed") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const invoice = event.data.object as any;
-      const subscriptionId: string | undefined =
-        typeof invoice.subscription === "string"
-          ? invoice.subscription
-          : invoice.subscription?.id ??
-            (invoice.parent?.type === "subscription_details"
-              ? invoice.parent?.subscription_details?.subscription
-              : undefined);
+      const invoice = event.data.object as InvoiceWithLegacySubscription;
+      const subscriptionId = subscriptionIdFromInvoice(invoice);
       if (subscriptionId) {
         const userId = await userIdFromSubscription(subscriptionId);
         console.log(`⏳  Payment failed (grace period — access kept) userId: ${userId ?? "unknown"} sub: ${subscriptionId}`);
@@ -559,6 +599,7 @@ export async function POST(req: NextRequest) {
         // subscription commissions (charge.invoice is not populated on this API version).
         const refs = [stripeId(charge.invoice), pi, ...(await invoiceRefsForPaymentIntent(pi))];
         needsRetry = (await voidCommissionsForRefs(refs, "refund")) || needsRetry;
+        await revokeAccessForPaymentIntent(pi, "Full refund");
       }
     }
 
@@ -590,7 +631,22 @@ export async function POST(req: NextRequest) {
   // Finalize. If a money-write failed transiently, un-mark the event and return 500
   // so Stripe redelivers; the idempotent retry re-records cleanly.
   if (needsRetry) {
-    await supabaseAdmin.from("processed_stripe_events").delete().eq("id", event.id);
+    await supabaseAdmin
+      .from("processed_stripe_events")
+      .update({ status: "failed", last_error: `Handler failed for ${event.type}`, updated_at: new Date().toISOString() })
+      .eq("id", event.id);
+    return NextResponse.json({ error: "transient failure, please retry" }, { status: 500 });
+  }
+
+  const { data: completedEvent, error: completeError } = await supabaseAdmin
+    .from("processed_stripe_events")
+    .update({ status: "completed", last_error: null, updated_at: new Date().toISOString() })
+    .eq("id", event.id)
+    .eq("status", "processing")
+    .select("id")
+    .maybeSingle();
+  if (completeError || !completedEvent) {
+    console.error(`Could not complete Stripe event ${event.id}:`, completeError);
     return NextResponse.json({ error: "transient failure, please retry" }, { status: 500 });
   }
 

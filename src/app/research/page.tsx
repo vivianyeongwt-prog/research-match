@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllFieldContent } from "@/lib/research-data";
+import { siteOrigin } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 export const revalidate = false;
 
-const SITE = "https://www.researchmatch.site";
+const SITE = siteOrigin();
 
 export const metadata: Metadata = {
   title: "Research Fields: Find Professors by Subject",

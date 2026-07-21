@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { generateJSON } from "@/lib/llm";
-import { withinRateLimit, clientIp } from "@/lib/rate-limit";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import {
+  allowRequestRate,
+  consumeUsage,
+  releaseUsage,
+  requestAccess,
+  requestSubject,
+} from "@/lib/server-access";
 
 const RATE_LIMIT_MAX_CHECKS = 12;
 
@@ -44,31 +44,12 @@ const EMAIL_SCHEMA = {
   required: ["flags"],
 };
 
-async function authenticatedUserId(req: NextRequest) {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token) return null;
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error) return null;
-  return data.user?.id ?? null;
-}
-
 export async function POST(req: NextRequest) {
+  let quotaReservation: { scope: string; subject: string } | null = null;
   try {
-    // Anonymous checks are allowed: the first check is a no-account "taste" (the
-    // client shows the top flag + count and gates the rest behind signup).
-    // Per-account / per-plan limits are enforced client-side; here we only
-    // rate-limit (by user when signed in, by IP when anonymous) to curb abuse.
-    const userId = await authenticatedUserId(req);
-    const rateKey = userId || `anon:${clientIp(req)}`;
-
-    if (!withinRateLimit(`email:${rateKey}`, RATE_LIMIT_MAX_CHECKS)) {
-      return NextResponse.json({ error: "Too many email checks. Try again in a minute." }, { status: 429 });
-    }
-
     const { draft, professorName, institution, topics, highlights } = await req.json() as EmailReviewRequest;
 
-    if (!draft || draft.trim().length < 10) {
+    if (typeof draft !== "string" || draft.trim().length < 10) {
       return NextResponse.json({
         flags: [
           {
@@ -79,6 +60,34 @@ export async function POST(req: NextRequest) {
           },
         ],
       });
+    }
+    if (
+      draft.length > 5_000 ||
+      (professorName !== undefined && (typeof professorName !== "string" || professorName.length > 200)) ||
+      (institution !== undefined && (typeof institution !== "string" || institution.length > 300)) ||
+      (topics !== undefined && (!Array.isArray(topics) || topics.length > 10 || topics.some((topic) => typeof topic !== "string" || topic.length > 160))) ||
+      (highlights !== undefined && (!Array.isArray(highlights) || highlights.length > 10 || highlights.some((highlight) => typeof highlight?.paper !== "string" || highlight.paper.length > 500)))
+    ) {
+      return NextResponse.json({ error: "Email review input is too large or malformed." }, { status: 400 });
+    }
+
+    const access = await requestAccess(req);
+    const subject = requestSubject(req, access.user?.id);
+    if (!(await allowRequestRate(req, "email", RATE_LIMIT_MAX_CHECKS, access.user?.id))) {
+      return NextResponse.json({ error: "Too many email checks. Try again in a minute." }, { status: 429 });
+    }
+
+    // The server owns the trial. Local storage only changes how the button looks;
+    // it cannot grant another model call or reveal a paid result.
+    if (!access.isPaid) {
+      const scope = access.user ? "email-check:free-account" : "email-check:anonymous";
+      if (!(await consumeUsage(scope, subject, 1))) {
+        return NextResponse.json(
+          { error: access.user ? "upgrade_required" : "signup_required" },
+          { status: 403 }
+        );
+      }
+      quotaReservation = { scope, subject };
     }
 
     const hasPapers = !!highlights?.length;
@@ -119,7 +128,7 @@ For each check below, first look for evidence in the email, then decide whether 
 Return JSON: { "flags": [ { "type": "error" or "warning", "issue": "FLAG_NAME", "suggestion": "one sentence explanation" } ] }
 Only flag real problems. If the email is solid, return { "flags": [] }. Max 4 flags.`;
 
-    const SYSTEM = "You are a strict but fair cold email reviewer. Before flagging any issue, you MUST quote the specific part of the email that proves the problem exists. If you cannot quote evidence of the problem, do NOT flag it. Write each suggestion without em dashes; use commas or periods instead. You return valid JSON only.";
+    const SYSTEM = "You are a strict but fair cold email reviewer. Only flag an issue when the email contains specific evidence for it. Mention the relevant phrase or concrete absence in the suggestion. If you cannot identify evidence, do not flag it. Write each suggestion without em dashes; use commas or periods instead. You return valid JSON only.";
 
     const parsed = await generateJSON<{ flags?: { type: string; issue: string; suggestion: string }[] }>({
       system: SYSTEM,
@@ -130,10 +139,16 @@ Only flag real problems. If the email is solid, return { "flags": [] }. Max 4 fl
     });
 
     if (!parsed) {
+      if (quotaReservation) await releaseUsage(quotaReservation.scope, quotaReservation.subject);
       return NextResponse.json({ error: "Couldn't check your email right now. Please try again." }, { status: 503 });
     }
-    return NextResponse.json({ flags: parsed.flags ?? [] });
+    const flags = parsed.flags ?? [];
+    if (!access.user) {
+      return NextResponse.json({ flags: flags.slice(0, 1), totalFlags: flags.length, gated: true });
+    }
+    return NextResponse.json({ flags, totalFlags: flags.length, gated: false });
   } catch (err) {
+    if (quotaReservation) await releaseUsage(quotaReservation.scope, quotaReservation.subject);
     console.error("email check error:", err);
     return NextResponse.json({ error: "Couldn't check your email right now. Please try again." }, { status: 500 });
   }

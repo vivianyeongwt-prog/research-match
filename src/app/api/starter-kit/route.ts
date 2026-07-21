@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { withinRateLimit, clientIp, isPlausibleEmail } from "@/lib/rate-limit";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { isPlausibleEmail } from "@/lib/rate-limit";
+import { allowRequestRate, supabaseAdmin } from "@/lib/server-access";
 
 /* ── POST: save email ────────────────────────────────────── */
 export async function POST(req: NextRequest) {
   try {
-    if (!withinRateLimit(`starter-kit:${clientIp(req)}`, 5)) {
+    if (!(await allowRequestRate(req, "starter-kit", 5))) {
       return NextResponse.json({ error: "Too many attempts. Try again in a minute." }, { status: 429 });
     }
 
@@ -19,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
     }
 
-    const { error } = await supabase.from("pdf_downloads").insert({
+    const { error } = await supabaseAdmin.from("pdf_downloads").insert({
       email: email.trim().toLowerCase(),
       created_at: new Date().toISOString(),
     });
@@ -35,7 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("starter-kit POST error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Could not prepare the starter kit." }, { status: 500 });
   }
 }
 
@@ -248,7 +243,7 @@ function buildContentStream(): string[] {
   L.push(`0 -13 Td`);
   L.push(`/F2 8.5 Tf`);
   L.push("0.11 0.478 0.337 rg");
-  L.push(`(${esc("Try Research Match: researchmatch.net")}) Tj`);
+  L.push(`(${esc("Try Research Match: researchmatch.site")}) Tj`);
   L.push("ET");
 
   return L;

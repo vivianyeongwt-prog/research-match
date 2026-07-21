@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { normalizeReferralCode } from "@/lib/buddy-pass";
 import { isPlausibleEmail } from "@/lib/rate-limit";
+import { apiFetch } from "@/lib/client-fetch";
 
 const HERO_PLACEHOLDERS = [
   "e.g. machine learning",
@@ -40,7 +41,6 @@ export default function LandingPage() {
   const [inlineWaitlistDone, setInlineWaitlistDone] = useState(false);
   const [inlineWaitlistLoading, setInlineWaitlistLoading] = useState(false);
   const [inlineWaitlistError, setInlineWaitlistError] = useState("");
-  const [lifetimeSpotsRemaining, setLifetimeSpotsRemaining] = useState<number | null>(null);
   const [searchCount, setSearchCount] = useState<number | null>(null);
   const [activePricingIndex, setActivePricingIndex] = useState(0);
   const [activePricingTab, setActivePricingTab] = useState<string>("free");
@@ -52,7 +52,7 @@ export default function LandingPage() {
   const paidPricingOptions = [
     { key: "weekly", label: "Weekly", detail: "$7", price: "$7", period: "1 week access", cta: "Start 1-Week Sprint for $7", badge: null },
     { key: "semester", label: "Semester", detail: "$29", price: "$29", period: "4 months access", cta: "Get Semester Access for $29", badge: "Best value" },
-    { key: "lifetime", label: "Lifetime", detail: "$59", price: "$59", period: "Yours forever.", cta: "Claim your spot for $59", badge: null },
+    { key: "lifetime", label: "Lifetime", detail: "$59", price: "$59", period: "Yours forever.", cta: "Get lifetime access for $59", badge: null },
   ] as const;
   const activePaidPlan =
     activePricingTab === "weekly" || activePricingTab === "semester" || activePricingTab === "lifetime"
@@ -147,8 +147,12 @@ export default function LandingPage() {
     }
   }, []);
   useEffect(() => {
-    fetch("/api/stats").then(r => r.json()).then(d => {
-      startTransition(() => setSearchCount(d.searches));
+    apiFetch("/api/stats").then(async (r) => {
+      if (!r.ok) return null;
+      return r.json() as Promise<{ searches?: unknown }>;
+    }).then(d => {
+      if (!d || typeof d.searches !== "number" || !Number.isFinite(d.searches) || d.searches < 0) return;
+      startTransition(() => setSearchCount(d.searches as number));
     }).catch(() => { });
   }, []);
 
@@ -157,13 +161,6 @@ export default function LandingPage() {
       startTransition(() => setPlaceholderIdx((i) => (i + 1) % HERO_PLACEHOLDERS.length));
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/lifetime-spots")
-      .then((r) => r.json())
-      .then((d) => { startTransition(() => setLifetimeSpotsRemaining(d.remaining ?? 200)); })
-      .catch(() => { startTransition(() => setLifetimeSpotsRemaining(200)); });
   }, []);
 
   useEffect(() => {
@@ -222,12 +219,16 @@ export default function LandingPage() {
     setCheckoutError("");
     try {
       const priceId =
-        plan === "weekly"   ? (process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY   || "price_1TMxDSFINW44xCyFWrm6ZTOo") :
-        plan === "semester" ? (process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER || "price_1TIuAlFINW44xCyFcxqgQpeV") :
-                              (process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME || "price_1TIuBBFINW44xCyFoSCtUpFN");
+        plan === "weekly"   ? process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY :
+        plan === "semester" ? process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER :
+                              process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME;
+      if (!priceId) {
+        setCheckoutError("Checkout is not configured for this plan.");
+        return;
+      }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error("Missing auth session");
-      const res = await fetch("/api/checkout", {
+      const res = await apiFetch("/api/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -261,7 +262,7 @@ export default function LandingPage() {
     setInlineWaitlistError("");
     setInlineWaitlistLoading(true);
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await apiFetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, tier: "general" }),
@@ -602,7 +603,7 @@ export default function LandingPage() {
                 <div className="lp-dot" style={{ background: "#ff5f57" }} />
                 <div className="lp-dot" style={{ background: "#febc2e" }} />
                 <div className="lp-dot" style={{ background: "#28c840" }} />
-                <span className="lp-mockup-url">researchmatch.net/app</span>
+                <span className="lp-mockup-url">researchmatch.site/app</span>
               </div>
               <div className="lp-mockup-body">
                 <div className="lp-mock-search">
@@ -644,7 +645,7 @@ export default function LandingPage() {
                 <div className="lp-dot" style={{ background: "#ff5f57" }} />
                 <div className="lp-dot" style={{ background: "#febc2e" }} />
                 <div className="lp-dot" style={{ background: "#28c840" }} />
-                <span className="lp-mockup-url">researchmatch.net/app</span>
+                <span className="lp-mockup-url">researchmatch.site/app</span>
               </div>
               <div className="lp-mockup-body" style={{ padding: 0 }}>
                 <div
@@ -690,7 +691,7 @@ export default function LandingPage() {
                 <div className="lp-dot" style={{ background: "#ff5f57" }} />
                 <div className="lp-dot" style={{ background: "#febc2e" }} />
                 <div className="lp-dot" style={{ background: "#28c840" }} />
-                <span className="lp-mockup-url">researchmatch.net/app</span>
+                <span className="lp-mockup-url">researchmatch.site/app</span>
               </div>
               <div className="lp-mockup-body flex flex-col gap-6 md:flex-row md:gap-12" style={{ alignItems: "center", padding: "24px 20px" }}>
                 <div className="lp-mock-email">
@@ -786,7 +787,7 @@ export default function LandingPage() {
       <section id="pricing" className="lp-pricing-section" data-reveal>
         <div className="lp-pricing-header">
           <h2 className="lp-pricing-title">Pick your plan.</h2>
-          <p className="lp-pricing-guarantee">No professor reply in 30 days, full refund.</p>
+          <p className="lp-pricing-guarantee">Cancel recurring plans from your profile.</p>
         </div>
 
         {/* Mobile: Tab toggle */}
@@ -932,18 +933,14 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            {activePaidPlan === "lifetime" && lifetimeSpotsRemaining === 0 ? (
-              <button disabled className="lp-price-btn" style={{ background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed" }}>Sold out</button>
-            ) : (
-              <button
-                onClick={() => handleCheckout(activePaidPlan)}
-                disabled={checkoutLoading === activePaidPlan}
-                className="lp-price-btn"
-                style={{ background: "rgba(101, 153, 131, 0.08)", color: "#2d5a47", border: "1px solid rgba(101, 153, 131, 0.2)", cursor: "pointer", width: "100%" }}
-              >
-                {checkoutLoading === activePaidPlan ? "Loading…" : paidPlan.cta}
-              </button>
-            )}
+            <button
+              onClick={() => handleCheckout(activePaidPlan)}
+              disabled={checkoutLoading === activePaidPlan}
+              className="lp-price-btn"
+              style={{ background: "rgba(101, 153, 131, 0.08)", color: "#2d5a47", border: "1px solid rgba(101, 153, 131, 0.2)", cursor: "pointer", width: "100%" }}
+            >
+              {checkoutLoading === activePaidPlan ? "Loading…" : paidPlan.cta}
+            </button>
           </div>
         </div>
 
@@ -1062,18 +1059,14 @@ export default function LandingPage() {
                     <li key={f}><span className="lp-check">✓</span>{f}</li>
                   ))}
                 </ul>
-                {lifetimeSpotsRemaining === 0 ? (
-                  <button disabled className="lp-price-btn" style={{ background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed" }}>Sold out</button>
-                ) : (
-                  <button
-                    onClick={() => handleCheckout("lifetime")}
-                    disabled={checkoutLoading === "lifetime"}
-                    className="lp-price-btn"
-                    style={{ background: "rgba(101, 153, 131, 0.08)", color: "#2d5a47", border: "1px solid rgba(101, 153, 131, 0.2)", cursor: "pointer", width: "100%" }}
-                  >
-                    {checkoutLoading === "lifetime" ? "Loading…" : "Claim your spot for $59"}
-                  </button>
-                )}
+                <button
+                  onClick={() => handleCheckout("lifetime")}
+                  disabled={checkoutLoading === "lifetime"}
+                  className="lp-price-btn"
+                  style={{ background: "rgba(101, 153, 131, 0.08)", color: "#2d5a47", border: "1px solid rgba(101, 153, 131, 0.2)", cursor: "pointer", width: "100%" }}
+                >
+                  {checkoutLoading === "lifetime" ? "Loading…" : "Get lifetime access for $59"}
+                </button>
               </div>
             </div>
           </div>
@@ -1274,6 +1267,8 @@ export default function LandingPage() {
             <Link href="/blog">Blog</Link>
             <a href="#pricing">Pricing</a>
             <Link href="/feedback">Feedback</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
           </div>
           <div className="lp-footer-copy">
             Built for the student who reaches out.

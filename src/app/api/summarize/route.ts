@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { hasPaidAccess } from "@/lib/buddy-pass";
 import { oaUrl, isOaAuthorId } from "@/lib/openalex";
 import { generateJSON } from "@/lib/llm";
-import { clientIp } from "@/lib/rate-limit";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import {
+  allowRequestRate,
+  requestAccess,
+  requestSubject,
+  supabaseAdmin,
+} from "@/lib/server-access";
 
 const FREE_LIMIT = 2;
 const ANON_LIMIT = 2;
@@ -48,65 +46,52 @@ const SUMMARY_SCHEMA = {
 };
 
 export async function POST(req: NextRequest) {
+  let quotaReservation: { userId: string | null; anonSubject: string | null } | null = null;
   try {
     const { authorId } = await req.json();
     if (!isOaAuthorId(authorId)) {
       return NextResponse.json({ error: "authorId required" }, { status: 400 });
     }
 
-    // --- Server-side rate limiting ---
-    const authHeader = req.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "").trim();
-    let userId: string | null = null;
-
-    if (token) {
-      const { data: { user } } = await supabaseAdmin.auth.getUser(token);
-      if (user) userId = user.id;
+    const access = await requestAccess(req);
+    if (!(await allowRequestRate(req, "summarize", 12, access.user?.id))) {
+      return NextResponse.json({ error: "Too many summaries. Try again in a minute." }, { status: 429 });
     }
 
-    if (userId) {
-      // Authenticated user: check Supabase
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("plan_type, summaries_used, summaries_reset_at, buddy_pass_active_until")
-        .eq("id", userId)
-        .single();
-
-      const isPaid = hasPaidAccess(profile);
-
-      if (!isPaid) {
-        // Lifetime cap — no monthly reset. 2 summaries total, ever.
-        const used = profile?.summaries_used ?? 0;
-        if (used >= FREE_LIMIT) {
-          return NextResponse.json({ error: "limit_reached" }, { status: 403 });
-        }
+    if (!access.isPaid) {
+      const userId = access.user?.id ?? null;
+      const anonSubject = userId ? null : requestSubject(req);
+      const { data: reserved, error: reserveError } = await supabaseAdmin.rpc("consume_summary_quota", {
+        p_user_id: userId,
+        p_anon_subject: anonSubject,
+        p_limit: userId ? FREE_LIMIT : ANON_LIMIT,
+      });
+      if (reserveError) {
+        console.error("summarize: quota reservation failed:", reserveError);
+        return NextResponse.json({ error: "Usage could not be verified. Please try again." }, { status: 503 });
       }
-    } else {
-      // Anonymous user: IP-based limiting
-      const ip = clientIp(req);
-
-      const { data: anonUse, error: anonReadError } = await supabaseAdmin
-        .from("anon_summary_uses")
-        .select("count")
-        .eq("ip", ip)
-        .maybeSingle();
-      if (anonReadError) {
-        console.error("summarize: anon limit read failed:", anonReadError);
-      }
-
-      if ((anonUse?.count ?? 0) >= ANON_LIMIT) {
+      if (reserved !== true) {
         return NextResponse.json({ error: "limit_reached" }, { status: 403 });
       }
+      quotaReservation = { userId, anonSubject };
     }
 
     // --- Fetch recent papers ---
     const fromYear = new Date().getFullYear() - 3;
     const worksRes = await fetch(
-      oaUrl(`https://api.openalex.org/works?filter=author.id:${encodeURIComponent(authorId)},publication_year:>${fromYear}&sort=cited_by_count:desc&per_page=20&select=title,abstract_inverted_index,cited_by_count,publication_year,authorships,doi`)
+      oaUrl(`https://api.openalex.org/works?filter=author.id:${encodeURIComponent(authorId)},publication_year:>${fromYear}&sort=cited_by_count:desc&per_page=20&select=title,abstract_inverted_index,cited_by_count,publication_year,authorships,doi`),
+      { signal: AbortSignal.timeout(8_000) }
     );
     // A throttled/erroring OpenAlex response must NOT read as "this researcher has
     // no recent papers" — that's a false claim. Surface a retryable error instead.
     if (!worksRes.ok) {
+      if (quotaReservation) {
+        await supabaseAdmin.rpc("release_summary_quota", {
+          p_user_id: quotaReservation.userId,
+          p_anon_subject: quotaReservation.anonSubject,
+        });
+        quotaReservation = null;
+      }
       console.error(`summarize: OpenAlex works fetch failed (${worksRes.status}) for ${authorId}`);
       return NextResponse.json(
         { error: "The paper database is busy right now. Please try again in a moment." },
@@ -118,6 +103,13 @@ export async function POST(req: NextRequest) {
     const works = allWorks.slice(0, 8);
 
     if (works.length === 0) {
+      if (quotaReservation) {
+        await supabaseAdmin.rpc("release_summary_quota", {
+          p_user_id: quotaReservation.userId,
+          p_anon_subject: quotaReservation.anonSubject,
+        });
+        quotaReservation = null;
+      }
       return NextResponse.json({ summary: "No recent papers found for this researcher.", highlights: [] });
     }
 
@@ -179,6 +171,13 @@ Return only valid JSON, no markdown, no explanation.`;
 
     // Never dump a raw error to the user — return a clean, retry-able message.
     if (!parsed) {
+      if (quotaReservation) {
+        await supabaseAdmin.rpc("release_summary_quota", {
+          p_user_id: quotaReservation.userId,
+          p_anon_subject: quotaReservation.anonSubject,
+        });
+        quotaReservation = null;
+      }
       return NextResponse.json({
         summary: "We couldn't generate a summary for this professor right now. Please try again.",
         highlights: [],
@@ -198,53 +197,28 @@ Return only valid JSON, no markdown, no explanation.`;
       questions: parsed.questions ?? [],
     };
 
-    // Only count as used if we got real content
+    // A free use was reserved atomically before model work. Refund it when no real
+    // result was produced; otherwise the reservation is the durable usage count.
     const gotRealContent = highlightsWithPosition.length > 0 &&
       !result.summary.includes("unavailable") &&
       !result.summary.includes("No recent papers");
 
-    if (gotRealContent) {
-      if (userId) {
-        // Increment server-side for authenticated user
-        const { data: profile } = await supabaseAdmin
-          .from("profiles")
-          .select("plan_type, summaries_used, summaries_reset_at, buddy_pass_active_until")
-          .eq("id", userId)
-          .single();
-
-        const isPaid = hasPaidAccess(profile);
-
-        if (!isPaid) {
-          // Lifetime cap — just increment, never reset.
-          await supabaseAdmin.from("profiles").update({
-            summaries_used: (profile?.summaries_used ?? 0) + 1,
-          }).eq("id", userId);
-        }
-      } else {
-        // Increment IP counter for anon user
-        const ip = clientIp(req);
-
-        const { data: existing } = await supabaseAdmin
-          .from("anon_summary_uses")
-          .select("count")
-          .eq("ip", ip)
-          .single();
-
-        if (existing) {
-          await supabaseAdmin
-            .from("anon_summary_uses")
-            .update({ count: existing.count + 1 })
-            .eq("ip", ip);
-        } else {
-          await supabaseAdmin
-            .from("anon_summary_uses")
-            .insert({ ip, count: 1, first_used_at: new Date().toISOString() });
-        }
-      }
+    if (!gotRealContent && quotaReservation) {
+      await supabaseAdmin.rpc("release_summary_quota", {
+        p_user_id: quotaReservation.userId,
+        p_anon_subject: quotaReservation.anonSubject,
+      });
+      quotaReservation = null;
     }
 
     return NextResponse.json(result);
   } catch (err) {
+    if (quotaReservation) {
+      await supabaseAdmin.rpc("release_summary_quota", {
+        p_user_id: quotaReservation.userId,
+        p_anon_subject: quotaReservation.anonSubject,
+      });
+    }
     console.error("summarize error:", err);
     return NextResponse.json(
       { error: "Something went wrong generating the summary. Please try again." },

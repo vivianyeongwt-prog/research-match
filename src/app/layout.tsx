@@ -5,6 +5,10 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/lib/auth-context";
 import AnalyticsInit from "./AnalyticsInit";
+import { siteOrigin } from "@/lib/site-url";
+import { serializeJsonLd } from "@/lib/json-ld";
+
+const SITE = siteOrigin();
 
 const inter = Hanken_Grotesk({
   subsets: ["latin"],
@@ -22,7 +26,7 @@ const playfair = Fraunces({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.researchmatch.site"),
+  metadataBase: new URL(SITE),
   alternates: { canonical: "/" },
   verification: {
     google: "s_3kAnRUjvOPzjElpM04zRSPoHf08YAFpfOWvUJDYDw",
@@ -51,8 +55,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
 };
-
-const SITE = "https://www.researchmatch.site";
 
 // Sitewide Organization + WebSite schema. The SearchAction mirrors the real
 // search entry point (/app?q=...) so Google can surface a sitelinks search box.
@@ -95,7 +97,7 @@ export default function RootLayout({
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(siteJsonLd) }}
         />
         <AnalyticsInit />
         <AuthProvider>

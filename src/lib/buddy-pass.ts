@@ -2,6 +2,7 @@ export type BuddyPassProfile = {
   id?: string | null;
   email?: string | null;
   plan_type?: string | null;
+  plan_expires_at?: string | null;
   buddy_pass_active_until?: string | null;
 };
 
@@ -26,23 +27,28 @@ export function hasActiveBuddyPass(profile?: BuddyPassProfile | null, now = new 
   return new Date(profile.buddy_pass_active_until).getTime() > now.getTime();
 }
 
-export function hasPaidPlan(profile?: BuddyPassProfile | null) {
-  return !!profile?.plan_type && PAID_PLAN_TYPES.has(profile.plan_type);
+export function hasPaidPlan(profile?: BuddyPassProfile | null, now = new Date()) {
+  if (!profile?.plan_type || !PAID_PLAN_TYPES.has(profile.plan_type)) return false;
+  if (profile.plan_type === "lifetime") return true;
+  if (!profile.plan_expires_at) return true;
+  return new Date(profile.plan_expires_at).getTime() > now.getTime();
 }
 
 export function hasPaidAccess(profile?: BuddyPassProfile | null, now = new Date()) {
-  return hasPaidPlan(profile) || hasActiveBuddyPass(profile, now);
+  return hasPaidPlan(profile, now) || hasActiveBuddyPass(profile, now);
 }
 
 export function planLabelFor(profile?: BuddyPassProfile | null) {
-  if (profile?.plan_type === "lifetime") return "Lifetime";
-  if (profile?.plan_type === "weekly") return "Weekly";
-  if (
-    profile?.plan_type === "semester" ||
-    profile?.plan_type === "student_monthly" ||
-    profile?.plan_type === "student_annual"
-  ) {
-    return "Semester";
+  if (hasPaidPlan(profile)) {
+    if (profile?.plan_type === "lifetime") return "Lifetime";
+    if (profile?.plan_type === "weekly") return "Weekly";
+    if (
+      profile?.plan_type === "semester" ||
+      profile?.plan_type === "student_monthly" ||
+      profile?.plan_type === "student_annual"
+    ) {
+      return "Semester";
+    }
   }
   if (hasActiveBuddyPass(profile)) return "Buddy Pass";
   return "Free";

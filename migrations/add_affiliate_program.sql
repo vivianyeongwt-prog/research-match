@@ -57,8 +57,66 @@ CREATE TABLE IF NOT EXISTS public.payouts (
 -- Webhook idempotency ledger: one row per Stripe event id we've fully processed.
 CREATE TABLE IF NOT EXISTS public.processed_stripe_events (
   id text PRIMARY KEY,
+  status text NOT NULL DEFAULT 'completed',
+  last_error text,
+  updated_at timestamptz NOT NULL DEFAULT now(),
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.processed_stripe_events
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'completed',
+  ADD COLUMN IF NOT EXISTS last_error text,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'processed_stripe_events_status_check'
+      AND conrelid = 'public.processed_stripe_events'::regclass
+  ) THEN
+    ALTER TABLE public.processed_stripe_events
+      ADD CONSTRAINT processed_stripe_events_status_check
+      CHECK (status IN ('processing', 'failed', 'completed'));
+  END IF;
+END $$;
+
+-- Atomically claim an event. Completed events are immutable duplicates; failed
+-- events can be retried immediately; abandoned processing claims can be recovered
+-- after five minutes if a server died between the claim and completion update.
+CREATE OR REPLACE FUNCTION public.claim_stripe_event(p_event_id text)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_status text;
+  v_updated_at timestamptz;
+BEGIN
+  INSERT INTO public.processed_stripe_events (id, status, updated_at)
+  VALUES (p_event_id, 'processing', now())
+  ON CONFLICT (id) DO NOTHING;
+  IF FOUND THEN RETURN 'claimed'; END IF;
+
+  SELECT status, updated_at INTO v_status, v_updated_at
+  FROM public.processed_stripe_events
+  WHERE id = p_event_id
+  FOR UPDATE;
+
+  IF v_status = 'completed' THEN RETURN 'completed'; END IF;
+  IF v_status = 'failed' OR v_updated_at < now() - interval '5 minutes' THEN
+    UPDATE public.processed_stripe_events
+      SET status = 'processing', last_error = null, updated_at = now()
+      WHERE id = p_event_id;
+    RETURN 'claimed';
+  END IF;
+  RETURN 'busy';
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.claim_stripe_event(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_stripe_event(text) TO service_role;
 
 -- One affiliate per code / per promo code; fast lookup from the webhook.
 CREATE UNIQUE INDEX IF NOT EXISTS affiliates_code_unique
@@ -74,26 +132,21 @@ CREATE UNIQUE INDEX IF NOT EXISTS commissions_invoice_unique
 -- One referral per subscription. Non-partial so the webhook's idempotent
 -- upsert(onConflict: stripe_subscription_id) works; NULLs (one-time payments) are
 -- treated as distinct, so multiple NULL-subscription referrals are still allowed.
--- First collapse any pre-existing duplicate subscription rows (keep the earliest),
--- repointing their commissions to the survivor, so the UNIQUE index can't abort on
--- dirty data. (No-op on an empty/clean table.)
-UPDATE public.commissions c
-SET referral_id = keep.keep_id
-FROM (
-  SELECT id,
-         first_value(id) OVER (PARTITION BY stripe_subscription_id ORDER BY created_at, id) AS keep_id
-  FROM public.referrals
-  WHERE stripe_subscription_id IS NOT NULL
-) keep
-WHERE c.referral_id = keep.id AND keep.id <> keep.keep_id;
-
-DELETE FROM public.referrals r
-USING (
-  SELECT id, row_number() OVER (PARTITION BY stripe_subscription_id ORDER BY created_at, id) AS rn
-  FROM public.referrals
-  WHERE stripe_subscription_id IS NOT NULL
-) d
-WHERE r.id = d.id AND d.rn > 1;
+-- Never merge or delete financial rows automatically. If legacy duplicates exist,
+-- stop the migration so an operator can review them in a backup/restored staging
+-- copy and make an explicit accounting decision.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM public.referrals
+    WHERE stripe_subscription_id IS NOT NULL
+    GROUP BY stripe_subscription_id
+    HAVING count(*) > 1
+  ) THEN
+    RAISE EXCEPTION 'Duplicate referral subscriptions require manual review before creating referrals_subscription_unique';
+  END IF;
+END $$;
 
 DROP INDEX IF EXISTS referrals_subscription_idx;
 CREATE UNIQUE INDEX IF NOT EXISTS referrals_subscription_unique

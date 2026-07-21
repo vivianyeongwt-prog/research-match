@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { authenticatedUser, customerIdsForUser } from "@/lib/stripe-customers";
+import { siteOrigin } from "@/lib/site-url";
+import { allowRequestRate } from "@/lib/server-access";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-02-25.clover",
@@ -61,6 +63,9 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "You must be signed in to manage billing." }, { status: 401 });
     }
+    if (!(await allowRequestRate(req, "customer-portal", 8, user.id, 600))) {
+      return NextResponse.json({ error: "Too many billing requests." }, { status: 429 });
+    }
 
     const customerIds = await customerIdsForUser(stripe, user.id, user.email);
 
@@ -71,11 +76,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const origin = req.headers.get("origin") || "http://localhost:3000";
-
     const customer = await customerWithCurrentSubscription(customerIds);
 
-    const portalSession = await createPortalSession(customer, `${origin}/profile`);
+    const portalSession = await createPortalSession(customer, `${siteOrigin()}/profile`);
 
     return NextResponse.json({ url: portalSession.url });
   } catch (err) {

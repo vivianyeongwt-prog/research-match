@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { withinRateLimit, clientIp, isPlausibleEmail } from "@/lib/rate-limit";
+import { isPlausibleEmail } from "@/lib/rate-limit";
+import { allowRequestRate, supabaseAdmin } from "@/lib/server-access";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!withinRateLimit(`waitlist:${clientIp(req)}`, 5)) {
+    if (!(await allowRequestRate(req, "waitlist", 5))) {
       return NextResponse.json({ error: "Too many attempts. Try again in a minute." }, { status: 429 });
     }
 
@@ -13,13 +13,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "A valid email and tier are required" }, { status: 400 });
     }
 
-    const { error } = await supabase.from("waitlist").insert({
+    const { error } = await supabaseAdmin.from("waitlist").insert({
       email: email.trim().toLowerCase(),
       tier,
       created_at: new Date().toISOString(),
     });
 
-    if (error) {
+    if (error && error.code !== "23505") {
       console.error("waitlist error:", error);
       return NextResponse.json({ error: "Failed to join waitlist" }, { status: 500 });
     }
@@ -27,6 +27,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("waitlist error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Could not join the waitlist." }, { status: 500 });
   }
 }

@@ -1,50 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
-import { withinRateLimit, clientIp } from "@/lib/rate-limit";
+import { allowRequestRate, requestAccess, supabaseAdmin } from "@/lib/server-access";
 
-const ADMIN_EMAIL = "thomasjacekim@gmail.com";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const CATEGORIES = new Set(["General Feedback", "Bug Report", "Feature Request"]);
 
 async function authenticatedAdmin(req: NextRequest) {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token) return false;
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error) return false;
-
-  return data.user?.email === ADMIN_EMAIL;
+  const access = await requestAccess(req);
+  const admins = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  return !!access.user?.email && admins.includes(access.user.email.toLowerCase());
 }
 
 export async function GET(req: NextRequest) {
+  if (!(await allowRequestRate(req, "feedback-read", 30))) {
+    return NextResponse.json({ error: "Too many feedback requests." }, { status: 429 });
+  }
   const sort = req.nextUrl.searchParams.get("sort") || "upvotes";
   const order = sort === "newest" ? "created_at" : "upvotes";
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("feedback")
     .select("*")
-    .order(order, { ascending: false });
+    .order(order, { ascending: false })
+    .limit(200);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not load feedback." }, { status: 500 });
   return NextResponse.json(data);
 }
 
 export async function POST(req: NextRequest) {
-  if (!withinRateLimit(`feedback-post:${clientIp(req)}`, 5)) {
+  if (!(await allowRequestRate(req, "feedback-post", 5))) {
     return NextResponse.json({ error: "Too many submissions. Try again in a minute." }, { status: 429 });
   }
 
   const { content, category, author_name } = await req.json();
 
-  if (typeof content !== "string" || !content.trim() || content.length > 5000) {
+  if (
+    typeof content !== "string" || !content.trim() || content.length > 5000 ||
+    (category !== undefined && (typeof category !== "string" || !CATEGORIES.has(category))) ||
+    (author_name !== undefined && (typeof author_name !== "string" || author_name.length > 100))
+  ) {
     return NextResponse.json({ error: "Feedback content is required." }, { status: 400 });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("feedback")
     .insert({
       content: content.trim(),
@@ -55,28 +55,24 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not save feedback." }, { status: 500 });
   return NextResponse.json(data);
 }
 
 export async function PATCH(req: NextRequest) {
   // Upvotes are anonymous by design; the per-IP cap just blunts scripted inflation.
-  if (!withinRateLimit(`feedback-vote:${clientIp(req)}`, 20)) {
+  if (!(await allowRequestRate(req, "feedback-vote", 20))) {
     return NextResponse.json({ error: "Too many votes. Try again in a minute." }, { status: 429 });
   }
 
   const { id } = await req.json();
 
-  if (!id) return NextResponse.json({ error: "ID required." }, { status: 400 });
-
-  const { error } = await supabase.rpc("increment_upvotes", { row_id: id });
-
-  if (error) {
-    const { data: current } = await supabase.from("feedback").select("upvotes").eq("id", id).single();
-    if (current) {
-      await supabase.from("feedback").update({ upvotes: (current.upvotes || 0) + 1 }).eq("id", id);
-    }
+  if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    return NextResponse.json({ error: "Valid ID required." }, { status: 400 });
   }
+
+  const { error } = await supabaseAdmin.rpc("increment_upvotes", { row_id: id });
+  if (error) return NextResponse.json({ error: "Could not record vote." }, { status: 500 });
 
   return NextResponse.json({ success: true });
 }
@@ -88,13 +84,15 @@ export async function PUT(req: NextRequest) {
 
   const { id, resolved } = await req.json();
 
-  if (!id) return NextResponse.json({ error: "ID required." }, { status: 400 });
+  if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    return NextResponse.json({ error: "Valid ID required." }, { status: 400 });
+  }
 
   const { error } = await supabaseAdmin
     .from("feedback")
     .update({ resolved: !!resolved })
     .eq("id", id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not update feedback." }, { status: 500 });
   return NextResponse.json({ success: true });
 }

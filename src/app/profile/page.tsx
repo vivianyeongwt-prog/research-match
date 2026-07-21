@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { formatBuddyPassDate, hasActiveBuddyPass, hasPaidAccess, planLabelFor } from "@/lib/buddy-pass";
+import { apiFetch } from "@/lib/client-fetch";
 import styles from "./profile.module.css";
 
 type BuddyReferral = {
@@ -58,7 +59,12 @@ export default function ProfilePage() {
   const [buddyError, setBuddyError] = useState("");
   const [activationLoading, setActivationLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(false);
   const [copyState, setCopyState] = useState<"idle" | "code" | "link">("idle");
+  const [resetRequested, setResetRequested] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
 
   const isPaid = hasPaidAccess(profile);
   const buddyActive = buddyPass.active || hasActiveBuddyPass(profile);
@@ -76,7 +82,7 @@ export default function ProfilePage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error("Missing auth session");
-      const res  = await fetch("/api/buddy-pass", { headers: { Authorization: `Bearer ${session.access_token}` } });
+      const res = await apiFetch("/api/buddy-pass", { headers: { Authorization: `Bearer ${session.access_token}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not load Buddy Pass.");
       setBuddyPass(data);
@@ -96,11 +102,32 @@ export default function ProfilePage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    setResetRequested(new URLSearchParams(window.location.search).get("reset") === "1");
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     fetchBuddyPass();
     const interval = window.setInterval(fetchBuddyPass, 15000);
     return () => window.clearInterval(interval);
   }, [fetchBuddyPass, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+        const res = await apiFetch("/api/billing-status", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const data = await res.json();
+        if (active && res.ok) setHasSubscription(data.hasSubscription === true);
+      } catch { /* hide billing actions when ownership cannot be verified */ }
+    })();
+    return () => { active = false; };
+  }, [user]);
 
   async function copyBuddyPass(value: string, kind: "code" | "link") {
     if (!value) return;
@@ -120,7 +147,7 @@ export default function ProfilePage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error("Missing auth session");
-      const res  = await fetch("/api/buddy-pass", {
+      const res = await apiFetch("/api/buddy-pass", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ action: "activate" }),
@@ -139,8 +166,9 @@ export default function ProfilePage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) { alert("Please sign in again to continue."); return; }
-      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER || "price_1TIuAlFINW44xCyFcxqgQpeV";
-      const res  = await fetch("/api/checkout", {
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER;
+      if (!priceId) { alert("Checkout is not configured for this plan."); return; }
+      const res = await apiFetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ priceId }),
@@ -160,13 +188,14 @@ export default function ProfilePage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) { alert("Please sign in again to cancel your subscription."); return; }
-      const res  = await fetch("/api/cancel-subscription", {
+      const res = await apiFetch("/api/cancel-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({}),
       });
       const data = await res.json();
       if (!res.ok) { alert(data.error || "Could not cancel subscription. Please contact support."); return; }
+      setHasSubscription(false);
       await refreshProfile();
       alert("Subscription canceled. You will not be charged again.");
     } catch {
@@ -174,6 +203,26 @@ export default function ProfilePage() {
     } finally {
       setCancelLoading(false);
     }
+  }
+
+  async function updatePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (newPassword.length < 8) {
+      setResetMessage("Use at least 8 characters.");
+      return;
+    }
+    setResetLoading(true);
+    setResetMessage("");
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setResetLoading(false);
+    if (error) {
+      setResetMessage(error.message);
+      return;
+    }
+    setNewPassword("");
+    setResetRequested(false);
+    setResetMessage("Password updated.");
+    window.history.replaceState({}, "", "/profile");
   }
 
   /* ── Signed-out gate ─────────────────────────────────────────── */
@@ -432,12 +481,33 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="pro-actions">
+                {resetRequested && (
+                  <form onSubmit={updatePassword} style={{ padding: "14px 0" }}>
+                    <label htmlFor="new-account-password" style={{ display: "block", fontSize: "0.84rem", fontWeight: 700, marginBottom: "8px" }}>
+                      Choose a new password
+                    </label>
+                    <input
+                      id="new-account-password"
+                      type="password"
+                      autoComplete="new-password"
+                      minLength={8}
+                      required
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      style={{ width: "100%", padding: "11px 13px", border: "1px solid rgba(101,153,131,.28)", borderRadius: "12px", font: "inherit", marginBottom: "9px" }}
+                    />
+                    <button type="submit" disabled={resetLoading} className="pro-upgrade" style={{ width: "100%" }}>
+                      {resetLoading ? "Updating…" : "Update password"}
+                    </button>
+                  </form>
+                )}
+                {resetMessage && <p role="status" className={resetMessage === "Password updated." ? undefined : "pro-error"}>{resetMessage}</p>}
                 <Link href="/feedback" className="pro-action">
                   Give feedback
                   <span className="pro-action-arrow" aria-hidden="true">→</span>
                 </Link>
 
-                {isPaid && profile?.plan_type !== "lifetime" && (
+                {hasSubscription && (
                   <button
                     id="cancel-subscription-btn"
                     type="button"

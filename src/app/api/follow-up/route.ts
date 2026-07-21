@@ -1,17 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { withinRateLimit, clientIp } from "@/lib/rate-limit";
+import {
+  allowRequestRate,
+  consumeUsage,
+  releaseUsage,
+  requestAccess,
+  requestSubject,
+} from "@/lib/server-access";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: NextRequest) {
+  let quotaReservation: { scope: string; subject: string } | null = null;
   try {
-    if (!withinRateLimit(`follow-up:${clientIp(req)}`, 4)) {
-      return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
+    const { email } = await req.json();
+    if (typeof email !== "string" || !email.trim()) {
+      return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    }
+    if (email.length > 10_000) {
+      return NextResponse.json({ error: "Email is too long." }, { status: 400 });
     }
 
-    const { email } = await req.json();
-    if (!email?.trim()) return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    const access = await requestAccess(req);
+    if (!access.user) {
+      return NextResponse.json({ error: "Sign in to generate a follow-up." }, { status: 401 });
+    }
+    if (!(await allowRequestRate(req, "follow-up", 4, access.user.id))) {
+      return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
+    }
+    if (!access.isPaid) {
+      const subject = requestSubject(req, access.user.id);
+      const scope = "follow-up:free-account";
+      if (!(await consumeUsage(scope, subject, 1))) {
+        return NextResponse.json({ error: "upgrade_required" }, { status: 403 });
+      }
+      quotaReservation = { scope, subject };
+    }
 
     const userContent = `A student sent this cold email to a professor:
 
@@ -68,14 +92,22 @@ Return JSON exactly like this:
       }
     }
 
-    if (!parsed) {
+    if (
+      !parsed ||
+      typeof parsed.followUp1 !== "string" ||
+      parsed.followUp1.trim().length === 0 ||
+      typeof parsed.followUp2 !== "string" ||
+      parsed.followUp2.trim().length === 0
+    ) {
+      if (quotaReservation) await releaseUsage(quotaReservation.scope, quotaReservation.subject);
       return NextResponse.json({ error: "Couldn't generate follow-ups right now. Please try again." }, { status: 503 });
     }
     return NextResponse.json({
-      followUp1: parsed.followUp1 ?? "",
-      followUp2: parsed.followUp2 ?? "",
+      followUp1: parsed.followUp1,
+      followUp2: parsed.followUp2,
     });
   } catch (err) {
+    if (quotaReservation) await releaseUsage(quotaReservation.scope, quotaReservation.subject);
     console.error("follow-up error:", err);
     return NextResponse.json({ error: "Couldn't generate follow-ups right now. Please try again." }, { status: 500 });
   }

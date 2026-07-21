@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { oaUrl } from "@/lib/openalex";
-import { withinRateLimit, clientIp } from "@/lib/rate-limit";
+import { allowRequestRate } from "@/lib/server-access";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -125,7 +125,10 @@ async function resolveTopicUncached(topic: string): Promise<{ ids: string[]; nam
 
     const termResults = await Promise.all(
       searchTerms.map(term =>
-        fetch(oaUrl(`https://api.openalex.org/topics?search=${encodeURIComponent(term)}&per_page=5`))
+        fetch(
+          oaUrl(`https://api.openalex.org/topics?search=${encodeURIComponent(term)}&per_page=5`),
+          { signal: AbortSignal.timeout(6_000) }
+        )
           // A throttled response must not read as "no such topic" — treat it like a
           // network failure so the result isn't cached as a legitimate empty match.
           .then(r => (r.ok ? r.json() : { results: [] }))
@@ -160,7 +163,10 @@ async function resolveTopicUncached(topic: string): Promise<{ ids: string[]; nam
 
 async function resolveUniversityUncached(university: string): Promise<{ id: string; name: string } | null> {
   try {
-    const res = await fetch(oaUrl(`https://api.openalex.org/institutions?search=${encodeURIComponent(university)}&per_page=5`));
+    const res = await fetch(
+      oaUrl(`https://api.openalex.org/institutions?search=${encodeURIComponent(university)}&per_page=5`),
+      { signal: AbortSignal.timeout(6_000) }
+    );
     if (!res.ok) return null;
     const data = await res.json();
     const candidates: { id: string; display_name: string }[] = data.results ?? [];
@@ -174,7 +180,7 @@ async function resolveUniversityUncached(university: string): Promise<{ id: stri
 
 export async function POST(req: NextRequest) {
   try {
-    if (!withinRateLimit(`resolve:${clientIp(req)}`, 20)) {
+    if (!(await allowRequestRate(req, "resolve", 12))) {
       return NextResponse.json({ error: "Too many searches. Try again in a minute." }, { status: 429 });
     }
 
@@ -182,8 +188,18 @@ export async function POST(req: NextRequest) {
 
     // Cap is an abuse bound only — 25 comfortably covers any real multi-topic /
     // comma-separated-university search the client can produce.
-    const topics: string[] = (body.topics ?? (body.topic ? [body.topic] : [])).slice(0, 25);
-    const universities: string[] = (body.universities ?? (body.university ? [body.university] : [])).slice(0, 25);
+    const rawTopics = body.topics ?? (body.topic ? [body.topic] : []);
+    const rawUniversities = body.universities ?? (body.university ? [body.university] : []);
+    if (
+      !Array.isArray(rawTopics) || !Array.isArray(rawUniversities) ||
+      rawTopics.length === 0 || rawTopics.length > 25 || rawUniversities.length > 25 ||
+      rawTopics.some((value) => typeof value !== "string" || !value.trim() || value.length > 200) ||
+      rawUniversities.some((value) => typeof value !== "string" || !value.trim() || value.length > 200)
+    ) {
+      return NextResponse.json({ error: "Search terms are malformed." }, { status: 400 });
+    }
+    const topics = rawTopics.map((value) => value.trim());
+    const universities = rawUniversities.map((value) => value.trim());
 
     const [topicResults, uniResults] = await Promise.all([
       Promise.all(topics.map(resolveTopic)),

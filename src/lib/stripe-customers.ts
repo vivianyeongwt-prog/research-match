@@ -4,12 +4,7 @@
 // module exists to prevent.
 import type { NextRequest } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabaseAdmin } from "@/lib/server-access";
 
 // Identify the caller from their verified Supabase bearer token. Both the id and
 // the email come from the token — never from the request body or the profiles row.
@@ -23,10 +18,9 @@ export async function authenticatedUser(req: NextRequest) {
 }
 
 // Resolve every Stripe customer that belongs to this user: subscriptions tagged
-// with their userId, checkout sessions tagged with their userId, and customers
-// matching their AUTH-VERIFIED email. Never look up by profiles.email — that row
-// is client-writable, and a tampered email would hand out another person's
-// Stripe customer (their billing portal / their subscriptions).
+// with their userId and customers matching their AUTH-VERIFIED email. Never look
+// up by profiles.email. Even though RLS now protects that row, the verified Auth
+// identity remains the only appropriate billing authority.
 export async function customerIdsForUser(
   stripe: Stripe,
   userId: string,
@@ -51,18 +45,6 @@ export async function customerIdsForUser(
   } catch (err) {
     console.warn("Subscription metadata lookup failed:", err);
   }
-
-  const sessions = await stripe.checkout.sessions
-    .list({ limit: 100 })
-    .autoPagingToArray({ limit: 1000 });
-
-  sessions.forEach((session) => {
-    if (session.metadata?.userId === userId && session.customer) {
-      customerIds.add(
-        typeof session.customer === "string" ? session.customer : session.customer.id
-      );
-    }
-  });
 
   if (verifiedEmail) {
     const customers = await stripe.customers.list({ email: verifiedEmail, limit: 10 });

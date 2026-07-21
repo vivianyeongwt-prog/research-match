@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { oaUrl } from "@/lib/openalex";
-import { withinRateLimit, clientIp } from "@/lib/rate-limit";
+import { isOaAuthorId, oaUrl } from "@/lib/openalex";
+import { allowRequestRate } from "@/lib/server-access";
 
 interface AuthorInput {
   id: string;
@@ -26,12 +26,20 @@ interface OpenAlexWork {
 
 export async function POST(req: NextRequest) {
   try {
-    if (!withinRateLimit(`score-authors:${clientIp(req)}`, 20)) {
+    if (!(await allowRequestRate(req, "score-authors", 10))) {
       return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
     }
 
     const { authors }: { authors: AuthorInput[] } = await req.json();
-    if (!Array.isArray(authors) || authors.length > 50) {
+    if (
+      !Array.isArray(authors) || authors.length > 50 ||
+      authors.some((author) =>
+        !author || typeof author.id !== "string" || !isOaAuthorId(author.id.split("/").pop()) ||
+        !Number.isFinite(author.works_count) || author.works_count < 0 ||
+        !Number.isFinite(author.cited_by_count) || author.cited_by_count < 0 ||
+        typeof author.has_institution !== "boolean"
+      )
+    ) {
       return NextResponse.json({ error: "authors must be an array of at most 50" }, { status: 400 });
     }
     const fiveYearsAgo = new Date().getFullYear() - 5;
