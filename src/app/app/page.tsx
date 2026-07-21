@@ -2,34 +2,53 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
-import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { hasPaidAccess, normalizeReferralCode, planLabelFor } from "@/lib/buddy-pass";
 import { track } from "@/lib/analytics";
-import { foldName, looksLikePersonName, nameMatches } from "@/lib/author-normalize";
+import { looksLikePersonName } from "@/lib/author-normalize";
 import { useMobile } from "@/lib/use-mobile";
-import { oaUrl } from "@/lib/openalex";
 import { signupSuccessMessage } from "@/lib/auth-copy";
 import { apiFetch } from "@/lib/client-fetch";
-
-// OpenAlex can occasionally hang; without a timeout a single stalled request
-// freezes the search spinner forever. oaFetch bounds every client OpenAlex call
-// so the search always resolves (the catch/finally clears loading). Callers may
-// still pass their own init (e.g. a shorter signal) — it overrides the default.
-const OA_TIMEOUT_MS = 15000;
-function oaFetch(url: string, init?: RequestInit): Promise<Response> {
-  // oaUrl() adds the polite-pool mailto to every client OpenAlex call.
-  return fetch(oaUrl(url), { signal: AbortSignal.timeout(OA_TIMEOUT_MS), ...init });
-}
-
-// Thrown when OpenAlex (or our resolve route) returns a throttle/5xx so search() can
-// show an honest "try again" message instead of a misleading "no professors found" —
-// the symptom users hit when an upstream daily limit was reached.
-class RateLimitError extends Error {}
-const isThrottle = (status: number) => status === 429 || status >= 500;
-const THROTTLE_MSG =
-  "ResearchMatch is getting a lot of searches right now and hit a temporary limit. Give it a moment and try again — your search terms are fine.";
+import {
+  ANON_SUMMARY_LIMIT,
+  MAX_CITATIONS,
+  MAX_PAPERS,
+  PLACEHOLDER_EXAMPLES,
+  PROFESSORS_PER_PAGE,
+  RateLimitError,
+  THROTTLE_MSG,
+  dedupeAuthors,
+  formatCitations,
+  formatInstitutionLocation,
+  homeInstitutionFirst,
+  isThrottle,
+  lookupAuthorsByIds,
+  lookupAuthorsByName,
+  oaFetch,
+  promoteMatchedInstitution,
+  topicRelevanceRank,
+  type Author,
+  type EmailFlag,
+  type OpenAlexInstitutionRef,
+  type OpenAlexWork,
+  type SummaryData,
+} from "@/lib/research-match-domain";
+import {
+  STORAGE_KEYS,
+  emailCheckStorageKey,
+  readAnonSummariesUsed,
+  readSavedProfessors,
+} from "@/lib/browser-storage";
+import {
+  ResearchSearchForm,
+  SearchModeToggle,
+  type SearchMode,
+} from "@/components/ResearchSearchForm";
+import { ResearchAppNav } from "@/components/ResearchAppNav";
+import { AccountModal, type AuthMode } from "@/components/AccountModal";
+import { UpgradeModal, type CheckoutPlan } from "@/components/UpgradeModal";
+import { EmailComposerModal } from "@/components/EmailComposerModal";
 
 export default function AppPageWrapper() {
   return <Suspense><AppPageInner /></Suspense>;
@@ -227,226 +246,10 @@ const RESEARCH_SUGGESTIONS = [
   "Science and Technology Studies", "Social Epidemiology",
 ].sort();
 
-interface Author {
-  id: string;
-  display_name: string;
-  orcid?: string | null;
-  last_known_institutions: { id: string; display_name: string; country_code: string; geo?: { city?: string; region?: string; country?: string } }[];
-  affiliations?: { institution?: { id?: string }; years?: number[] }[];
-  works_count: number;
-  cited_by_count: number;
-  topics: { id?: string; display_name: string }[];
-}
-
-interface OpenAlexInstitutionRef {
-  id?: string;
-}
-
-interface OpenAlexAuthorship {
-  author?: { id?: string };
-  institutions?: OpenAlexInstitutionRef[];
-}
-
-interface OpenAlexWork {
-  publication_year?: number;
-  authorships?: OpenAlexAuthorship[];
-}
-
-const US_STATE_CODES: Record<string, string> = {
-  Alabama: "AL", Alaska: "AK", Arizona: "AZ", Arkansas: "AR", California: "CA",
-  Colorado: "CO", Connecticut: "CT", Delaware: "DE", Florida: "FL", Georgia: "GA",
-  Hawaii: "HI", Idaho: "ID", Illinois: "IL", Indiana: "IN", Iowa: "IA",
-  Kansas: "KS", Kentucky: "KY", Louisiana: "LA", Maine: "ME", Maryland: "MD",
-  Massachusetts: "MA", Michigan: "MI", Minnesota: "MN", Mississippi: "MS",
-  Missouri: "MO", Montana: "MT", Nebraska: "NE", Nevada: "NV", "New Hampshire": "NH",
-  "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY", "North Carolina": "NC",
-  "North Dakota": "ND", Ohio: "OH", Oklahoma: "OK", Oregon: "OR", Pennsylvania: "PA",
-  "Rhode Island": "RI", "South Carolina": "SC", "South Dakota": "SD", Tennessee: "TN",
-  Texas: "TX", Utah: "UT", Vermont: "VT", Virginia: "VA", Washington: "WA",
-  "West Virginia": "WV", Wisconsin: "WI", Wyoming: "WY",
-};
-
-function formatInstitutionLocation(inst: Author["last_known_institutions"][0] | undefined): string {
-  if (!inst) return "";
-  const name = inst.display_name;
-  const city = inst.geo?.city;
-  const region = inst.geo?.region;
-  const country = inst.geo?.country;
-  const isUS = inst.country_code === "US";
-  if (!city && !region) return name;
-  if (isUS) {
-    const stateCode = region ? (US_STATE_CODES[region] ?? region) : "";
-    return city ? `${name}, ${city}${stateCode ? `, ${stateCode}` : ""}` : name;
-  }
-  return city && country ? `${name}, ${city}, ${country}` : name;
-}
-
-// How many distinct years the author actually published under one of the searched
-// institutions. A genuine home shows many years (Anna Schuh / Oxford = 17); a
-// collaboration or stale artifact shows 1-2 (E.L. Wright / Caltech = 2, R. Wald /
-// Caltech = 1). On OpenAlex data this year COUNT is the signal that separates the
-// two — the year SPAN does not (Wright's Caltech span is 2007-2026 but only 2 years).
-function matchedAffiliationYears(a: Author, fullInstIds: string[]): number {
-  let years = 0;
-  for (const af of a.affiliations ?? []) {
-    if (af.institution?.id && fullInstIds.includes(af.institution.id)) {
-      years = Math.max(years, (af.years ?? []).length);
-    }
-  }
-  return years;
-}
-
-// A searched institution must appear in at least this many distinct publication
-// years before we display it as the professor's institution on the card. Below it,
-// the match is most likely a co-authorship/collaboration artifact.
-const GENUINE_AFFILIATION_MIN_YEARS = 3;
-
-// Does this author have ANY affiliation with one of the searched institutions?
-// OpenAlex lists multiple last_known_institutions; the searched one is often NOT the
-// most recent (e.g. Anna Schuh's primary is Muhimbili, with Oxford third), so
-// checking only [0] silently drops real faculty. Returns true if matched at all, so
-// the professor stays findable. The matched institution is shown on the card ONLY
-// when it's a genuine multi-year affiliation; for a thin 1-2 year match we keep them
-// in results but display their real home (via homeInstitutionFirst) so a stray
-// collaboration doesn't mislabel where they work (E.L. Wright is UCLA, not Caltech).
-function promoteMatchedInstitution(a: Author, fullInstIds: string[]): boolean {
-  const arr = a.last_known_institutions ?? [];
-  const idx = arr.findIndex((inst) => inst?.id && fullInstIds.includes(inst.id));
-  if (idx < 0) return false;
-  // With no per-year affiliation data we can't tell a genuine tenure from a stray
-  // collaboration, so default to showing the searched institution (the original
-  // behaviour). Only when we DO have year data do we require a real 3+ year match
-  // before promoting it; a thin recent match shows the professor's real home instead.
-  const hasYearData = (a.affiliations?.length ?? 0) > 0;
-  if (!hasYearData || matchedAffiliationYears(a, fullInstIds) >= GENUINE_AFFILIATION_MIN_YEARS) {
-    if (idx > 0) {
-      const [matched] = arr.splice(idx, 1);
-      arr.unshift(matched);
-    }
-  } else {
-    homeInstitutionFirst(a); // thin match — show their real home, not the artifact
-  }
-  return true;
-}
-
-// Reorder an author's institutions so the one to SHOW on the card is first: their
-// "home" institution, i.e. the affiliation with the most recent activity, then the
-// longest tenure. OpenAlex's default ordering can surface a secondary affiliation
-// (e.g. Anna Schuh shows "Muhimbili" though Oxford is her 21-year home). We still
-// match against ALL of an author's institutions elsewhere, so they stay findable by
-// any of them — this only affects what the card displays when no university was typed.
-function homeInstitutionFirst(a: Author): void {
-  const arr = a.last_known_institutions ?? [];
-  if (arr.length <= 1) return;
-  const affs = a.affiliations ?? [];
-  if (affs.length === 0) return;
-  const score = (instId?: string) => {
-    const af = instId ? affs.find((x) => x.institution?.id === instId) : undefined;
-    const years = af?.years ?? [];
-    return years.length ? { recent: Math.max(...years), span: Math.max(...years) - Math.min(...years) } : { recent: 0, span: 0 };
-  };
-  arr.sort((x, y) => {
-    const sx = score(x?.id), sy = score(y?.id);
-    return sy.recent - sx.recent || sy.span - sx.span;
-  });
-}
-
-// OpenAlex disambiguation fragments: a real person split into ghost entities with
-// a couple of works and no ORCID. We never want to show one in place of the
-// canonical record (the "2 papers / 0 citations" Benjamin bug).
-function isGhostAuthor(a: Author): boolean {
-  return !a.orcid && (a.works_count ?? 0) < 5;
-}
-
-// Collapse fragments of the same person: key by folded name, keep the richest
-// record (ORCID-backed, then most works). Never merges two distinct ORCID
-// identities that happen to share a name.
-function dedupeAuthors(authors: Author[]): Author[] {
-  const cleaned = authors.filter((a) => !isGhostAuthor(a));
-  const byKey = new Map<string, Author>();
-  for (const a of cleaned) {
-    let key = foldName(a.display_name);
-    if (!key) key = a.id;
-    const existing = byKey.get(key);
-    if (!existing) { byKey.set(key, a); continue; }
-    if (a.orcid && existing.orcid && a.orcid !== existing.orcid) {
-      byKey.set(`${key}#${a.orcid}`, a); // distinct people, same name — keep both
-      continue;
-    }
-    const better =
-      (Number(!!a.orcid) - Number(!!existing.orcid)) ||
-      (a.works_count - existing.works_count) ||
-      (a.cited_by_count - existing.cited_by_count);
-    if (better > 0) byKey.set(key, a);
-  }
-  return Array.from(byKey.values());
-}
-
-// Rank a candidate by how CENTRAL the searched topic is to them, not by lifetime
-// citations. Without this, a "DNA methylation at Oxford" search ranks by career
-// citations and the top-15 slice fills up with GWAS/genetics giants who merely
-// touch methylation, truncating away the actual specialists (Klose, Song,
-// Kriaučionis) whose #1 topic IS DNA methylation. Lower is better.
-//
-// We rank by the MINIMUM position of any resolved topic in the author's own
-// (involvement-ordered) topic list: position 0 = that topic is their #1, so they
-// are a true specialist. OpenAlex has no single canonical topic for broad fields
-// ("organic chemistry" is split into Fluorine / Synthetic Methods / Cycloaddition,
-// etc.), so resolve returns several sub-topics; matching ANY of them at position 0
-// must rank a specialist to the top. The searched-topic index (i) is only a light
-// tiebreak (×10 keeps position dominant), so we don't over-privilege whichever
-// sub-topic the resolver happened to list first.
-function topicRelevanceRank(a: Author, topicIds: string[]): number {
-  const authorTopicIds = (a.topics ?? []).map((t) => t.id?.split("/").pop());
-  let best = Infinity;
-  for (let i = 0; i < topicIds.length; i++) {
-    const pos = authorTopicIds.indexOf(topicIds[i]);
-    if (pos >= 0) best = Math.min(best, pos * 10 + i);
-  }
-  return best === Infinity ? 9999 : best;
-}
-
-// Look up authors by personal name (used by By-Name mode and by the interest
-// search when a typed query turns out to be a person, not a topic). Trusts
-// OpenAlex's name ranking, drops unrelated namesakes and ghost fragments, and —
-// when a university was typed — surfaces those affiliated with it first.
-async function lookupAuthorsByName(name: string, fullInstIds: string[]): Promise<Author[]> {
-  const res = await oaFetch(
-    `https://api.openalex.org/authors?search=${encodeURIComponent(name.trim())}&per_page=25&sort=cited_by_count:desc&select=id,display_name,orcid,last_known_institutions,affiliations,works_count,cited_by_count,topics`
-  );
-  const data = await res.json();
-  let authors = ((data.results ?? []) as Author[]).filter((a) => nameMatches(name, a.display_name));
-  authors = dedupeAuthors(authors);
-  authors.forEach(homeInstitutionFirst);
-  if (fullInstIds.length > 0) {
-    const atInst = authors.filter((a) => promoteMatchedInstitution(a, fullInstIds));
-    if (atInst.length > 0) authors = atInst;
-  }
-  return authors.sort(
-    (a, b) => (Number(!!b.orcid) - Number(!!a.orcid)) || (b.cited_by_count - a.cited_by_count)
-  );
-}
-
-interface SummaryData {
-  summary: string;
-  highlights: { paper: string; detail: string; authorPosition?: string; doi?: string | null }[];
-  questions: string[];
-}
-
-interface EmailFlag {
-  type: string;
-  issue: string;
-  suggestion: string;
-}
-
-// Free summaries a signed-out visitor gets before any account is needed.
-// Mirrors ANON_LIMIT in /api/summarize (the real server-side gate).
-const ANON_SUMMARY_LIMIT = 2;
-
 function AppPageInner() {
   const { user, profile, loading: authLoading2, signUp, signIn, signOut, refreshProfile } = useAuth();
   const searchParams = useSearchParams();
-  const [searchMode, setSearchMode] = useState<"interest" | "name">("interest");
+  const [searchMode, setSearchMode] = useState<SearchMode>("interest");
   // Mobile: the full search form collapses into a one-line pill once there are
   // results; tapping the pill reopens it. Desktop ignores this entirely.
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -476,7 +279,7 @@ function AppPageInner() {
 
   // Auth modals
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
+  const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
@@ -493,11 +296,6 @@ function AppPageInner() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const authModalRef = useRef<HTMLDivElement>(null);
 
-  const PLACEHOLDER_EXAMPLES = [
-    "e.g. neuroscience", "e.g. organic chemistry", "e.g. political science",
-    "e.g. machine learning", "e.g. cardiology", "e.g. astrophysics",
-    "e.g. behavioral economics", "e.g. robotics", "e.g. immunology",
-  ];
   const DEFAULT_PLACEHOLDER = PLACEHOLDER_EXAMPLES[0];
   const suggestionsRef = useRef<HTMLDivElement>(null);
   // Bumped on every new search; the background responsiveness pass checks it so a
@@ -521,19 +319,10 @@ function AppPageInner() {
   const [resultGated, setResultGated] = useState(false);
 
   // Citation + Paper filter
-  const MAX_CITATIONS = 100000;
-  const MAX_PAPERS = 500;
-  const PROFESSORS_PER_PAGE = 5;
   const [citationRange, setCitationRange] = useState<[number, number]>([0, MAX_CITATIONS]);
   const [paperRange, setPaperRange] = useState<[number, number]>([0, MAX_PAPERS]);
   const [showCitationFilter, setShowCitationFilter] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
-  function formatCitations(n: number): string {
-    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-    if (n >= 1000) return `${Math.round(n / 1000)}k`;
-    return n.toString();
-  }
 
   // Email finder
   const [emailLookup, setEmailLookup] = useState<Record<string, { emails: { email: string; source: string; confidence: string }[]; searchUrls: { google: string; scholar: string; directory: string | null }; homepageUrl: string | null; orcidUrl: string | null } | null>>({});
@@ -572,7 +361,7 @@ function AppPageInner() {
   // Persist free email check usage in localStorage, scoped per user
   useEffect(() => {
     if (user?.id) {
-      setFreeEmailCheckUsed(localStorage.getItem(`rm-email-check-${user.id}`) === "1");
+      setFreeEmailCheckUsed(localStorage.getItem(emailCheckStorageKey(user.id)) === "1");
     } else {
       setFreeEmailCheckUsed(false);
     }
@@ -663,6 +452,14 @@ function AppPageInner() {
     } catch {
       showToast("Something went wrong. Try again.");
     }
+  }
+
+  async function startPlanCheckout(plan: CheckoutPlan) {
+    const priceId =
+      plan === "weekly" ? process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY :
+      plan === "semester" ? process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER :
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME;
+    await startCheckout(priceId);
   }
 
   // Auto-search from landing page URL params
@@ -762,9 +559,9 @@ function AppPageInner() {
   const [welcomeSubtitle, setWelcomeSubtitle] = useState("Your research journey starts here.");
   const [anonSummariesUsed, setAnonSummariesUsed] = useState(0);
   useEffect(() => {
-    const visitCount = parseInt(localStorage.getItem("research-match-visits") || "0", 10);
-    localStorage.setItem("research-match-visits", String(visitCount + 1));
-    localStorage.setItem("research-match-last-visit", new Date().toISOString());
+    const visitCount = parseInt(localStorage.getItem(STORAGE_KEYS.visits) || "0", 10);
+    localStorage.setItem(STORAGE_KEYS.visits, String(visitCount + 1));
+    localStorage.setItem(STORAGE_KEYS.lastVisit, new Date().toISOString());
     setWelcomeSubtitle(visitCount === 0 ? "Your research journey starts here." : "Welcome back. Let\u2019s keep going.");
 
     if (visitCount === 0) {
@@ -780,13 +577,7 @@ function AppPageInner() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem("rm-anon-summaries-used");
-    if (stored !== null) {
-      setAnonSummariesUsed(parseInt(stored, 10) || 0);
-    } else if (localStorage.getItem("hasViewedFreeSummary") === "true") {
-      // Migrate the old single-summary boolean flag.
-      setAnonSummariesUsed(1);
-    }
+    setAnonSummariesUsed(readAnonSummariesUsed());
   }, []);
 
   // Exit intent — subtle goodbye on mouse leave (desktop only)
@@ -802,10 +593,7 @@ function AppPageInner() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem("research-match-saved");
-    if (stored) {
-      try { setSaved(JSON.parse(stored)); } catch { /* ignore */ }
-    }
+    setSaved(readSavedProfessors<Author>());
   }, []);
 
   useEffect(() => {
@@ -821,7 +609,7 @@ function AppPageInner() {
   // After signup: clear any pending summarize flag (don't auto-fire — let user click manually so it properly deducts their credit)
   useEffect(() => {
     if (!user) return;
-    sessionStorage.removeItem("rm-pending-summarize");
+    sessionStorage.removeItem(STORAGE_KEYS.pendingSummary);
   }, [user]);
 
   // Reset modal copy state when modals close
@@ -968,7 +756,7 @@ function AppPageInner() {
     setSaved((prev) => {
       const exists = prev.some((a) => a.id === author.id);
       const next = exists ? prev.filter((a) => a.id !== author.id) : [...prev, author];
-      localStorage.setItem("research-match-saved", JSON.stringify(next));
+      localStorage.setItem(STORAGE_KEYS.savedProfessors, JSON.stringify(next));
       if (!exists) showToast("Professor saved!");
       return next;
     });
@@ -1084,17 +872,7 @@ function AppPageInner() {
           // Batch all author lookups into ONE OpenAlex call (ids.openalex: takes a
           // pipe-list) instead of one request per author — far fewer calls, far less
           // chance of tripping the rate limit.
-          const batched = await oaFetch(`https://api.openalex.org/authors?filter=ids.openalex:${shortIds.join("|")}&per_page=${shortIds.length}&select=id,display_name,orcid,last_known_institutions,affiliations,works_count,cited_by_count,topics`).then(r => r.ok ? r.json() : null).catch(() => null);
-          const results = (batched?.results ?? []) as (Author | null)[];
-          
-          const authorMap = new Map<string, Author>();
-          for (const authorData of results) {
-            if (authorData && authorData.id) {
-               if (fullInstIds.length > 0 && !promoteMatchedInstitution(authorData, fullInstIds)) continue;
-               authorMap.set(authorData.id, authorData);
-            }
-          }
-          authors = Array.from(authorMap.values()).sort((a, b) => b.cited_by_count - a.cited_by_count);
+          authors = await lookupAuthorsByIds(shortIds, fullInstIds);
         }
         }
       } else {
@@ -1130,18 +908,7 @@ function AppPageInner() {
 
             const shortIds = Array.from(authorIdsToFetch.keys());
             if (shortIds.length > 0) {
-              const batched = await oaFetch(`https://api.openalex.org/authors?filter=ids.openalex:${shortIds.join("|")}&per_page=${shortIds.length}&select=id,display_name,orcid,last_known_institutions,affiliations,works_count,cited_by_count,topics`).then(r => r.ok ? r.json() : null).catch(() => null);
-              const results = (batched?.results ?? []) as (Author | null)[];
-              
-              const authorMap = new Map<string, Author>();
-              for (const authorData of results) {
-                if (authorData && authorData.id) {
-                  if (promoteMatchedInstitution(authorData, fullInstIds)) {
-                    authorMap.set(authorData.id, authorData);
-                  }
-                }
-              }
-              authors = Array.from(authorMap.values()).sort((a, b) => b.cited_by_count - a.cited_by_count);
+              authors = await lookupAuthorsByIds(shortIds, fullInstIds);
             }
           }
 
@@ -1401,7 +1168,7 @@ function AppPageInner() {
       if (res.status === 403) {
         if (!user) {
           // Anon hit server limit — sync local state so locked overlay appears, no modal
-          localStorage.setItem("rm-anon-summaries-used", String(ANON_SUMMARY_LIMIT));
+          localStorage.setItem(STORAGE_KEYS.anonymousSummariesUsed, String(ANON_SUMMARY_LIMIT));
           setAnonSummariesUsed(ANON_SUMMARY_LIMIT);
           // Record the drop-off even though we don't pop the modal for anon.
           track("paywall_hit", { limit_type: "summary" });
@@ -1428,7 +1195,7 @@ function AppPageInner() {
         const wasFirstSummary = anonSummariesUsed === 0;
         setAnonSummariesUsed((prev) => {
           const next = prev + 1;
-          localStorage.setItem("rm-anon-summaries-used", String(next));
+          localStorage.setItem(STORAGE_KEYS.anonymousSummariesUsed, String(next));
           return next;
         });
         // After the very first summary, nudge with what's left (no paywall yet).
@@ -1488,6 +1255,13 @@ function AppPageInner() {
     <p key={i} style={{ fontSize: "1rem", color: "#6b7280", paddingLeft: "20px", borderLeft: "3px solid #9dbfb1", marginBottom: "12px", lineHeight: 1.6 }}>{q}</p>
   );
 
+  function showEmailCheckFailure(suggestion: string) {
+    setEmailFlags([{ type: "error", issue: "Check failed", suggestion }]);
+    setEmailTotalFlags(1);
+    setResultGated(false);
+    setHasChecked(true);
+  }
+
   async function checkEmail() {
     if (!emailTarget || !emailDraft.trim()) return;
     // Funnel: user pressed Check, at the moment of value, before any signup gate.
@@ -1522,9 +1296,7 @@ function AppPageInner() {
           setShowUpgradeModal(true);
           return;
         }
-        setEmailFlags([{ type: "error", issue: "Check failed", suggestion: data.message || data.error || "Something went wrong. Try again." }]);
-        setResultGated(false);
-        setHasChecked(true);
+        showEmailCheckFailure(data.message || data.error || "Something went wrong. Try again.");
         return;
       }
       const flags = data.flags ?? [];
@@ -1542,7 +1314,7 @@ function AppPageInner() {
       } else if (user?.id && !isPaid) {
         setResultGated(false);
         if (!freeEmailCheckUsed) {
-          localStorage.setItem(`rm-email-check-${user.id}`, "1");
+          localStorage.setItem(emailCheckStorageKey(user.id), "1");
           setFreeEmailCheckUsed(true);
         }
       } else setResultGated(false);
@@ -1572,7 +1344,9 @@ function AppPageInner() {
           });
         }, 300);
       }
-    } catch { setEmailFlags([{ type: "error", issue: "Check failed", suggestion: "Something went wrong. Try again." }]); setHasChecked(true); }
+    } catch {
+      showEmailCheckFailure("Something went wrong. Try again.");
+    }
     finally { setCheckingEmail(false); }
   }
 
@@ -1782,6 +1556,36 @@ function AppPageInner() {
       searchByName();
     }
   };
+  const modeToggleSliderStyle = {
+    left: searchMode === "interest"
+      ? `${btnInterestRef.current?.offsetLeft ?? 4}px`
+      : `${btnNameRef.current?.offsetLeft ?? 100}px`,
+    width: searchMode === "interest"
+      ? `${btnInterestRef.current?.offsetWidth ?? 110}px`
+      : `${btnNameRef.current?.offsetWidth ?? 95}px`,
+  };
+  const searchFormProps = {
+    mode: searchMode,
+    query,
+    setQuery,
+    queryTags,
+    university,
+    setUniversity,
+    universityTags: uniTags,
+    professorName: profName,
+    setProfessorName: setProfName,
+    professorUniversity: profUniversity,
+    setProfessorUniversity: setProfUniversity,
+    defaultPlaceholder: DEFAULT_PLACEHOLDER,
+    suggestions: filteredSuggestions,
+    showSuggestions,
+    setShowSuggestions,
+    suggestionsRef,
+    addQueryTag,
+    addUniversityTag: addUniTag,
+    removeQueryTag,
+    removeUniversityTag: removeUniTag,
+  };
   // ────────────────────────────────────────────────────────────────────────
 
   return (
@@ -1836,158 +1640,26 @@ function AppPageInner() {
         </defs>
       </svg>
 
-      {/* ====== FLOATING PILL NAV ====== */}
-      <nav className="rm-floating-nav">
-        <div className="rm-nav-pill" ref={menuRef}>
-
-          {/* Hamburger */}
-          <button
-            ref={menuButtonRef}
-            type="button"
-            className={`rm-hamburger${showMenu ? " rm-hamburger-open" : ""}`}
-            onClick={() => setShowMenu(v => !v)}
-            aria-label="Menu"
-            aria-expanded={showMenu}
-            aria-controls="research-match-menu"
-          >
-            <span className="rm-hamburger-line" />
-            <span className="rm-hamburger-line" />
-            <span className="rm-hamburger-line" />
-          </button>
-
-          <Link href="/" className="rm-nav-logo">
-            <svg width="180" height="32" viewBox="0 0 280 50" xmlns="http://www.w3.org/2000/svg" aria-label="Research Match">
-              <g transform="translate(2,2) scale(0.46)">
-                <path d="M50 84 C30 78 22 60 24 38 C36 42 46 52 50 70" fill="none" stroke="#2d5a47" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M50 84 C70 78 78 60 76 38 C64 42 54 52 50 70" fill="none" stroke="#2d5a47" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="50" cy="32" r="9.5" fill="#c9ad77"/>
-              </g>
-              <text x="52" y="33" fontFamily="Georgia, 'Times New Roman', serif" fontSize="23" fontWeight="700" fill="#2d5a47">Research Match</text>
-            </svg>
-          </Link>
-          <div className="rm-nav-spacer" />
-
-          {saved.length > 0 && (
-            <button
-              onClick={() => setShowSaved(!showSaved)}
-              className={`rm-nav-saved${showSaved ? " rm-nav-saved-active" : ""}`}
-            >
-              Saved ({saved.length})
-            </button>
-          )}
-
-          {!user ? (
-            <>
-              <button onClick={() => { setShowAuthModal(true); setAuthMode("login"); setAuthError(""); }} className="rm-nav-btn">
-                Log in
-              </button>
-              <button onClick={() => { setShowAuthModal(true); setAuthMode("signup"); setAuthError(""); }} className="btn-cta rm-nav-cta">
-                Sign up
-              </button>
-            </>
-          ) : (
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              {isFree && (
-                <button onClick={() => setShowUpgradeModal(true)} style={{ fontSize: "0.78rem", fontWeight: 700, color: "#a8853e", background: "rgba(201, 173, 119, 0.12)", padding: "7px 14px", borderRadius: "999px", border: "1px solid rgba(201, 173, 119, 0.25)", cursor: "pointer", transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)", fontFamily: "var(--font-playfair), Georgia, serif", whiteSpace: "nowrap" }}>
-                  Upgrade
-                </button>
-              )}
-              {isPaid && profile?.plan_type === "lifetime" && (
-                <span className="rm-nav-badge" style={{ color: "#fff", background: "linear-gradient(135deg, #659983, #2e9e6f)" }}>{planLabel}</span>
-              )}
-              {isPaid && profile?.plan_type !== "lifetime" && (
-                <span className="rm-nav-badge" style={{ color: "#fff", background: "#659983" }}>{planLabel}</span>
-              )}
-              <Link href="/profile" style={{
-                width: "36px", height: "36px", borderRadius: "50%",
-                background: "linear-gradient(135deg, #659983, #2e9e6f)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#fff", fontSize: "0.82rem", fontWeight: 700,
-                textDecoration: "none", transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease",
-                boxShadow: "0 2px 8px rgba(101, 153, 131, 0.25)",
-                border: "2px solid rgba(255,255,255,0.45)",
-                flexShrink: 0,
-              }} className="profile-avatar">
-                {user.email?.charAt(0).toUpperCase()}
-              </Link>
-            </div>
-          )}
-
-          {/* Dropdown menu */}
-          <div id="research-match-menu" aria-hidden={!showMenu} inert={!showMenu} className={`rm-nav-dropdown${showMenu ? " rm-nav-dropdown-open" : ""}`}>
-            <div className="rm-nav-dropdown-inner">
-
-              {/* ── Tools ── */}
-              <div className="rm-nav-section-label">Tools</div>
-              <Link href="/app" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">⬡</span>
-                Professor Search
-                <span className="rm-nav-item-badge rm-nav-item-badge-tool" style={{ marginLeft: "auto" }}>App</span>
-              </Link>
-              <Link href="/how-it-works" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">◎</span>
-                How It Works
-              </Link>
-
-              {/* ── Email Playbook ── */}
-              <div className="rm-nav-section-divider" />
-              <div className="rm-nav-section-label">Email Playbook</div>
-              <Link href="/framework" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">⊞</span>
-                Email Framework
-              </Link>
-              <Link href="/examples" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">✦</span>
-                Emails That Worked
-              </Link>
-              <Link href="/follow-up" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">⟳</span>
-                Follow-Up Generator
-              </Link>
-
-              {/* ── Resources ── */}
-              <div className="rm-nav-section-divider" />
-              <div className="rm-nav-section-label">Resources</div>
-              <Link href="/blog" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">✒</span>
-                Blog
-              </Link>
-              <Link href="/feedback" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">↗</span>
-                Feedback
-              </Link>
-              <Link href="/contact" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">✉</span>
-                Contact
-              </Link>
-
-              {/* ── Account ── */}
-              <div className="rm-nav-section-divider" />
-              <Link href="/profile" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">⚙</span>
-                Account Settings
-              </Link>
-              <Link href="/?#pricing" className="rm-nav-dropdown-item" onClick={() => setShowMenu(false)}>
-                <span className="rm-nav-dropdown-icon">◈</span>
-                Pricing
-              </Link>
-              {user && (
-                <>
-                  <div className="rm-nav-dropdown-divider" />
-                  <button
-                    className="rm-nav-dropdown-item rm-nav-dropdown-logout"
-                    onClick={() => { signOut(); setShowMenu(false); }}
-                  >
-                    <span className="rm-nav-dropdown-icon">⏏</span>
-                    Log Out
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-        </div>
-      </nav>
+      <ResearchAppNav
+        loggedIn={Boolean(user)}
+        userEmail={user?.email ?? null}
+        isFree={isFree}
+        isPaid={isPaid}
+        isLifetime={profile?.plan_type === "lifetime"}
+        planLabel={planLabel}
+        savedCount={saved.length}
+        showingSaved={showSaved}
+        menuOpen={showMenu}
+        menuRef={menuRef}
+        menuButtonRef={menuButtonRef}
+        onToggleMenu={() => setShowMenu((open) => !open)}
+        onCloseMenu={() => setShowMenu(false)}
+        onToggleSaved={() => setShowSaved(!showSaved)}
+        onLogin={() => { setShowAuthModal(true); setAuthMode("login"); setAuthError(""); }}
+        onSignup={() => { setShowAuthModal(true); setAuthMode("signup"); setAuthError(""); }}
+        onUpgrade={() => setShowUpgradeModal(true)}
+        onSignOut={() => { void signOut(); setShowMenu(false); }}
+      />
 
       <main className={`rm-page rm-app-body ${revealPhase === "done" ? "rm-page-revealed" : revealPhase === "content" ? "rm-page-revealing" : "rm-page-hidden"}`}>
 
@@ -2003,86 +1675,20 @@ function AppPageInner() {
               <span className="rm-hero-title-black" style={{ display: "block" }}>Find your</span>
               <span className="rm-hero-title-green" style={{ display: "block", whiteSpace: "nowrap" }}>research professor.</span>
             </h1>
-            {/* Mode toggle */}
-            <div className="mode-toggle" ref={toggleRef}>
-              <div
-                className="mode-toggle-slider"
-                style={{
-                  left: searchMode === "interest"
-                    ? (btnInterestRef.current?.offsetLeft ?? 4) + "px"
-                    : (btnNameRef.current?.offsetLeft ?? 100) + "px",
-                  width: searchMode === "interest"
-                    ? (btnInterestRef.current?.offsetWidth ?? 110) + "px"
-                    : (btnNameRef.current?.offsetWidth ?? 95) + "px",
-                }}
-              />
-              <button ref={btnInterestRef} onClick={() => setSearchMode("interest")} className={`mode-toggle-btn ${searchMode === "interest" ? "mode-toggle-btn-active" : ""}`}>By Interest</button>
-              <button ref={btnNameRef} onClick={() => setSearchMode("name")} className={`mode-toggle-btn ${searchMode === "name" ? "mode-toggle-btn-active" : ""}`}>By Name</button>
-            </div>
-
-            {/* Hero search */}
-            {searchMode === "interest" ? (
-              <div className="glass-search rm-search rm-hero-search">
-                <div className="rm-search-input-wrap" ref={suggestionsRef} style={{ position: "relative" }}>
-                  <label className="rm-search-label">Research Interest</label>
-                  <div className="rm-tag-input-row">
-                    {queryTags.map((tag, i) => (
-                      <span key={i} className="rm-tag-chip">{tag}<button onClick={() => removeQueryTag(i)} className="rm-tag-chip-x">×</button></span>
-                    ))}
-                    <input
-                      value={query}
-                      onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
-                      onFocus={() => setShowSuggestions(true)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") { setShowSuggestions(false); if (query.trim()) addQueryTag(); else triggerSearch(); }
-                        else if (e.key === ",") { e.preventDefault(); addQueryTag(); }
-                        else if (e.key === "Backspace" && !query && queryTags.length > 0) removeQueryTag(queryTags.length - 1);
-                      }}
-                      placeholder={queryTags.length === 0 ? DEFAULT_PLACEHOLDER : "Add another..."}
-                      className="rm-search-input rm-tag-input"
-                    />
-                  </div>
-                  {showSuggestions && filteredSuggestions.length > 0 && (
-                    <div className="suggestions-dropdown">
-                      {filteredSuggestions.map((s, i) => (
-                        <button key={i} className="suggestion-item" onClick={() => { setQuery(s); setShowSuggestions(false); }}>{s}</button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="rm-search-divider" />
-                <div className="rm-uni-field">
-                  <label className="rm-search-label">University</label>
-                  <div className="rm-tag-input-row">
-                    {uniTags.map((tag, i) => (
-                      <span key={i} className="rm-tag-chip">{tag}<button onClick={() => removeUniTag(i)} className="rm-tag-chip-x">×</button></span>
-                    ))}
-                    <input value={university} onChange={(e) => setUniversity(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") { if (university.trim()) addUniTag(); else triggerSearch(); }
-                        else if (e.key === ",") { e.preventDefault(); addUniTag(); }
-                        else if (e.key === "Backspace" && !university && uniTags.length > 0) removeUniTag(uniTags.length - 1);
-                      }}
-                      placeholder={uniTags.length === 0 ? "e.g. MIT, Stanford..." : "Add another..."}
-                      className="rm-search-input rm-tag-input" />
-                  </div>
-                </div>
-                <button data-search-btn onClick={triggerSearch} className="btn-cta rm-search-btn">Search</button>
-              </div>
-            ) : (
-              <div className="glass-search rm-search rm-hero-search">
-                <div className="rm-search-input-wrap">
-                  <label className="rm-search-label">Professor Name</label>
-                  <input value={profName} onChange={(e) => setProfName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && triggerSearchByName()} placeholder="e.g. Geoffrey Hinton, Fei-Fei Li..." className="rm-search-input" />
-                </div>
-                <div className="rm-search-divider" />
-                <div className="rm-uni-field">
-                  <label className="rm-search-label">University (optional)</label>
-                  <input value={profUniversity} onChange={(e) => setProfUniversity(e.target.value)} onKeyDown={(e) => e.key === "Enter" && triggerSearchByName()} placeholder="Narrows common names" className="rm-search-input" />
-                </div>
-                <button onClick={triggerSearchByName} className="btn-cta rm-search-btn">Search</button>
-              </div>
-            )}
+            <SearchModeToggle
+              mode={searchMode}
+              onChange={setSearchMode}
+              sliderStyle={modeToggleSliderStyle}
+              containerRef={toggleRef}
+              interestButtonRef={btnInterestRef}
+              nameButtonRef={btnNameRef}
+            />
+            <ResearchSearchForm
+              {...searchFormProps}
+              hero
+              onInterestSearch={triggerSearch}
+              onNameSearch={triggerSearchByName}
+            />
 
             {error && <p style={{ textAlign: "center", fontSize: "1rem", color: "#c45c5c", marginTop: "20px" }}>{error}</p>}
 
@@ -2129,21 +1735,15 @@ function AppPageInner() {
               {!showSaved && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                    <div className="mode-toggle" ref={toggleRef} style={{ marginBottom: 0 }}>
-                      <div
-                        className="mode-toggle-slider"
-                        style={{
-                          left: searchMode === "interest"
-                            ? (btnInterestRef.current?.offsetLeft ?? 4) + "px"
-                            : (btnNameRef.current?.offsetLeft ?? 100) + "px",
-                          width: searchMode === "interest"
-                            ? (btnInterestRef.current?.offsetWidth ?? 110) + "px"
-                            : (btnNameRef.current?.offsetWidth ?? 95) + "px",
-                        }}
-                      />
-                      <button ref={btnInterestRef} onClick={() => setSearchMode("interest")} className={`mode-toggle-btn ${searchMode === "interest" ? "mode-toggle-btn-active" : ""}`}>By Interest</button>
-                      <button ref={btnNameRef} onClick={() => setSearchMode("name")} className={`mode-toggle-btn ${searchMode === "name" ? "mode-toggle-btn-active" : ""}`}>By Name</button>
-                    </div>
+                    <SearchModeToggle
+                      mode={searchMode}
+                      onChange={setSearchMode}
+                      sliderStyle={modeToggleSliderStyle}
+                      containerRef={toggleRef}
+                      interestButtonRef={btnInterestRef}
+                      nameButtonRef={btnNameRef}
+                      compact
+                    />
                     <button
                       className="rm-saved-pill"
                       onClick={() => { if (saved.length > 0) setShowSaved(true); }}
@@ -2154,82 +1754,12 @@ function AppPageInner() {
                       {saved.length > 0 ? `${saved.length} saved` : "Saved"}
                     </button>
                   </div>
-                  {searchMode === "interest" ? (
-                    <div className="glass-search rm-search">
-                      <svg width="24" height="24" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginLeft: "4px", opacity: 0.85 }} aria-hidden="true">
-                        <circle cx="80" cy="80" r="52" fill="none" stroke="#659983" strokeWidth="7"/>
-                        <path d="M118 118 L155 155" fill="none" stroke="#659983" strokeWidth="8" strokeLinecap="round"/>
-                        <line x1="64" y1="64" x2="96" y2="64" stroke="#c9ad77" strokeWidth="5" strokeLinecap="round"/>
-                        <line x1="64" y1="80" x2="96" y2="80" stroke="#c9ad77" strokeWidth="5" strokeLinecap="round"/>
-                        <line x1="64" y1="96" x2="96" y2="96" stroke="#c9ad77" strokeWidth="5" strokeLinecap="round"/>
-                      </svg>
-                      <div className="rm-search-input-wrap" ref={suggestionsRef} style={{ position: "relative" }}>
-                        <label className="rm-search-label">Research Interest</label>
-                        <div className="rm-tag-input-row">
-                          {queryTags.map((tag, i) => (
-                            <span key={i} className="rm-tag-chip">{tag}<button onClick={() => removeQueryTag(i)} className="rm-tag-chip-x">×</button></span>
-                          ))}
-                          <input
-                            value={query}
-                            onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
-                            onFocus={() => setShowSuggestions(true)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") { setShowSuggestions(false); if (query.trim()) addQueryTag(); else search(); }
-                              else if (e.key === ",") { e.preventDefault(); addQueryTag(); }
-                              else if (e.key === "Backspace" && !query && queryTags.length > 0) removeQueryTag(queryTags.length - 1);
-                            }}
-                            placeholder={queryTags.length === 0 ? DEFAULT_PLACEHOLDER : "Add another..."}
-                            className="rm-search-input rm-tag-input"
-                          />
-                        </div>
-                        {showSuggestions && filteredSuggestions.length > 0 && (
-                          <div className="suggestions-dropdown">
-                            {filteredSuggestions.map((s, i) => (
-                              <button key={i} className="suggestion-item" onClick={() => { setQuery(s); setShowSuggestions(false); }}>{s}</button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="rm-search-divider" />
-                      <div className="rm-uni-field">
-                        <label className="rm-search-label">University</label>
-                        <div className="rm-tag-input-row">
-                          {uniTags.map((tag, i) => (
-                            <span key={i} className="rm-tag-chip">{tag}<button onClick={() => removeUniTag(i)} className="rm-tag-chip-x">×</button></span>
-                          ))}
-                          <input value={university} onChange={(e) => setUniversity(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") { if (university.trim()) addUniTag(); else search(); }
-                              else if (e.key === ",") { e.preventDefault(); addUniTag(); }
-                              else if (e.key === "Backspace" && !university && uniTags.length > 0) removeUniTag(uniTags.length - 1);
-                            }}
-                            placeholder={uniTags.length === 0 ? "e.g. MIT, Stanford..." : "Add another..."}
-                            className="rm-search-input rm-tag-input" />
-                        </div>
-                      </div>
-                      <button data-search-btn onClick={search} className="btn-cta rm-search-btn">Search</button>
-                    </div>
-                  ) : (
-                    <div className="glass-search rm-search">
-                      <svg width="24" height="24" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginLeft: "4px", opacity: 0.85 }} aria-hidden="true">
-                        <circle cx="80" cy="80" r="52" fill="none" stroke="#659983" strokeWidth="7"/>
-                        <path d="M118 118 L155 155" fill="none" stroke="#659983" strokeWidth="8" strokeLinecap="round"/>
-                        <line x1="64" y1="64" x2="96" y2="64" stroke="#c9ad77" strokeWidth="5" strokeLinecap="round"/>
-                        <line x1="64" y1="80" x2="96" y2="80" stroke="#c9ad77" strokeWidth="5" strokeLinecap="round"/>
-                        <line x1="64" y1="96" x2="96" y2="96" stroke="#c9ad77" strokeWidth="5" strokeLinecap="round"/>
-                      </svg>
-                      <div className="rm-search-input-wrap">
-                        <label className="rm-search-label">Professor Name</label>
-                        <input value={profName} onChange={(e) => setProfName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && searchByName()} placeholder="e.g. Geoffrey Hinton, Fei-Fei Li..." className="rm-search-input" />
-                      </div>
-                      <div className="rm-search-divider" />
-                      <div className="rm-uni-field">
-                        <label className="rm-search-label">University (optional)</label>
-                        <input value={profUniversity} onChange={(e) => setProfUniversity(e.target.value)} onKeyDown={(e) => e.key === "Enter" && searchByName()} placeholder="Narrows common names" className="rm-search-input" />
-                      </div>
-                      <button onClick={searchByName} className="btn-cta rm-search-btn">Search</button>
-                    </div>
-                  )}
+                  <ResearchSearchForm
+                    {...searchFormProps}
+                    showIcon
+                    onInterestSearch={search}
+                    onNameSearch={searchByName}
+                  />
                 </>
               )}
               {showSaved && (
@@ -2924,328 +2454,46 @@ function AppPageInner() {
         )}
 
         {/* EMAIL MODAL */}
-        {emailTarget && (() => {
-          const targetId = emailTarget.id.split("/").pop()!;
-          const targetSummary = summaries[targetId];
-          const isLoadingTargetSummary = loadingSummary[targetId];
-          // Same gating as the results card: free users see one paper + one question;
-          // the rest stay behind the paywall. Without this the modal leaked the full
-          // paywalled set that the card carefully blurs.
-          const refHighlight = (h: { paper: string; doi?: string | null; detail: string; authorPosition?: string }, i: number) => (
-            <div key={i} style={{ marginBottom: "14px" }}>
-              <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "#2d5a47" }}>
-                {h.paper}
-                {h.doi && (
-                  <a href={h.doi} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 400, fontSize: "0.75rem", marginLeft: "8px", color: "#2d5a47" }}>
-                    Read &rarr;
-                  </a>
-                )}
-              </p>
-              <p style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: "3px" }}>{h.detail}</p>
-            </div>
-          );
-          const refQuestion = (q: string, i: number) => (
-            <p key={i} style={{ fontSize: "0.8rem", color: "#6b7280", paddingLeft: "14px", borderLeft: "2px solid #9dbfb1", marginBottom: "12px", lineHeight: 1.6 }}>{q}</p>
-          );
-          return (
-            <div className="modal-bg rm-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEmailModal(); }}>
-              <div className="modal-glass rm-modal" ref={emailSheetRef} role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
-                {/* Drag handle — pull down to dismiss (mobile bottom sheet) */}
-                <div className="rm-modal-grab" aria-hidden="true" onTouchStart={onSheetDragStart} onTouchMove={onSheetDragMove} onTouchEnd={onSheetDragEnd}>
-                  <span className="rm-modal-grab-bar" />
-                </div>
-                {/* Mobile-only tab bar — also a drag-to-dismiss zone so a near-miss still dismisses */}
-                <div className="rm-modal-tabs" onTouchStart={onSheetDragStart} onTouchMove={onSheetDragMove} onTouchEnd={onSheetDragEnd}>
-                  <button
-                    className={`rm-modal-tab${mobileEmailTab === "compose" ? " rm-modal-tab-active" : ""}`}
-                    onClick={() => setMobileEmailTab("compose")}
-                  >✏️ Compose</button>
-                  <button
-                    className={`rm-modal-tab${mobileEmailTab === "reference" ? " rm-modal-tab-active" : ""}`}
-                    onClick={() => setMobileEmailTab("reference")}
-                  >📄 Reference</button>
-                </div>
-                <div className={`rm-modal-left${mobileEmailTab === "reference" ? " rm-modal-panel-hidden" : ""}`}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                    <h2 id="email-modal-title" className="rm-modal-title">Email to {emailTarget.display_name}</h2>
-                    <button onClick={closeEmailModal} aria-label="Close" style={{ flexShrink: 0, width: "36px", height: "36px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", lineHeight: 1, color: "#6b7280", background: "none", border: "none", borderRadius: "999px", cursor: "pointer", transition: "background 0.15s ease, color 0.15s ease" }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(101,153,131,0.12)"; e.currentTarget.style.color = "#2d5a47"; }} onMouseLeave={e => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#6b7280"; }}>&times;</button>
-                  </div>
-
-                  {/* Check their website banner */}
-                  <div className="rm-email-tip rm-email-tip-before" style={{ padding: "14px 18px", background: "rgba(101, 153, 131,0.08)", border: "1.5px solid rgba(101, 153, 131,0.18)", borderRadius: "14px", marginBottom: "16px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>&#128161;</span>
-                    <p style={{ fontSize: "0.85rem", color: "#2d5a47", lineHeight: 1.6 }}>
-                      <strong>Before emailing</strong>, check the professor&apos;s faculty page for specific contact instructions. Less than 5% of students do this and it instantly sets you apart.
-                    </p>
-                  </div>
-
-                  {/* Volunteer framing tip */}
-                  <div className="rm-email-tip rm-email-tip-volunteer" style={{ padding: "12px 18px", background: "rgba(101, 153, 131,0.12)", border: "1px solid rgba(101, 153, 131,0.25)", borderRadius: "14px", marginBottom: "16px" }}>
-                    <p style={{ fontSize: "0.82rem", color: "#2d5a47", lineHeight: 1.6 }}>
-                      <strong>Tip:</strong> Consider saying you&apos;d like to <em>volunteer</em> rather than asking for a position. It lowers the commitment for professors and makes them more likely to say yes.
-                    </p>
-                  </div>
-
-                  {/* Email Framework toggle — requires account */}
-                  <div style={{ marginBottom: "16px" }}>
-                    {user ? (
-                    <button
-                      onClick={() => setShowFramework(v => !v)}
-                      style={{
-                        width: "100%", padding: "10px 18px",
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        background: "transparent",
-                        border: "1.5px solid rgba(101, 153, 131,0.35)",
-                        borderRadius: "12px", cursor: "pointer",
-                        fontFamily: "DM Sans, Inter, sans-serif",
-                        fontSize: "0.88rem", fontWeight: 600, color: "#2d5a47",
-                        transition: "background 0.2s",
-                      }}
-                    >
-                      <span>✦ Email Framework</span>
-                      <span style={{ fontSize: "0.8rem", transition: "transform 0.2s", transform: showFramework ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block" }}>↓</span>
-                    </button>
-                    ) : (
-                    <button
-                      onClick={() => { setShowAuthModal(true); setAuthMode("signup"); setAuthError(""); }}
-                      style={{
-                        width: "100%", padding: "10px 18px",
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        background: "transparent",
-                        border: "1.5px solid rgba(101, 153, 131,0.2)",
-                        borderRadius: "12px", cursor: "pointer",
-                        fontFamily: "DM Sans, Inter, sans-serif",
-                        fontSize: "0.88rem", fontWeight: 600, color: "#6b7280",
-                        transition: "background 0.2s",
-                      }}
-                    >
-                      <span>✦ Email Framework</span>
-                    </button>
-                    )}
-
-                    {showFramework && (
-                      <div style={{
-                        marginTop: "10px",
-                        background: "rgba(255,255,255,0.7)",
-                        border: "1px solid rgba(101, 153, 131,0.15)",
-                        borderRadius: "14px", padding: "20px",
-                      }}>
-                        <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>Template</p>
-                        <p style={{ fontSize: "0.85rem", lineHeight: 1.8, color: "#1a1a1a", marginBottom: "16px" }}>
-                          &ldquo;I came across your recent work on{" "}
-                          <span style={{ background: "rgba(101, 153, 131,0.1)", color: "#2d5a47", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>[SPECIFIC TOPIC]</span>
-                          {" "}and was particularly struck by{" "}
-                          <span style={{ background: "rgba(101, 153, 131,0.1)", color: "#2d5a47", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>[SPECIFIC FINDING]</span>
-                          . This connects directly to my interest in{" "}
-                          <span style={{ background: "rgba(101, 153, 131,0.1)", color: "#2d5a47", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>[YOUR RESEARCH ANGLE]</span>
-                          {" "}because{" "}
-                          <span style={{ background: "rgba(101, 153, 131,0.1)", color: "#2d5a47", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>[ONE GENUINE REASON]</span>
-                          . I&apos;m especially curious whether{" "}
-                          <span style={{ background: "rgba(101, 153, 131,0.1)", color: "#2d5a47", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>[INTELLIGENT QUESTION]</span>
-                          .&rdquo;
-                        </p>
-                        <div style={{ height: "1px", background: "rgba(101, 153, 131,0.12)", marginBottom: "14px" }} />
-                        <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#c45c5c", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>Avoid These Phrases</p>
-                        {[
-                          { phrase: "I found your work fascinating", reason: "Name the specific finding instead." },
-                          { phrase: "I am highly motivated", reason: "Show it through what you've done." },
-                          { phrase: "Your research aligns with my interests", reason: "Explain the specific connection." },
-                          { phrase: "I would love to learn from you", reason: "Ask about their research instead." },
-                          { phrase: "I am passionate about this field", reason: "Describe what you've actually done." },
-                        ].map((item, i) => (
-                          <div key={i} style={{ marginBottom: "8px" }}>
-                            <p style={{ fontSize: "0.82rem", fontStyle: "italic", color: "#9b2c2c", margin: "0 0 2px" }}>&ldquo;{item.phrase}&rdquo;</p>
-                            <p style={{ fontSize: "0.77rem", color: "#9ca3af", margin: 0 }}>{item.reason}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <textarea value={emailDraft} onChange={(e) => { setEmailDraft(e.target.value); setHasChecked(false); }} placeholder={"Paste the email you're about to send."} className="modal-textarea" style={{ flex: 1, padding: "24px", lineHeight: 1.7 }} />
-                  {/* Pre-check notice */}
-                  {!user && !hasChecked && (
-                    <div style={{ margin: "12px 0 4px", padding: "10px 14px", background: "rgba(101, 153, 131,0.055)", border: "1px solid rgba(101, 153, 131,0.13)", borderRadius: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#2d5a47", opacity: 0.6, flexShrink: 0 }}>ℹ</span>
-                      <span style={{ fontSize: "0.8rem", color: "#2d5a47" }}>Free to try. No account needed.</span>
-                    </div>
-                  )}
-                  {!isPaid && !freeEmailCheckUsed && !!user && (
-                    <div style={{ margin: "12px 0 4px", padding: "10px 14px", background: "rgba(101, 153, 131,0.055)", border: "1px solid rgba(101, 153, 131,0.13)", borderRadius: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#2d5a47", opacity: 0.6, flexShrink: 0 }}>ℹ</span>
-                      <span style={{ fontSize: "0.8rem", color: "#2d5a47" }}>You have 1 free email check. Use it on your best draft.</span>
-                    </div>
-                  )}
-                  <div className="rm-modal-actions rm-modal-sticky-footer">
-                    {!isPaid && freeEmailCheckUsed ? (
-                      /* Post-check notice: free check consumed, soft upgrade mention */
-                      <div style={{ display: "flex", flexDirection: "column", gap: "3px", flex: 1, background: "rgba(101, 153, 131,0.055)", border: "1px solid rgba(101, 153, 131,0.13)", borderRadius: "12px", padding: "12px 16px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span style={{ fontSize: "0.82rem", color: "#2d5a47", opacity: 0.6, flexShrink: 0 }}>ℹ</span>
-                          <span style={{ fontSize: "0.82rem", color: "#2d5a47", fontWeight: 500 }}>You&apos;ve used your free email check.</span>
-                        </div>
-                        <p style={{ fontSize: "0.74rem", color: "#8aaa9d", paddingLeft: "21px", margin: 0 }}>Upgrade to keep checking emails before you send.</p>
-                      </div>
-                    ) : (
-                      <button onClick={checkEmail} disabled={checkingEmail || !emailDraft.trim()} className="btn-cta" style={{ padding: "14px 36px", fontSize: "1rem" }}>
-                        {checkingEmail ? (
-                          <span style={{ display: "inline-flex", alignItems: "center" }}>
-                            Checking<span className="rm-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-                          </span>
-                        ) : "Check email"}
-                      </button>
-                    )}
-                    <button onClick={handleCopy} disabled={!emailDraft.trim()} style={{ fontSize: "1rem", color: "#6b7280", background: "none", border: "none", cursor: emailDraft.trim() ? "pointer" : "default", opacity: emailDraft.trim() ? 1 : 0.3, fontFamily: "var(--font-playfair), Georgia, serif", transition: "color 0.2s" }}
-                      onMouseEnter={e => { if (emailDraft.trim()) e.currentTarget.style.color = "#659983"; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = "#6b7280"; }}
-                    >
-                      Copy to clipboard
-                    </button>
-                    <span style={{ marginLeft: "auto", fontSize: "0.9rem", fontWeight: 700, color: wordCount > 200 ? "#c45c5c" : "#6b7280", background: wordCount > 200 ? "rgba(196, 92, 92,0.08)" : "transparent", padding: "6px 14px", borderRadius: "999px", transition: "all 0.3s ease" }}>
-                      {wordCount} words
-                    </span>
-                  </div>
-                  {hasChecked && (() => {
-                    const total = emailTotalFlags;
-                    const gated = resultGated; // anonymous taste
-                    const FlagCard = (flag: EmailFlag, i: number) => (
-                      <div key={i} className={`flag-enter ${flag.type === "error" ? "flag-error" : "flag-warning"}`} style={{ padding: "16px 20px" }}>
-                        <span style={{ fontWeight: 700, fontSize: "0.95rem", color: flag.type === "error" ? "#c45c5c" : "#a8853e" }}>{flag.type === "error" ? "\u26A0" : "\u25CF"} {flag.issue}</span>
-                        <p style={{ fontSize: "0.85rem", color: "#6b7280", marginTop: "4px" }}>{flag.suggestion}</p>
-                      </div>
-                    );
-                    const accountBtn = (
-                      <button onClick={openCheckerSignup} className="btn-cta" style={{ marginTop: "14px", padding: "11px 26px", fontSize: "0.9rem" }}>
-                        Create free account &rarr;
-                      </button>
-                    );
-
-                    // Perfect email
-                    if (total === 0) {
-                      return (
-                        <div className="email-pass" style={{ marginTop: "20px", padding: "20px 24px", textAlign: "center" }}>
-                          <p style={{ fontSize: "1.4rem", marginBottom: "6px" }}>&#127881;</p>
-                          <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "#2d5a47" }}>Perfect email! No issues found.</p>
-                          <p style={{ fontSize: "0.85rem", color: "#6b7280", marginTop: "6px" }}>
-                            {gated ? "Clean. Checking your next email needs a free account." : "Copy it and send it with confidence."}
-                          </p>
-                          {gated && accountBtn}
-                        </div>
-                      );
-                    }
-
-                    const visible = gated ? emailFlags.slice(0, 1) : emailFlags;
-                    const hiddenCount = gated ? Math.max(0, total - visible.length) : 0;
-
-                    return (
-                      <div style={{ marginTop: "20px" }}>
-                        {gated && (
-                          <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "#2d5a47", marginBottom: "10px" }}>
-                            {total} {total === 1 ? "issue" : "issues"} found.
-                          </p>
-                        )}
-                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                          {visible.map((flag, i) => FlagCard(flag, i))}
-                        </div>
-
-                        {/* Gated: blur the rest behind a signup overlay */}
-                        {hiddenCount > 0 && (
-                          <div style={{ position: "relative", marginTop: "10px" }}>
-                            <div aria-hidden="true" style={{ display: "flex", flexDirection: "column", gap: "10px", filter: "blur(6px)", userSelect: "none", pointerEvents: "none" }}>
-                              {Array.from({ length: Math.min(hiddenCount, 3) }, (_, i) => (
-                                <div key={i} className="flag-enter flag-warning" style={{ padding: "16px 20px" }}>
-                                  <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#a8853e" }}>● Additional issue</span>
-                                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginTop: "4px" }}>Create an account to reveal the complete review.</p>
-                                </div>
-                              ))}
-                            </div>
-                            <div
-                              onClick={openCheckerSignup}
-                              style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", cursor: "pointer", background: "linear-gradient(to bottom, rgba(245,240,230,0.55) 0%, rgba(245,240,230,0.96) 55%)", padding: "16px", borderRadius: "12px" }}
-                            >
-                              <p style={{ fontSize: "0.92rem", fontWeight: 700, color: "#2d5a47", marginBottom: "4px" }}>
-                                {hiddenCount} more {hiddenCount === 1 ? "issue" : "issues"} found
-                              </p>
-                              <p style={{ fontSize: "0.82rem", color: "#6b7280", marginBottom: "12px" }}>Create a free account to see them all.</p>
-                              <span className="btn-cta" style={{ padding: "10px 24px", fontSize: "0.88rem" }}>Create free account &rarr;</span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Gated single-flag (nothing to blur): push the account ask to the next email */}
-                        {gated && hiddenCount === 0 && (
-                          <div style={{ marginTop: "14px", padding: "12px 16px", background: "rgba(101, 153, 131,0.055)", border: "1px solid rgba(101, 153, 131,0.13)", borderRadius: "12px" }}>
-                            <p style={{ fontSize: "0.85rem", color: "#2d5a47", fontWeight: 500, margin: 0 }}>Clean otherwise. Checking your next email needs a free account.</p>
-                            {accountBtn}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-                <div className={`modal-sidebar rm-modal-right${mobileEmailTab === "compose" ? " rm-modal-panel-hidden" : ""}`}>
-                  <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "24px" }}>Reference</p>
-                  <div style={{ marginBottom: "24px" }}>
-                    <p style={{ fontSize: "1.4rem", fontWeight: 700, color: "#1a1a1a" }}>{emailTarget.display_name}</p>
-                    <p style={{ fontSize: "0.9rem", color: "#6b7280", marginTop: "4px" }}>{formatInstitutionLocation(emailTarget.last_known_institutions?.[0])}</p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
-                      {emailTarget.topics?.slice(0, 4).map((t, i) => <span key={i} className="tag" style={{ fontSize: "0.7rem" }}>{t.display_name}</span>)}
-                    </div>
-                  </div>
-                  <div style={{ height: "1px", background: "linear-gradient(to right, transparent, #8aaa9d, transparent)", opacity: 0.5, marginBottom: "24px" }} />
-                  {isLoadingTargetSummary && (
-                    <div style={{ textAlign: "center", padding: "20px 0" }}>
-                      <p style={{ fontSize: "0.9rem", color: "#6b7280" }}>Loading research info<span className="rm-dots" aria-hidden="true"><i></i><i></i><i></i></span></p>
-                    </div>
-                  )}
-                  {targetSummary && (
-                    <>
-                      <div style={{ marginBottom: "24px" }}>
-                        <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Their Research</p>
-                        <p style={{ fontSize: "0.9rem", color: "#6b7280", lineHeight: 1.7 }}>{targetSummary.summary}</p>
-                      </div>
-                      {targetSummary.highlights.length > 0 && (
-                        <div style={{ marginBottom: "24px" }}>
-                          <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Papers to Mention</p>
-                          {(isFree ? targetSummary.highlights.slice(0, 1) : targetSummary.highlights).map((h, i) => refHighlight(h, i))}
-                          {isFree && targetSummary.highlights.length > 1 && (
-                            <div className="rm-locked-wrap">
-                              <div className="rm-locked-blur" aria-hidden="true">
-                                {targetSummary.highlights.slice(1).map((h, i) => refHighlight(h, i + 1))}
-                              </div>
-                              <button type="button" className="rm-locked-overlay" onClick={openSummaryPaywall}>
-                                See the other {targetSummary.highlights.length - 1} paper{targetSummary.highlights.length - 1 === 1 ? "" : "s"}
-                                <span className="rm-locked-overlay-sub">Unlock with any plan</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {targetSummary.questions.length > 0 && (
-                        <div>
-                          <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Questions to Ask</p>
-                          {(isFree ? targetSummary.questions.slice(0, 1) : targetSummary.questions).map((q, i) => refQuestion(q, i))}
-                          {isFree && targetSummary.questions.length > 1 && (
-                            <div className="rm-locked-wrap">
-                              <div className="rm-locked-blur" aria-hidden="true">
-                                {targetSummary.questions.slice(1).map((q, i) => refQuestion(q, i + 1))}
-                              </div>
-                              <button type="button" className="rm-locked-overlay" onClick={openSummaryPaywall}>
-                                See all {targetSummary.questions.length} questions
-                                <span className="rm-locked-overlay-sub">Unlock with any plan</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
+        {emailTarget && (
+          <EmailComposerModal
+            target={emailTarget}
+            summary={summaries[emailTarget.id.split("/").pop()!]}
+            loadingSummary={Boolean(loadingSummary[emailTarget.id.split("/").pop()!])}
+            draft={emailDraft}
+            flags={emailFlags}
+            totalFlags={emailTotalFlags}
+            checking={checkingEmail}
+            checked={hasChecked}
+            resultGated={resultGated}
+            frameworkOpen={showFramework}
+            activeTab={mobileEmailTab}
+            freeEmailCheckUsed={freeEmailCheckUsed}
+            loggedIn={Boolean(user)}
+            isPaid={isPaid}
+            isFree={isFree}
+            wordCount={wordCount}
+            sheetRef={emailSheetRef}
+            onDragStart={onSheetDragStart}
+            onDragMove={onSheetDragMove}
+            onDragEnd={onSheetDragEnd}
+            onClose={closeEmailModal}
+            onTabChange={setMobileEmailTab}
+            onToggleFramework={() => setShowFramework((open) => !open)}
+            onFrameworkSignup={() => {
+              setShowAuthModal(true);
+              setAuthMode("signup");
+              setAuthError("");
+            }}
+            onDraftChange={(draft) => {
+              setEmailDraft(draft);
+              setHasChecked(false);
+            }}
+            onCheck={checkEmail}
+            onCopy={handleCopy}
+            onCheckerSignup={openCheckerSignup}
+            onSummaryPaywall={openSummaryPaywall}
+          />
+        )}
         {/* TOAST */}
         {toast && (
           <div className="toast" key={toast.msg}>
@@ -3257,195 +2505,39 @@ function AppPageInner() {
 
       {/* AUTH MODAL */}
       {showAuthModal && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245,240,230,0.85)", backdropFilter: "blur(12px)" }} onClick={() => setShowAuthModal(false)}>
-          <div ref={authModalRef} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" className="glass-card rm-modal-card" style={{ padding: "40px", maxWidth: "400px", width: "90%", position: "relative" }} onClick={(e) => e.stopPropagation()}>
-            <button type="button" aria-label="Close account dialog" onClick={() => setShowAuthModal(false)} style={{ position: "absolute", top: "14px", right: "14px", width: "36px", height: "36px", border: 0, borderRadius: "999px", background: "rgba(101,153,131,0.08)", color: "#2d5a47", cursor: "pointer", fontSize: "1.25rem" }}>×</button>
-            <h3 id="auth-modal-title" style={{ fontSize: "1.4rem", fontWeight: 700, color: "#2d5a47", marginBottom: "8px" }}>
-              {authMode === "signup" ? "Create your free account" : "Welcome back"}
-            </h3>
-            <p style={{ fontSize: "0.9rem", color: "#6b7280", marginBottom: "24px" }}>
-              {authModalCopy || (authMode === "signup" ? "Free access to research summaries, email checker, and more." : "Log in to your account.")}
-            </p>
-            <form onSubmit={handleAuthSubmit}>
-              {authError && <p role="alert" style={{ fontSize: "0.85rem", color: "#c45c5c", marginBottom: "16px", background: "rgba(196, 92, 92,0.08)", padding: "10px 14px", borderRadius: "10px" }}>{authError}</p>}
-              <input aria-label="Email address" autoComplete="email" required type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "12px", outline: "none" }} />
-              <input aria-label="Password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} required minLength={6} type="password" placeholder="Password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "12px", outline: "none" }} />
-              {authMode === "signup" && (
-                <input aria-label="Promo code (optional)" autoComplete="off" type="text" placeholder="Promo code (optional)" value={authPromoCode} onChange={(e) => setAuthPromoCode(e.target.value)} style={{ width: "100%", padding: "12px 16px", fontSize: "1rem", border: "1.5px solid rgba(101, 153, 131,0.4)", borderRadius: "12px", background: "rgba(255,255,255,0.5)", color: "#1a1a1a", fontFamily: "inherit", marginBottom: "20px", outline: "none" }} />
-              )}
-              {authMode !== "signup" && <div style={{ marginBottom: "8px" }} />}
-              <button type="submit" disabled={authLoading} className="btn-cta rm-search-btn" style={{ width: "100%", padding: "14px", fontSize: "1rem" }}>
-                {authLoading ? "Loading..." : authMode === "signup" ? "Sign up" : "Log in"}
-              </button>
-              {authMode === "login" && (
-                <button type="button" disabled={authLoading} onClick={sendPasswordReset} style={{ display: "block", margin: "12px auto 0", color: "#2d5a47", fontWeight: 600, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "0.82rem" }}>
-                  Forgot password?
-                </button>
-              )}
-            </form>
-            <p style={{ fontSize: "0.85rem", color: "#6b7280", textAlign: "center", marginTop: "16px" }}>
-              {authMode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-              <button onClick={() => { setAuthMode(authMode === "signup" ? "login" : "signup"); setAuthError(""); }} style={{ color: "#2d5a47", fontWeight: 600, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "0.85rem" }}>
-                {authMode === "signup" ? "Log in" : "Sign up"}
-              </button>
-            </p>
-          </div>
-        </div>
+        <AccountModal
+          mode={authMode}
+          copy={authModalCopy}
+          email={authEmail}
+          password={authPassword}
+          promoCode={authPromoCode}
+          error={authError}
+          loading={authLoading}
+          dialogRef={authModalRef}
+          onClose={() => setShowAuthModal(false)}
+          onSubmit={handleAuthSubmit}
+          onEmailChange={setAuthEmail}
+          onPasswordChange={setAuthPassword}
+          onPromoCodeChange={setAuthPromoCode}
+          onPasswordReset={sendPasswordReset}
+          onModeChange={(mode) => { setAuthMode(mode); setAuthError(""); }}
+        />
       )}
 
       {/* UPGRADE MODAL */}
       {showUpgradeModal && (
-        <div className="rm-upgrade-backdrop" onClick={() => setShowUpgradeModal(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="upgrade-modal-title" className="glass-card rm-modal-card rm-upgrade-card" style={{ padding: "32px", position: "relative" }} onClick={(e) => e.stopPropagation()}>
-            <button type="button" aria-label="Close upgrade dialog" onClick={() => setShowUpgradeModal(false)} style={{ position: "absolute", top: "12px", right: "12px", width: "34px", height: "34px", border: 0, borderRadius: "999px", background: "rgba(101,153,131,0.08)", color: "#2d5a47", cursor: "pointer", fontSize: "1.2rem" }}>×</button>
-            <h3 id="upgrade-modal-title" style={{ fontSize: "1.25rem", fontWeight: 700, color: "#2d5a47", marginBottom: "4px", paddingRight: "32px" }}>{upgradeModalTitle || "Unlock the full toolkit"}</h3>
-            <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "20px" }}>{upgradeModalSubtitle || "Every finding, every question, the email checker, and the professor email finder."}</p>
-            <details
-              open={Boolean(checkoutReferralCode)}
-              style={{
-                marginBottom: "14px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.48)",
-                border: "1px solid rgba(101, 153, 131,0.1)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.65)",
-                overflow: "hidden",
-              }}
-            >
-              <summary
-                style={{
-                  listStyle: "none",
-                  cursor: "pointer",
-                  padding: "12px 14px",
-                  color: "#2d5a47",
-                  fontSize: "0.82rem",
-                  fontWeight: 750,
-                  letterSpacing: "0.01em",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                Have a Research Buddy Pass?
-                <span style={{
-                  fontSize: "0.68rem",
-                  color: "#557065",
-                  fontWeight: 750,
-                  padding: "5px 9px",
-                  borderRadius: "999px",
-                  background: "rgba(101, 153, 131,0.08)",
-                  whiteSpace: "nowrap",
-                }}>
-                  Optional
-                </span>
-              </summary>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                padding: "0 14px 14px",
-              }}>
-                <input
-                  type="text"
-                  placeholder="Enter friend code"
-                  value={checkoutReferralCode}
-                  onChange={(e) => { setCheckoutReferralCode(normalizeReferralCode(e.target.value)); setCheckoutError(""); }}
-                  style={{
-                    width: "100%",
-                    minWidth: 0,
-                    border: "1px solid rgba(101, 153, 131,0.12)",
-                    outline: "none",
-                    background: "rgba(255,255,255,0.64)",
-                    color: "#1f3f32",
-                    fontSize: "0.9rem",
-                    fontWeight: 650,
-                    letterSpacing: "0.02em",
-                    fontFamily: "inherit",
-                    padding: "12px 13px",
-                    borderRadius: "12px",
-                    textTransform: "uppercase",
-                  }}
-                />
-              </div>
-            </details>
-            {checkoutError && (
-              <p style={{
-                fontSize: "0.78rem",
-                color: "#a24646",
-                background: "rgba(196,92,92,0.08)",
-                border: "1px solid rgba(196,92,92,0.14)",
-                padding: "9px 12px",
-                borderRadius: "12px",
-                marginBottom: "14px",
-              }}>
-                {checkoutError}
-              </p>
-            )}
-
-            {/* Weekly — the emphasized plan */}
-            <div style={{ padding: "20px", borderRadius: "16px", border: "2px solid rgba(101, 153, 131,0.5)", boxShadow: "0 10px 30px rgba(101, 153, 131,0.16)", background: "linear-gradient(135deg, rgba(101, 153, 131,0.08), rgba(101, 153, 131,0.03))", marginBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.1em" }}>Weekly Sprint</p>
-                <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#fff", background: "linear-gradient(135deg, #659983, #557f6c)", padding: "3px 9px", borderRadius: "999px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Most Popular</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "2px" }}>
-                <span style={{ fontSize: "2.1rem", fontWeight: 800, color: "#2d5a47" }}>$7</span>
-                <span style={{ fontSize: "0.85rem", color: "#2d5a47", fontWeight: 600 }}>/ week</span>
-              </div>
-              <p style={{ fontSize: "0.78rem", color: "#6b7280", marginBottom: "12px" }}>Full access while you run your outreach. Cancel anytime.</p>
-              <ul style={{ listStyle: "none", padding: 0, marginBottom: "16px" }}>
-                {["Unlimited research summaries", "Email checker with red-flag detection", "Professor email finder", "Professor responsiveness indicator", "Cold Email Playbook"].map((f) => (
-                  <li key={f} style={{ fontSize: "0.82rem", color: "#6b7280", padding: "3px 0", display: "flex", gap: "8px" }}>
-                    <span style={{ color: "#2d5a47" }}>✓</span> {f}
-                  </li>
-                ))}
-              </ul>
-              <button onClick={async () => {
-                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_WEEKLY;
-                await startCheckout(priceId);
-              }} className="btn-cta rm-search-btn" style={{ width: "100%", padding: "13px", fontSize: "0.95rem", background: "linear-gradient(135deg, #659983, #557f6c)", boxShadow: "0 8px 24px rgba(101, 153, 131,0.3)", textShadow: "0 1px 2px rgba(18, 54, 39,0.24)" }}>
-                Start Weekly for $7
-              </button>
-              <p style={{ fontSize: "0.74rem", color: "#9b7d40", textAlign: "center", marginTop: "8px", fontWeight: 600 }}>Cancel recurring plans from your profile.</p>
-            </div>
-
-            {/* Semester — secondary option */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 18px", borderRadius: "12px", border: "1px solid rgba(101, 153, 131,0.18)", background: "rgba(101, 153, 131,0.03)", flexWrap: "wrap", marginBottom: "10px" }}>
-              <div>
-                <p style={{ fontSize: "0.65rem", fontWeight: 700, color: "#2d5a47", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "2px" }}>Semester</p>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-                  <span style={{ fontSize: "1.3rem", fontWeight: 800, color: "#2d5a47" }}>$29</span>
-                  <span style={{ fontSize: "0.78rem", color: "#6b7280" }}>/ 4 months · full semester access</span>
-                </div>
-              </div>
-              <button onClick={async () => {
-                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_SEMESTER;
-                await startCheckout(priceId);
-              }} className="btn-cta" style={{ padding: "10px 22px", fontSize: "0.85rem", background: "rgba(101, 153, 131, 0.1)", color: "#2d5a47", border: "none", whiteSpace: "nowrap" }}>
-                Get Semester for $29
-              </button>
-            </div>
-
-            {/* Lifetime — de-emphasized one-time option */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", padding: "11px 16px", borderRadius: "12px", border: "1px solid rgba(101, 153, 131,0.1)", background: "rgba(255,255,255,0.45)", flexWrap: "wrap", marginBottom: "12px" }}>
-              <span style={{ fontSize: "0.8rem", color: "#6b7280" }}>
-                Prefer to pay once? <strong style={{ color: "#2d5a47", fontWeight: 700 }}>Lifetime for $59</strong>, never pay again.
-              </span>
-              <button onClick={async () => {
-                const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME;
-                await startCheckout(priceId);
-              }} style={{ fontSize: "0.8rem", fontWeight: 700, color: "#2d5a47", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", textDecoration: "underline", fontFamily: "inherit" }}>
-                Get Lifetime →
-              </button>
-            </div>
-
-            <div style={{ padding: "10px 14px", background: "rgba(101, 153, 131,0.04)", borderRadius: "10px", border: "1px solid rgba(101, 153, 131,0.1)", display: "flex", gap: "16px", flexWrap: "wrap" }}>
-              {["Email Template (professor-tested)", "Emails That Worked (real examples)", "Follow-Up Guide"].map((b) => (
-                <p key={b} style={{ fontSize: "0.72rem", color: "#6b7280", display: "flex", gap: "5px", margin: 0 }}>
-                  <span style={{ color: "#a8853e" }}>✓</span> {b}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
+        <UpgradeModal
+          title={upgradeModalTitle}
+          subtitle={upgradeModalSubtitle}
+          referralCode={checkoutReferralCode}
+          checkoutError={checkoutError}
+          onClose={() => setShowUpgradeModal(false)}
+          onReferralCodeChange={(value) => {
+            setCheckoutReferralCode(normalizeReferralCode(value));
+            setCheckoutError("");
+          }}
+          onCheckout={startPlanCheckout}
+        />
       )}
     </>
   );

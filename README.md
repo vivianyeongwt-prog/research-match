@@ -51,4 +51,15 @@ The detailed operational and ownership checklist is in [TRANSFER.md](./TRANSFER.
 - `src/lib/stripe-plans.ts` is the single fail-closed mapping from Stripe prices to plans.
 - `migrations/` is the reproducible database contract used by those server modules.
 
+### Frontend layout
+
+- `src/app/app/page.tsx` coordinates search, access, and result state for the member workspace.
+- `src/components/ResearchSearchForm.tsx` is the shared hero/results search interface.
+- `src/components/ResearchAppNav.tsx`, `AccountModal.tsx`, `UpgradeModal.tsx`, and
+  `EmailComposerModal.tsx` isolate the workspace's major presentation regions.
+- `src/lib/research-match-domain.ts` owns OpenAlex author types, matching, ranking,
+  deduplication, and formatting rules independently of React.
+- `src/lib/browser-storage.ts` is the single contract for saved professors and
+  free-allowance storage keys, including legacy migration behavior.
+
 Never expose `SUPABASE_SERVICE_ROLE_KEY`, Stripe secret keys, webhook secrets, AI-provider keys, or `RATE_LIMIT_SECRET` to browser code.

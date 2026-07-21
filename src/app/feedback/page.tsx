@@ -68,7 +68,7 @@ export default function FeedbackPage() {
   // Sequence counter so a slow, out-of-order response can't clobber a newer one.
   const fetchSeqRef = useRef(0);
 
-  async function fetchFeedback() {
+  const fetchFeedback = useCallback(async () => {
     const seq = ++fetchSeqRef.current;
     setLoading(true);
     try {
@@ -78,10 +78,10 @@ export default function FeedbackPage() {
       if (Array.isArray(data)) startTransition(() => setItems(data));
     } catch { /* ignore */ }
     finally { if (seq === fetchSeqRef.current) setLoading(false); }
-  }
+  }, [sort]);
 
   // Runs on mount and whenever the sort changes (single fetch on first render).
-  useEffect(() => { fetchFeedback(); }, [sort]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchFeedback(); }, [fetchFeedback]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

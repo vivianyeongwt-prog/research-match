@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, startTransition } from "react";
 import Link from "next/link";
+import { ResearchMatchLogo } from "@/components/ResearchMatchLogo";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
@@ -397,14 +398,7 @@ export default function LandingPage() {
       <nav className="lp-nav">
         <div className="lp-nav-pill">
           <Link href="/" className="lp-nav-logo">
-            <svg width="180" height="32" viewBox="0 0 280 50" xmlns="http://www.w3.org/2000/svg" aria-label="Research Match">
-              <g transform="translate(2,2) scale(0.46)">
-                <path d="M50 84 C30 78 22 60 24 38 C36 42 46 52 50 70" fill="none" stroke="#2d5a47" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M50 84 C70 78 78 60 76 38 C64 42 54 52 50 70" fill="none" stroke="#2d5a47" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="50" cy="32" r="9.5" fill="#c9ad77" />
-              </g>
-              <text x="52" y="33" fontFamily="Georgia, 'Times New Roman', serif" fontSize="23" fontWeight="700" fill="#2d5a47">Research Match</text>
-            </svg>
+            <ResearchMatchLogo />
           </Link>
           <div className="lp-nav-spacer" />
           <div className="lp-nav-links">

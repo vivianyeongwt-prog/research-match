@@ -5,21 +5,12 @@ import type { User, AuthError } from "@supabase/supabase-js";
 import { generateReferralCode } from "./buddy-pass";
 import { track } from "./analytics";
 import { apiFetch } from "./client-fetch";
+import { STORAGE_KEYS, readAnonSummariesUsed } from "./browser-storage";
 
 // Free summaries allowed across a user's lifetime on the free tier. Shared
 // between the anonymous (pre-account) and free-account states so creating an
 // account can't reset the budget. Mirrors FREE_LIMIT / ANON_LIMIT in /api/summarize.
 const FREE_SUMMARY_LIMIT = 2;
-
-/** Free summaries this device already used while signed out. */
-function readAnonSummariesUsed(): number {
-  if (typeof window === "undefined") return 0;
-  const stored = localStorage.getItem("rm-anon-summaries-used");
-  if (stored !== null) return parseInt(stored, 10) || 0;
-  // Legacy single-summary boolean flag.
-  if (localStorage.getItem("hasViewedFreeSummary") === "true") return 1;
-  return 0;
-}
 
 // Build the initial profiles row. Shared by signUp and the lazy-create path in
 // fetchProfile, so the row shape can't drift between the two.
@@ -135,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
-        const pendingPromo = localStorage.getItem("rm-pending-promo");
+        const pendingPromo = localStorage.getItem(STORAGE_KEYS.pendingPromo);
         if (pendingPromo && session.access_token) {
           // Email-confirmation signups do not receive a session immediately. Redeem
           // their pending code once confirmation produces a verified access token.
@@ -147,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             },
             body: JSON.stringify({ code: pendingPromo }),
           }).then(() => {
-            localStorage.removeItem("rm-pending-promo");
+            localStorage.removeItem(STORAGE_KEYS.pendingPromo);
             return fetchProfile(session.user.id);
           }).catch(() => undefined);
         }
@@ -177,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const normalizedPromo = promoCode.trim().toUpperCase();
         const token = data.session?.access_token;
         if (!token) {
-          localStorage.setItem("rm-pending-promo", normalizedPromo);
+          localStorage.setItem(STORAGE_KEYS.pendingPromo, normalizedPromo);
           promoPending = true;
         } else {
           try {
@@ -222,9 +213,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) await fetchProfile(user.id);
-  };
+  }, [fetchProfile, user]);
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut: handleSignOut, refreshProfile }}>

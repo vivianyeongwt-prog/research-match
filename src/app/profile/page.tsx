@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { formatBuddyPassDate, hasActiveBuddyPass, hasPaidAccess, planLabelFor } from "@/lib/buddy-pass";
 import { apiFetch } from "@/lib/client-fetch";
+import { readSavedProfessors } from "@/lib/browser-storage";
 import styles from "./profile.module.css";
 
 type BuddyReferral = {
@@ -94,12 +95,9 @@ export default function ProfilePage() {
   }, [user]);
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("research-match-saved") || "[]");
-      setSavedCount(Array.isArray(saved) ? saved.length : 0);
-    } catch { setSavedCount(0); }
+    setSavedCount(readSavedProfessors().length);
     refreshProfile();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshProfile]);
 
   useEffect(() => {
     setResetRequested(new URLSearchParams(window.location.search).get("reset") === "1");
