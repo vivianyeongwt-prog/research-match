@@ -23,4 +23,18 @@ describe("frontend structure", () => {
     expect(page).toContain("<ResearchAppNav");
     expect(page.split("\n").length).toBeLessThan(2_600);
   });
+
+  it("associates visible search labels with their inputs", () => {
+    const landingPage = readFileSync(join(root, "src/app/page.tsx"), "utf8");
+    const searchForm = readFileSync(join(root, "src/components/ResearchSearchForm.tsx"), "utf8");
+
+    expect(landingPage).toContain('htmlFor="landing-research-interest"');
+    expect(landingPage).toContain('id="landing-research-interest"');
+    expect(landingPage).toContain('htmlFor="landing-university"');
+    expect(landingPage).toContain('id="landing-university"');
+    expect(searchForm).toContain('htmlFor={`${fieldIdPrefix}-research-interest`}');
+    expect(searchForm).toContain('id={`${fieldIdPrefix}-research-interest`}');
+    expect(searchForm).toContain('htmlFor={`${fieldIdPrefix}-professor-name`}');
+    expect(searchForm).toContain('id={`${fieldIdPrefix}-professor-name`}');
+  });
 });

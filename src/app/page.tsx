@@ -438,8 +438,11 @@ export default function LandingPage() {
             className={`lp-search-bar ${heroFocused ? "lp-search-focused" : ""}`}
           >
             <div className="lp-search-field">
-              <label className="lp-search-label">Research Interest</label>
+              <label className="lp-search-label" htmlFor="landing-research-interest">
+                Research Interest
+              </label>
               <input
+                id="landing-research-interest"
                 type="text"
                 value={heroQuery}
                 onChange={(e) => setHeroQuery(e.target.value)}
@@ -452,8 +455,11 @@ export default function LandingPage() {
             </div>
             <div className="lp-search-divider" />
             <div className="lp-search-field" style={{ flex: "0.75" }}>
-              <label className="lp-search-label">University</label>
+              <label className="lp-search-label" htmlFor="landing-university">
+                University
+              </label>
               <input
+                id="landing-university"
                 type="text"
                 value={heroUni}
                 onChange={(e) => setHeroUni(e.target.value)}

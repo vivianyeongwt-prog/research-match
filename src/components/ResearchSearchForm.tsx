@@ -118,14 +118,18 @@ export function ResearchSearchForm({
   onNameSearch,
 }: ResearchSearchFormProps) {
   const className = `glass-search rm-search${hero ? " rm-hero-search" : ""}`;
+  const fieldIdPrefix = hero ? "hero" : "results";
 
   if (mode === "name") {
     return (
       <div className={className}>
         {showIcon && <SearchIcon />}
         <div className="rm-search-input-wrap">
-          <label className="rm-search-label">Professor Name</label>
+          <label className="rm-search-label" htmlFor={`${fieldIdPrefix}-professor-name`}>
+            Professor Name
+          </label>
           <input
+            id={`${fieldIdPrefix}-professor-name`}
             value={professorName}
             onChange={(event) => setProfessorName(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && onNameSearch()}
@@ -135,8 +139,11 @@ export function ResearchSearchForm({
         </div>
         <div className="rm-search-divider" />
         <div className="rm-uni-field">
-          <label className="rm-search-label">University (optional)</label>
+          <label className="rm-search-label" htmlFor={`${fieldIdPrefix}-professor-university`}>
+            University (optional)
+          </label>
           <input
+            id={`${fieldIdPrefix}-professor-university`}
             value={professorUniversity}
             onChange={(event) => setProfessorUniversity(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && onNameSearch()}
@@ -153,7 +160,9 @@ export function ResearchSearchForm({
     <div className={className}>
       {showIcon && <SearchIcon />}
       <div className="rm-search-input-wrap" ref={suggestionsRef} style={{ position: "relative" }}>
-        <label className="rm-search-label">Research Interest</label>
+        <label className="rm-search-label" htmlFor={`${fieldIdPrefix}-research-interest`}>
+          Research Interest
+        </label>
         <div className="rm-tag-input-row">
           {queryTags.map((tag, index) => (
             <span key={index} className="rm-tag-chip">
@@ -162,6 +171,7 @@ export function ResearchSearchForm({
             </span>
           ))}
           <input
+            id={`${fieldIdPrefix}-research-interest`}
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -203,7 +213,9 @@ export function ResearchSearchForm({
       </div>
       <div className="rm-search-divider" />
       <div className="rm-uni-field">
-        <label className="rm-search-label">University</label>
+        <label className="rm-search-label" htmlFor={`${fieldIdPrefix}-university`}>
+          University
+        </label>
         <div className="rm-tag-input-row">
           {universityTags.map((tag, index) => (
             <span key={index} className="rm-tag-chip">
@@ -212,6 +224,7 @@ export function ResearchSearchForm({
             </span>
           ))}
           <input
+            id={`${fieldIdPrefix}-university`}
             value={university}
             onChange={(event) => setUniversity(event.target.value)}
             onKeyDown={(event) => {
