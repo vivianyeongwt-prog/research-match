@@ -40,4 +40,15 @@ The detailed operational and ownership checklist is in [TRANSFER.md](./TRANSFER.
 - Groq and Anthropic power AI-assisted search expansion, summaries, and email tools.
 - Serper supports public faculty-page discovery for the paid email finder.
 
+### Backend layout
+
+- `src/app/api/**/route.ts` contains thin HTTP handlers and request-specific validation.
+- `src/lib/server-access.ts` owns authenticated Supabase access, quotas, and rate limits.
+- `src/lib/stripe-server.ts` owns validated, lazy Stripe client configuration.
+- `src/lib/stripe-access.ts` owns plan provisioning, renewal, downgrade, and revocation.
+- `src/lib/stripe-affiliates.ts` owns affiliate attribution, commissions, and reversals.
+- `src/lib/stripe-webhook.ts` normalizes Stripe event references across API versions.
+- `src/lib/stripe-plans.ts` is the single fail-closed mapping from Stripe prices to plans.
+- `migrations/` is the reproducible database contract used by those server modules.
+
 Never expose `SUPABASE_SERVICE_ROLE_KEY`, Stripe secret keys, webhook secrets, AI-provider keys, or `RATE_LIMIT_SECRET` to browser code.

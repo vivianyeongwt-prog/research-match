@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { authenticatedUser, customerIdsForUser } from "@/lib/stripe-customers";
 import { allowRequestRate } from "@/lib/server-access";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
-
-function isCancelableSubscription(subscription: Stripe.Subscription) {
-  return ["active", "trialing", "past_due", "unpaid", "incomplete"].includes(subscription.status);
-}
+import { stripeClient } from "@/lib/stripe-server";
+import { isCurrentSubscription } from "@/lib/stripe-subscriptions";
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = stripeClient();
     const user = await authenticatedUser(req);
     if (!user) {
       return NextResponse.json({ error: "You must be signed in to cancel a subscription." }, { status: 401 });
@@ -39,7 +34,7 @@ export async function POST(req: NextRequest) {
       });
 
       for (const subscription of subscriptions.data) {
-        if (!isCancelableSubscription(subscription)) continue;
+        if (!isCurrentSubscription(subscription)) continue;
         cancelableSubscriptions.push(subscription);
       }
     }

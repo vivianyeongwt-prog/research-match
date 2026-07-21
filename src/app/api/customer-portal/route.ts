@@ -3,12 +3,10 @@ import Stripe from "stripe";
 import { authenticatedUser, customerIdsForUser } from "@/lib/stripe-customers";
 import { siteOrigin } from "@/lib/site-url";
 import { allowRequestRate } from "@/lib/server-access";
+import { stripeClient } from "@/lib/stripe-server";
+import { isPortalSubscription } from "@/lib/stripe-subscriptions";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
-
-async function customerWithCurrentSubscription(customerIds: string[]) {
+async function customerWithCurrentSubscription(stripe: Stripe, customerIds: string[]) {
   for (const customer of customerIds) {
     const subscriptions = await stripe.subscriptions.list({
       customer,
@@ -16,10 +14,7 @@ async function customerWithCurrentSubscription(customerIds: string[]) {
       limit: 100,
     });
 
-    const hasCurrentSubscription = subscriptions.data.some((subscription) =>
-      ["active", "trialing", "past_due"].includes(subscription.status) &&
-      !subscription.cancel_at_period_end
-    );
+    const hasCurrentSubscription = subscriptions.data.some(isPortalSubscription);
 
     if (hasCurrentSubscription) return customer;
   }
@@ -32,7 +27,7 @@ async function customerWithCurrentSubscription(customerIds: string[]) {
 // you save portal settings once in the Dashboard), create a sensible default
 // with cancellation enabled and retry. The first config created becomes the
 // account default, so this self-heals after one call.
-async function createPortalSession(customer: string, returnUrl: string) {
+async function createPortalSession(stripe: Stripe, customer: string, returnUrl: string) {
   try {
     return await stripe.billingPortal.sessions.create({ customer, return_url: returnUrl });
   } catch (err) {
@@ -59,6 +54,7 @@ async function createPortalSession(customer: string, returnUrl: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = stripeClient();
     const user = await authenticatedUser(req);
     if (!user) {
       return NextResponse.json({ error: "You must be signed in to manage billing." }, { status: 401 });
@@ -76,9 +72,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const customer = await customerWithCurrentSubscription(customerIds);
+    const customer = await customerWithCurrentSubscription(stripe, customerIds);
 
-    const portalSession = await createPortalSession(customer, `${siteOrigin()}/profile`);
+    const portalSession = await createPortalSession(stripe, customer, `${siteOrigin()}/profile`);
 
     return NextResponse.json({ url: portalSession.url });
   } catch (err) {

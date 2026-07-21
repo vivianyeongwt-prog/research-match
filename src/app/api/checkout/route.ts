@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { hasPaidPlan, normalizeReferralCode } from "@/lib/buddy-pass";
 import { allowRequestRate, requestAccess, supabaseAdmin } from "@/lib/server-access";
 import { siteOrigin } from "@/lib/site-url";
 import { currentCheckoutPriceIds, paidPlanFromPriceId } from "@/lib/stripe-plans";
+import { stripeClient } from "@/lib/stripe-server";
+import { isCurrentSubscription } from "@/lib/stripe-subscriptions";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
-
-async function buddyPassCouponId() {
+async function buddyPassCouponId(stripe: Stripe) {
   const configuredCoupon = process.env.STRIPE_BUDDY_PASS_COUPON_ID;
   if (configuredCoupon) return configuredCoupon;
 
@@ -35,6 +33,7 @@ async function buddyPassCouponId() {
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = stripeClient();
     const access = await requestAccess(req);
     if (!access.user) {
       return NextResponse.json({ error: "You must be signed in to start checkout." }, { status: 401 });
@@ -71,7 +70,7 @@ export async function POST(req: NextRequest) {
         query: `metadata['userId']:'${userId.replace(/'/g, "\\'")}'`,
         limit: 100,
       });
-      if (subscriptions.data.some((subscription) => ["active", "trialing", "past_due", "unpaid", "incomplete"].includes(subscription.status))) {
+      if (subscriptions.data.some(isCurrentSubscription)) {
         return NextResponse.json(
           { error: "You already have an active subscription. Manage it from your profile." },
           { status: 409 }
@@ -117,7 +116,7 @@ export async function POST(req: NextRequest) {
         referrerId: referrer.id,
         referredUserId: userId,
       };
-      discounts = [{ coupon: await buddyPassCouponId() }];
+      discounts = [{ coupon: await buddyPassCouponId(stripe) }];
     }
 
     const metadata = { userId, ...referralMetadata };

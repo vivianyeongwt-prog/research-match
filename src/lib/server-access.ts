@@ -3,10 +3,11 @@ import { createClient, type User } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { generateReferralCode, hasPaidAccess } from "@/lib/buddy-pass";
 import { clientIp, withinRateLimit } from "@/lib/rate-limit";
+import { requiredServerSetting } from "@/lib/server-env";
 
 export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  requiredServerSetting("NEXT_PUBLIC_SUPABASE_URL"),
+  requiredServerSetting("SUPABASE_SERVICE_ROLE_KEY"),
   { auth: { persistSession: false, autoRefreshToken: false } }
 );
 

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 import { authenticatedUser, customerIdsForUser } from "@/lib/stripe-customers";
 import { allowRequestRate } from "@/lib/server-access";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover",
-});
+import { stripeClient } from "@/lib/stripe-server";
+import { isCurrentSubscription } from "@/lib/stripe-subscriptions";
 
 export async function GET(req: NextRequest) {
   try {
+    const stripe = stripeClient();
     const user = await authenticatedUser(req);
     if (!user) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
     if (!(await allowRequestRate(req, "billing-status", 12, user.id))) {
@@ -18,9 +16,7 @@ export async function GET(req: NextRequest) {
     const customerIds = await customerIdsForUser(stripe, user.id, user.email);
     for (const customer of customerIds) {
       const subscriptions = await stripe.subscriptions.list({ customer, status: "all", limit: 100 });
-      const current = subscriptions.data.find((subscription) =>
-        ["active", "trialing", "past_due", "unpaid", "incomplete"].includes(subscription.status)
-      );
+      const current = subscriptions.data.find(isCurrentSubscription);
       if (current) {
         return NextResponse.json({ hasSubscription: true, cancelAtPeriodEnd: current.cancel_at_period_end });
       }
