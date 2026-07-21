@@ -28,6 +28,7 @@ describe("transfer contract", () => {
 
     expect(upgrade).toContain("create table if not exists public.pdf_downloads");
     expect(upgrade).toContain("create table if not exists public.professors");
+    expect(upgrade).toContain("add column if not exists framework_used");
     expect(upgrade).not.toMatch(/\b(drop table|truncate|delete from)\b/i);
   });
 

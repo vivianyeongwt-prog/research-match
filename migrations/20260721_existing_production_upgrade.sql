@@ -7,6 +7,9 @@
 
 create extension if not exists pgcrypto;
 
+alter table public.profiles
+  add column if not exists framework_used boolean not null default false;
+
 create table if not exists public.pdf_downloads (
   id uuid primary key default gen_random_uuid(),
   email text not null,
