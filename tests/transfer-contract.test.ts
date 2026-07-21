@@ -20,6 +20,17 @@ describe("transfer contract", () => {
     expect(block).not.toMatch(/id bigint|identity/i);
   });
 
+  it("provides an additive upgrade for tables missing from existing production", () => {
+    const upgrade = readFileSync(
+      join(root, "migrations/20260721_existing_production_upgrade.sql"),
+      "utf8"
+    );
+
+    expect(upgrade).toContain("create table if not exists public.pdf_downloads");
+    expect(upgrade).toContain("create table if not exists public.professors");
+    expect(upgrade).not.toMatch(/\b(drop table|truncate|delete from)\b/i);
+  });
+
   it("keeps every server-side sale-readiness RPC in the migration set", () => {
     const saleMigration = readFileSync(join(root, "migrations/20260720_sale_readiness.sql"), "utf8");
     const affiliateMigration = readFileSync(join(root, "migrations/add_affiliate_program.sql"), "utf8");
