@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { siteOrigin } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
+import { fieldsForPost } from "@/lib/research-blog-links";
+import { getPopulatedFieldSlugs } from "@/lib/research-data";
 
 const SITE = siteOrigin();
 
@@ -102,6 +104,7 @@ export default async function BlogPost({ params }: Props) {
     .map((s) => posts.find((p) => p.slug === s))
     .filter(Boolean);
   const cta = ctaForPost(post);
+  const relatedFields = fieldsForPost(post.slug, await getPopulatedFieldSlugs());
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -203,6 +206,29 @@ export default async function BlogPost({ params }: Props) {
             <span>Free preview.</span>
           </div>
         </section>
+
+        {/* Field guides — routes readers (and crawlers) from the guide cluster
+            into the /research field pages. */}
+        {relatedFields.length > 0 && (
+          <div className="blog-related">
+            <h2>Find professors by field</h2>
+            <div className="blog-related-list">
+              {relatedFields.map((f) => (
+                <Link
+                  key={f.slug}
+                  href={`/research/${f.slug}`}
+                  className="blog-related-card"
+                >
+                  <h3>{f.name} research positions</h3>
+                  <p>
+                    See {f.name} professors who are publishing right now, what each one
+                    works on, and how to email them.
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Related posts */}
         {relatedPosts.length > 0 && (

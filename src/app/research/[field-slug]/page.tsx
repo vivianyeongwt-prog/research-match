@@ -10,6 +10,7 @@ import {
 } from "@/lib/research-data";
 import { siteOrigin } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
+import { postsForField } from "@/lib/research-blog-links";
 
 // Fully static: pages are pre-rendered at build from precomputed Supabase rows.
 // No data fetching happens on a user request.
@@ -82,6 +83,7 @@ export default async function ResearchFieldPage({ params }: Props) {
     .slice(0, 4);
 
   const faq = content.faq ?? [];
+  const relatedGuides = postsForField(slug);
   const searchHref = `/app?q=${encodeURIComponent(field.name)}`;
   const toolHref = `/app?source=research&field=${slug}`;
 
@@ -245,6 +247,21 @@ export default async function ResearchFieldPage({ params }: Props) {
                 <p>{item.answer}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Outreach guides — reciprocal link back into the blog cluster. */}
+        {relatedGuides.length > 0 && (
+          <div className="blog-related">
+            <h2>Guides for emailing professors</h2>
+            <div className="blog-related-list">
+              {relatedGuides.map((p) => (
+                <Link key={p.slug} href={`/blog/${p.slug}`} className="blog-related-card">
+                  <h3>{p.title}</h3>
+                  <p>{p.description}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
