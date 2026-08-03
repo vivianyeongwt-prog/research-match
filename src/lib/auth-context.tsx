@@ -151,7 +151,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   const signUp = async (email: string, password: string, promoCode?: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const emailRedirectTo = typeof window === "undefined" ? undefined : window.location.href;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}),
+    });
     if (!error && data.user) {
       // Create profile row. If this insert is rejected (no session yet under
       // email confirmation), fetchProfile lazily creates the row on first

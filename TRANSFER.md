@@ -30,8 +30,9 @@ UUIDs; the core schema intentionally uses the same UUID contract.
 4. Re-verify Auth configuration, redirect URLs, custom SMTP, database settings,
    functions, extensions, RLS policies, and Storage after ownership changes.
 5. Do not deploy this application revision until the sale-readiness migrations
-   and `20260721_existing_production_upgrade.sql` have been applied and exercised
-   in a staging copy.
+   plus `20260721_existing_production_upgrade.sql` and
+   both `20260803` referral-system migrations have been applied and exercised in
+   a staging copy.
 6. Inventory every current and historical Stripe price ID before replaying webhooks.
    Put retired weekly, semester, and lifetime IDs in the corresponding comma-separated
    `STRIPE_LEGACY_*_PRICE_IDS` variables. Unknown prices intentionally grant nothing.
@@ -62,8 +63,9 @@ UUIDs; the core schema intentionally uses the same UUID contract.
 2. Create a new Supabase project.
 3. Apply `migrations/00000000_core_schema.sql`, then the remaining SQL files in
    filename order. Apply `migrations/20260720_sale_readiness.sql` and
-   `migrations/20260721_existing_production_upgrade.sql` before deploying the
-   matching application source.
+   `migrations/20260721_existing_production_upgrade.sql`, and
+   both `migrations/20260803*_referral_*.sql` files before deploying the matching
+   application source.
 4. Recreate the three Stripe prices and place the same IDs in both the public and
    server variables. Register `/api/webhooks/stripe` for the event types handled
    in the route.

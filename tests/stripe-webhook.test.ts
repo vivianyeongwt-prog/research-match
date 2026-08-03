@@ -39,4 +39,36 @@ describe("Stripe webhook helpers", () => {
       invoiceRefsForPaymentIntent(stripe, "pi_test")
     ).rejects.toThrow("temporary Stripe failure");
   });
+
+  it("resolves both one-time and subscription Checkout Sessions for reversals", async () => {
+    const { checkoutSessionIdsForPaymentRefs } = await import(
+      "../src/lib/stripe-webhook"
+    );
+    const listSessions = vi.fn(async (params: { payment_intent?: string; subscription?: string }) => ({
+      data: params.payment_intent
+        ? [{ id: "cs_payment" }]
+        : [
+            { id: "cs_subscription", invoice: "in_test" },
+            { id: "cs_renewal", invoice: "in_other" },
+            { id: "cs_payment", invoice: "in_test" },
+          ],
+    }));
+    const stripe = {
+      checkout: { sessions: { list: listSessions } },
+      invoices: {
+        retrieve: vi.fn(async () => ({
+          parent: {
+            type: "subscription_details",
+            subscription_details: { subscription: "sub_test" },
+          },
+        })),
+      },
+    } as unknown as Stripe;
+
+    await expect(
+      checkoutSessionIdsForPaymentRefs(stripe, "pi_test", ["in_test"])
+    ).resolves.toEqual(["cs_payment", "cs_subscription"]);
+    expect(listSessions).toHaveBeenCalledWith({ payment_intent: "pi_test", limit: 100 });
+    expect(listSessions).toHaveBeenCalledWith({ subscription: "sub_test", limit: 100 });
+  });
 });

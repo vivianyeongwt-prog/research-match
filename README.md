@@ -19,6 +19,10 @@ filename order. Do not use that greenfield sequence before importing an existing
 project backup; restore the source schema and data first, as described in
 `TRANSFER.md`. `migrations/20260720_sale_readiness.sql` contains the durable API
 usage ledger and atomic Buddy Pass reward used by the current server routes.
+`migrations/20260803205117_referral_system_hardening.sql` is also required: it
+locks down the reward RPCs, prevents duplicate referral counts, and adds atomic
+refund/dispute reversals. Apply the immediately following
+`20260803210704_referral_reversal_lock_order.sql` as well.
 
 ## Checks
 

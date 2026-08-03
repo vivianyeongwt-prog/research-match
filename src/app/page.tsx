@@ -5,9 +5,10 @@ import { ResearchMatchLogo } from "@/components/ResearchMatchLogo";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
-import { normalizeReferralCode } from "@/lib/buddy-pass";
+import { isReferralCode, normalizeReferralCode } from "@/lib/buddy-pass";
 import { isPlausibleEmail } from "@/lib/rate-limit";
 import { apiFetch } from "@/lib/client-fetch";
+import { readPendingReferralCode, storePendingReferralCode } from "@/lib/browser-storage";
 
 const HERO_PLACEHOLDERS = [
   "e.g. machine learning",
@@ -139,6 +140,13 @@ export default function LandingPage() {
 
   useEffect(() => { setBillingMounted(true); }, []);
 
+  useEffect(() => {
+    const pendingReferral = readPendingReferralCode();
+    if (!pendingReferral) return;
+    setReferralCode(pendingReferral);
+    setBuddyPassOpen(true);
+  }, []);
+
   // First-visit sleeve animation gate
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -210,6 +218,12 @@ export default function LandingPage() {
 
   async function handleCheckout(plan: "weekly" | "semester" | "lifetime") {
     const cleanReferralCode = normalizeReferralCode(referralCode);
+    if (referralCode.trim() && !isReferralCode(cleanReferralCode)) {
+      setCheckoutError("Enter a valid Buddy Pass code.");
+      setBuddyPassOpen(true);
+      return;
+    }
+    if (cleanReferralCode) storePendingReferralCode(cleanReferralCode);
     if (!user) {
       // Not logged in — send to app to sign up then upgrade
       const param = plan === "semester" ? "true" : plan;
@@ -1152,7 +1166,12 @@ export default function LandingPage() {
             <input
               ref={buddyInputRef}
               value={referralCode}
-              onChange={(e) => { setReferralCode(normalizeReferralCode(e.target.value)); setCheckoutError(""); }}
+              onChange={(e) => {
+                const normalized = normalizeReferralCode(e.target.value);
+                setReferralCode(normalized);
+                storePendingReferralCode(normalized);
+                setCheckoutError("");
+              }}
               placeholder="Enter friend code"
               aria-label="Research Buddy Pass code"
               style={{

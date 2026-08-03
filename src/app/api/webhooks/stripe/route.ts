@@ -16,11 +16,13 @@ import {
   voidCommissionsForRefs,
 } from "@/lib/stripe-affiliates";
 import {
+  checkoutSessionIdsForPaymentRefs,
   invoiceRefsForPaymentIntent,
   type InvoiceWithLegacySubscription,
   stripeId,
   subscriptionIdFromInvoice,
 } from "@/lib/stripe-webhook";
+import { voidBuddyPassRewardsForCheckoutSessions } from "@/lib/stripe-buddy-pass";
 
 function retryResponse() {
   return NextResponse.json(
@@ -300,11 +302,19 @@ export async function POST(req: NextRequest) {
           stripe,
           paymentIntentId
         );
+        const checkoutSessionIds = await checkoutSessionIdsForPaymentRefs(
+          stripe,
+          paymentIntentId,
+          invoiceIds
+        );
         needsRetry =
           (await voidCommissionsForRefs(
             [stripeId(charge.invoice), paymentIntentId, ...invoiceIds],
             "refund"
           )) || needsRetry;
+        needsRetry =
+          (await voidBuddyPassRewardsForCheckoutSessions(checkoutSessionIds)) ||
+          needsRetry;
         needsRetry =
           (await revokeAccessForPaymentIntent(
             stripe,
@@ -317,10 +327,14 @@ export async function POST(req: NextRequest) {
     if (event.type === "charge.dispute.created") {
       const dispute = event.data.object as Stripe.Dispute;
       const paymentIntentId = stripeId(dispute.payment_intent);
+      const invoiceIds = await invoiceRefsForPaymentIntent(stripe, paymentIntentId);
       const references: Array<string | null> = [
         paymentIntentId,
-        ...(await invoiceRefsForPaymentIntent(stripe, paymentIntentId)),
+        ...invoiceIds,
       ];
+      const buddyCheckoutSessionIds = new Set(
+        await checkoutSessionIdsForPaymentRefs(stripe, paymentIntentId, invoiceIds)
+      );
       const chargeId = stripeId(dispute.charge);
       if (chargeId) {
         try {
@@ -328,11 +342,25 @@ export async function POST(req: NextRequest) {
             invoice?: string | Stripe.Invoice | null;
           };
           const chargePaymentIntentId = stripeId(charge.payment_intent);
+          const chargeInvoiceIds = await invoiceRefsForPaymentIntent(
+            stripe,
+            chargePaymentIntentId
+          );
           references.push(
             stripeId(charge.invoice),
             chargePaymentIntentId,
-            ...(await invoiceRefsForPaymentIntent(stripe, chargePaymentIntentId))
+            ...chargeInvoiceIds
           );
+          const chargeCheckoutSessionIds = await checkoutSessionIdsForPaymentRefs(
+            stripe,
+            chargePaymentIntentId,
+            [stripeId(charge.invoice), ...chargeInvoiceIds].filter(
+              (id): id is string => Boolean(id)
+            )
+          );
+          for (const sessionId of chargeCheckoutSessionIds) {
+            buddyCheckoutSessionIds.add(sessionId);
+          }
         } catch (error) {
           console.error("Disputed charge lookup failed", { chargeId, error });
           needsRetry = true;
@@ -340,6 +368,10 @@ export async function POST(req: NextRequest) {
       }
       needsRetry =
         (await voidCommissionsForRefs(references, "dispute")) || needsRetry;
+      needsRetry =
+        (await voidBuddyPassRewardsForCheckoutSessions([
+          ...buddyCheckoutSessionIds,
+        ])) || needsRetry;
     }
   } catch (error) {
     console.error("Unhandled Stripe webhook error", {

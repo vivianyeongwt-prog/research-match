@@ -48,6 +48,32 @@ describe("transfer contract", () => {
     expect(affiliateMigration.toLowerCase()).toContain("function public.claim_stripe_event(");
   });
 
+  it("hardens referral rewards against direct calls and duplicate counting", () => {
+    const hardening = readFileSync(
+      join(root, "migrations/20260803205117_referral_system_hardening.sql"),
+      "utf8"
+    ).toLowerCase();
+    const affiliateMigration = readFileSync(
+      join(root, "migrations/add_affiliate_program.sql"),
+      "utf8"
+    ).toLowerCase();
+    const reversalLockOrder = readFileSync(
+      join(root, "migrations/20260803210704_referral_reversal_lock_order.sql"),
+      "utf8"
+    ).toLowerCase();
+
+    expect(hardening).toContain("buddy_pass_one_reward_per_user_unique");
+    expect(hardening).toContain("referral code does not belong to referrer");
+    expect(hardening).toContain("function public.void_buddy_pass_rewards(");
+    expect(hardening).toContain(
+      "revoke all on function public.grant_buddy_pass_week(uuid, integer) from public, anon, authenticated"
+    );
+    expect(hardening).toContain("stripe_checkout_session_id");
+    expect(affiliateMigration).toContain("referrals_checkout_session_unique");
+    expect(reversalLockOrder).toContain("order by referrer_id, id");
+    expect(reversalLockOrder).toContain("and status = 'rewarded'");
+  });
+
   it("warns against loading production data into a pre-created greenfield schema", () => {
     const runbook = readFileSync(join(root, "TRANSFER.md"), "utf8");
     expect(runbook).toContain("Do **not** run `00000000_core_schema.sql` first");

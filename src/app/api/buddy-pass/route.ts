@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateReferralCode } from "@/lib/buddy-pass";
+import { generateReferralCode, isReferralCode, normalizeReferralCode } from "@/lib/buddy-pass";
 import { allowRequestRate, requestAccess, supabaseAdmin } from "@/lib/server-access";
 import { siteOrigin } from "@/lib/site-url";
 
 async function ensureReferralCode(userId: string, currentCode?: string | null) {
-  if (currentCode) return currentCode;
+  const normalizedCurrentCode = normalizeReferralCode(currentCode ?? "");
+  if (isReferralCode(normalizedCurrentCode)) return normalizedCurrentCode;
 
   const referralCode = generateReferralCode(userId);
-  const { error } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("profiles")
     .update({ referral_code: referralCode })
-    .eq("id", userId);
+    .eq("id", userId)
+    .select("referral_code")
+    .maybeSingle();
 
-  if (error) throw error;
-  return referralCode;
+  if (error || !data?.referral_code) {
+    throw error ?? new Error("Referral code update did not match a profile.");
+  }
+  return data.referral_code;
 }
 
 export async function GET(req: NextRequest) {
@@ -39,7 +44,7 @@ export async function GET(req: NextRequest) {
 
     const referralCode = await ensureReferralCode(userId, profile.referral_code);
 
-    const { data: referrals } = await supabaseAdmin
+    const { data: referrals, error: referralsError } = await supabaseAdmin
       .from("buddy_pass_referrals")
       .select("id, created_at, reward_weeks, discount_percent, status")
       .eq("referrer_id", userId)
@@ -47,11 +52,14 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(8);
 
-    const { count: referralCount } = await supabaseAdmin
+    if (referralsError) throw referralsError;
+
+    const { count: referralCount, error: referralCountError } = await supabaseAdmin
       .from("buddy_pass_referrals")
       .select("id", { count: "exact", head: true })
       .eq("referrer_id", userId)
       .eq("status", "rewarded");
+    if (referralCountError) throw referralCountError;
 
     const activeUntil = profile.buddy_pass_active_until;
     const active = activeUntil ? new Date(activeUntil).getTime() > Date.now() : false;
@@ -64,7 +72,7 @@ export async function GET(req: NextRequest) {
       weeksUsed: profile.buddy_pass_weeks_used ?? 0,
       activeUntil,
       active,
-      successfulReferrals: referralCount ?? referrals?.length ?? 0,
+      successfulReferrals: referralCount ?? 0,
       referrals: (referrals ?? []).map((referral) => ({
         id: referral.id,
         friendEmail: "Friend",

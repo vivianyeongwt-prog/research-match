@@ -38,3 +38,41 @@ export async function invoiceRefsForPaymentIntent(
     .map((payment) => stripeId(payment.invoice))
     .filter((id): id is string => Boolean(id));
 }
+
+/** Resolve the Checkout Session that originally created a refunded/disputed payment. */
+export async function checkoutSessionIdsForPaymentRefs(
+  stripe: Stripe,
+  paymentIntentId: string | null | undefined,
+  invoiceIds: string[]
+): Promise<string[]> {
+  const sessionIds = new Set<string>();
+  const invoiceIdSet = new Set(invoiceIds);
+
+  if (paymentIntentId) {
+    const directSessions = await stripe.checkout.sessions.list({
+      payment_intent: paymentIntentId,
+      limit: 100,
+    });
+    for (const session of directSessions.data) sessionIds.add(session.id);
+  }
+
+  for (const invoiceId of invoiceIdSet) {
+    const invoice = await stripe.invoices.retrieve(invoiceId);
+    const subscriptionId = subscriptionIdFromInvoice(invoice);
+    if (!subscriptionId) continue;
+    const subscriptionSessions = await stripe.checkout.sessions.list({
+      subscription: subscriptionId,
+      limit: 100,
+    });
+    for (const session of subscriptionSessions.data) {
+      // Only the initial Checkout invoice earned the Buddy reward. Refunding a
+      // later renewal on the same subscription must not void that original reward.
+      const sessionInvoiceId = stripeId(session.invoice);
+      if (sessionInvoiceId && invoiceIdSet.has(sessionInvoiceId)) {
+        sessionIds.add(session.id);
+      }
+    }
+  }
+
+  return [...sessionIds];
+}

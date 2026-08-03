@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { hasPaidPlan, normalizeReferralCode } from "@/lib/buddy-pass";
+import { hasPaidPlan, isReferralCode, normalizeReferralCode } from "@/lib/buddy-pass";
 import { allowRequestRate, requestAccess, supabaseAdmin } from "@/lib/server-access";
 import { siteOrigin } from "@/lib/site-url";
 import { currentCheckoutPriceIds, paidPlanFromPriceId } from "@/lib/stripe-plans";
@@ -9,13 +9,19 @@ import { isCurrentSubscription } from "@/lib/stripe-subscriptions";
 
 async function buddyPassCouponId(stripe: Stripe) {
   const configuredCoupon = process.env.STRIPE_BUDDY_PASS_COUPON_ID;
-  if (configuredCoupon) return configuredCoupon;
+  if (configuredCoupon) {
+    const coupon = await stripe.coupons.retrieve(configuredCoupon);
+    assertBuddyPassCoupon(coupon);
+    return configuredCoupon;
+  }
 
   const couponId = "research_buddy_pass_25";
   try {
-    await stripe.coupons.retrieve(couponId);
+    const coupon = await stripe.coupons.retrieve(couponId);
+    assertBuddyPassCoupon(coupon);
     return couponId;
-  } catch {
+  } catch (error) {
+    if (!isMissingStripeResource(error)) throw error;
     try {
       const coupon = await stripe.coupons.create({
         id: couponId,
@@ -23,11 +29,33 @@ async function buddyPassCouponId(stripe: Stripe) {
         percent_off: 25,
         duration: "once",
       });
+      assertBuddyPassCoupon(coupon);
       return coupon.id;
     } catch {
-      await stripe.coupons.retrieve(couponId);
+      const coupon = await stripe.coupons.retrieve(couponId);
+      assertBuddyPassCoupon(coupon);
       return couponId;
     }
+  }
+}
+
+function isMissingStripeResource(error: unknown) {
+  return Boolean(
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    error.code === "resource_missing"
+  );
+}
+
+function assertBuddyPassCoupon(coupon: Stripe.Coupon | Stripe.DeletedCoupon) {
+  if (
+    "deleted" in coupon ||
+    !coupon.valid ||
+    coupon.percent_off !== 25 ||
+    coupon.duration !== "once"
+  ) {
+    throw new Error("The configured Buddy Pass coupon must be valid, 25% off, and apply once.");
   }
 }
 
@@ -83,15 +111,22 @@ export async function POST(req: NextRequest) {
 
     if (typeof referralCode === "string" && referralCode.trim()) {
       const normalizedReferralCode = normalizeReferralCode(referralCode);
-      if (!normalizedReferralCode) {
+      if (!isReferralCode(normalizedReferralCode)) {
         return NextResponse.json({ error: "Enter a valid Buddy Pass code." }, { status: 400 });
       }
-      const { data: referrer } = await supabaseAdmin
+      const { data: referrer, error: referrerError } = await supabaseAdmin
         .from("profiles")
         .select("id, referral_code")
         .eq("referral_code", normalizedReferralCode)
-        .single();
+        .maybeSingle();
 
+      if (referrerError) {
+        console.error("Buddy Pass referrer lookup failed", referrerError);
+        return NextResponse.json(
+          { error: "Could not verify that Buddy Pass code. Please try again." },
+          { status: 503 }
+        );
+      }
       if (!referrer) {
         return NextResponse.json({ error: "Buddy Pass code not found." }, { status: 400 });
       }
@@ -99,7 +134,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "You cannot use your own Buddy Pass code." }, { status: 400 });
       }
 
-      const { data: existingReferral } = await supabaseAdmin
+      const { data: existingReferral, error: existingReferralError } = await supabaseAdmin
         .from("buddy_pass_referrals")
         .select("id")
         .eq("referred_user_id", userId)
@@ -107,6 +142,13 @@ export async function POST(req: NextRequest) {
         .limit(1)
         .maybeSingle();
 
+      if (existingReferralError) {
+        console.error("Buddy Pass prior-use lookup failed", existingReferralError);
+        return NextResponse.json(
+          { error: "Could not verify Buddy Pass eligibility. Please try again." },
+          { status: 503 }
+        );
+      }
       if (existingReferral) {
         return NextResponse.json({ error: "You already used a Buddy Pass code." }, { status: 400 });
       }

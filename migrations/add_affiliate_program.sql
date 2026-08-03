@@ -27,8 +27,12 @@ CREATE TABLE IF NOT EXISTS public.referrals (
   affiliate_id uuid NOT NULL REFERENCES public.affiliates(id) ON DELETE CASCADE,
   stripe_customer_id text,
   stripe_subscription_id text,
+  stripe_checkout_session_id text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.referrals
+  ADD COLUMN IF NOT EXISTS stripe_checkout_session_id text;
 
 CREATE TABLE IF NOT EXISTS public.commissions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -151,6 +155,8 @@ END $$;
 DROP INDEX IF EXISTS referrals_subscription_idx;
 CREATE UNIQUE INDEX IF NOT EXISTS referrals_subscription_unique
   ON public.referrals (stripe_subscription_id);
+CREATE UNIQUE INDEX IF NOT EXISTS referrals_checkout_session_unique
+  ON public.referrals (stripe_checkout_session_id);
 CREATE INDEX IF NOT EXISTS referrals_affiliate_customer_idx
   ON public.referrals (affiliate_id, stripe_customer_id);
 CREATE INDEX IF NOT EXISTS commissions_affiliate_status_idx
@@ -169,3 +175,6 @@ ALTER TABLE public.referrals               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.commissions             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payouts                 ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.processed_stripe_events ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE public.affiliates, public.referrals, public.commissions,
+  public.payouts, public.processed_stripe_events FROM anon, authenticated;

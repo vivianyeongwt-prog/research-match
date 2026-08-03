@@ -23,11 +23,14 @@ export async function recordAffiliateAttribution(
       .find(Boolean) ?? null;
   if (!promotionCodeId) return false;
 
-  const { data: affiliate } = await supabaseAdmin
+  const { data: affiliate, error: affiliateError } = await supabaseAdmin
     .from("affiliates")
     .select("id, commission_rate, status, email")
     .eq("stripe_promotion_code_id", promotionCodeId)
     .maybeSingle();
+  if (affiliateError) {
+    throw new Error(`Affiliate lookup failed: ${affiliateError.message}`);
+  }
   if (!affiliate || (affiliate.status ?? "active") !== "active") return false;
 
   const buyerEmail = (session.customer_details?.email || session.customer_email || "")
@@ -43,39 +46,38 @@ export async function recordAffiliateAttribution(
   const subscriptionId = stripeId(session.subscription);
   let referralId: string | null = null;
 
-  if (subscriptionId) {
-    const { data, error } = await supabaseAdmin
-      .from("referrals")
-      .upsert(
-        {
-          affiliate_id: affiliate.id,
-          stripe_customer_id: customerId,
-          stripe_subscription_id: subscriptionId,
-        },
-        { onConflict: "stripe_subscription_id" }
-      )
-      .select("id")
-      .single();
-    if (error) {
-      console.error("Affiliate referral upsert failed", error);
-      needsRetry = true;
-    }
-    referralId = data?.id ?? null;
-  } else {
-    const { data, error } = await supabaseAdmin
-      .from("referrals")
-      .insert({
+  const { data: referral, error: referralError } = await supabaseAdmin
+    .from("referrals")
+    .upsert(
+      {
         affiliate_id: affiliate.id,
         stripe_customer_id: customerId,
-        stripe_subscription_id: null,
-      })
+        stripe_subscription_id: subscriptionId,
+        stripe_checkout_session_id: session.id,
+      },
+      { onConflict: "stripe_checkout_session_id" }
+    )
+    .select("id")
+    .single();
+  referralId = referral?.id ?? null;
+
+  if (referralError && referralError.code === "23505" && subscriptionId) {
+    // Rows created before checkout-session IDs were stored are still keyed by
+    // subscription. Reuse that row rather than creating or counting a duplicate.
+    const { data: legacyReferral, error: legacyReferralError } = await supabaseAdmin
+      .from("referrals")
       .select("id")
-      .single();
-    if (error) {
-      console.error("Affiliate referral insert failed", error);
+      .eq("stripe_subscription_id", subscriptionId)
+      .maybeSingle();
+    if (legacyReferralError || !legacyReferral) {
+      console.error("Legacy affiliate referral lookup failed", legacyReferralError ?? referralError);
       needsRetry = true;
+    } else {
+      referralId = legacyReferral.id;
     }
-    referralId = data?.id ?? null;
+  } else if (referralError) {
+    console.error("Affiliate referral upsert failed", referralError);
+    needsRetry = true;
   }
 
   const invoiceReference =
@@ -84,11 +86,15 @@ export async function recordAffiliateAttribution(
   const rate = Number(affiliate.commission_rate ?? 0.3);
 
   if (referralId && amountTotal > 0 && rate > 0) {
-    const { data: existing } = await supabaseAdmin
+    const { data: existing, error: existingError } = await supabaseAdmin
       .from("commissions")
       .select("id")
       .eq("stripe_invoice_id", invoiceReference)
       .maybeSingle();
+    if (existingError) {
+      console.error("Affiliate commission lookup failed", existingError);
+      return true;
+    }
     if (!existing) {
       const amountCents = Math.round(amountTotal * rate);
       const { error } = await supabaseAdmin.from("commissions").insert({
@@ -118,11 +124,15 @@ export async function recordRenewalCommission(
   invoice: InvoiceWithLegacySubscription,
   subscriptionId: string
 ): Promise<boolean> {
-  const { data: referral } = await supabaseAdmin
+  const { data: referral, error: referralError } = await supabaseAdmin
     .from("referrals")
     .select("id, affiliate_id, affiliates(commission_rate, status)")
     .eq("stripe_subscription_id", subscriptionId)
     .maybeSingle();
+  if (referralError) {
+    console.error("Affiliate renewal referral lookup failed", referralError);
+    return true;
+  }
   const affiliate = Array.isArray(referral?.affiliates)
     ? referral.affiliates[0]
     : referral?.affiliates;
@@ -135,11 +145,15 @@ export async function recordRenewalCommission(
   const rate = Number(affiliate.commission_rate ?? 0.3);
   if (!invoiceId || amountPaid <= 0 || rate <= 0) return false;
 
-  const { data: existing } = await supabaseAdmin
+  const { data: existing, error: existingError } = await supabaseAdmin
     .from("commissions")
     .select("id")
     .eq("stripe_invoice_id", invoiceId)
     .maybeSingle();
+  if (existingError) {
+    console.error("Affiliate renewal commission lookup failed", existingError);
+    return true;
+  }
   if (existing) return false;
 
   const amountCents = Math.round(amountPaid * rate);
@@ -190,11 +204,15 @@ export async function voidCommissionsForRefs(
     });
   }
 
-  const { data: paid } = await supabaseAdmin
+  const { data: paid, error: paidLookupError } = await supabaseAdmin
     .from("commissions")
     .select("id, amount_cents, affiliate_id")
     .in("stripe_invoice_id", ids)
     .eq("status", "paid");
+  if (paidLookupError) {
+    console.error("Paid commission clawback lookup failed", paidLookupError);
+    return true;
+  }
   for (const commission of paid ?? []) {
     console.warn("Manual affiliate commission clawback required", {
       commissionId: commission.id,

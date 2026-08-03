@@ -4,6 +4,7 @@ import {
   hasActiveBuddyPass,
   hasPaidAccess,
   hasPaidPlan,
+  isReferralCode,
   normalizeReferralCode,
   planLabelFor,
 } from "../src/lib/buddy-pass";
@@ -13,7 +14,11 @@ const NOW = new Date("2026-07-20T12:00:00.000Z");
 describe("Buddy Pass and plan access", () => {
   it("normalizes referral input and derives stable referral codes", () => {
     expect(normalizeReferralCode(" ab-c_12 + long-code-value ")).toBe("ABC12LONGCODEVAL");
-    expect(generateReferralCode("abcd1234-5678-90ab-cdef-1234567890ab")).toBe("RMABCD1234");
+    expect(generateReferralCode("abcd1234-5678-90ab-cdef-1234567890ab")).toBe("RMABCD1234567890");
+    expect(isReferralCode("RMABCD1234")).toBe(true);
+    expect(isReferralCode("RMABCD1234567890")).toBe(true);
+    expect(isReferralCode("rmabcd1234")).toBe(false);
+    expect(isReferralCode("RMTOO-SHORT")).toBe(false);
   });
 
   it("keeps lifetime access uncapped", () => {

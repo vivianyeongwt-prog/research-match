@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import WelcomeScreen from "./WelcomeScreen";
+import { clearPendingReferralCode } from "@/lib/browser-storage";
 
 const WELCOME_KEY = "rm_welcomed";
 
@@ -10,6 +11,7 @@ export default function WelcomePage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    clearPendingReferralCode();
     const alreadySeen = localStorage.getItem(WELCOME_KEY);
     if (alreadySeen) {
       router.replace("/app");

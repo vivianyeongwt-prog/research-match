@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
-import { hasPaidAccess, normalizeReferralCode, planLabelFor } from "@/lib/buddy-pass";
+import { hasPaidAccess, isReferralCode, normalizeReferralCode, planLabelFor } from "@/lib/buddy-pass";
 import { track } from "@/lib/analytics";
 import { looksLikePersonName } from "@/lib/author-normalize";
 import { useMobile } from "@/lib/use-mobile";
@@ -38,7 +38,9 @@ import {
   STORAGE_KEYS,
   emailCheckStorageKey,
   readAnonSummariesUsed,
+  readPendingReferralCode,
   readSavedProfessors,
+  storePendingReferralCode,
 } from "@/lib/browser-storage";
 import {
   ResearchSearchForm,
@@ -395,10 +397,15 @@ function AppPageInner() {
 
   useEffect(() => {
     if (authLoading2) return;
-    const buddyCode = searchParams.get("buddy");
-    if (!buddyCode) return;
+    const buddyParam = searchParams.get("buddy");
+    const buddyCode = buddyParam
+      ? normalizeReferralCode(buddyParam)
+      : readPendingReferralCode();
+    if (!isReferralCode(buddyCode)) return;
 
-    setCheckoutReferralCode(normalizeReferralCode(buddyCode));
+    setCheckoutReferralCode(buddyCode);
+    if (!buddyParam) return;
+    storePendingReferralCode(buddyCode);
     if (!user) {
       setShowAuthModal(true);
       setAuthMode("signup");
@@ -2533,7 +2540,9 @@ function AppPageInner() {
           checkoutError={checkoutError}
           onClose={() => setShowUpgradeModal(false)}
           onReferralCodeChange={(value) => {
-            setCheckoutReferralCode(normalizeReferralCode(value));
+            const normalized = normalizeReferralCode(value);
+            setCheckoutReferralCode(normalized);
+            storePendingReferralCode(normalized);
             setCheckoutError("");
           }}
           onCheckout={startPlanCheckout}

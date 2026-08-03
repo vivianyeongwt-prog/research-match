@@ -14,12 +14,19 @@ const PAID_PLAN_TYPES = new Set([
   "lifetime",
 ]);
 
+const REFERRAL_CODE_PATTERN = /^RM[A-Z0-9]{8,14}$/;
+
 export function normalizeReferralCode(code: string) {
   return code.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 16);
 }
 
 export function generateReferralCode(userId: string) {
-  return `RM${userId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+  return `RM${userId.replace(/-/g, "").slice(0, 14).toUpperCase()}`;
+}
+
+/** Accepts both the original 10-character codes and the longer collision-safe codes. */
+export function isReferralCode(code: string) {
+  return REFERRAL_CODE_PATTERN.test(code) && normalizeReferralCode(code) === code;
 }
 
 export function hasActiveBuddyPass(profile?: BuddyPassProfile | null, now = new Date()) {
