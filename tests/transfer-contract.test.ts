@@ -14,7 +14,9 @@ function filesUnder(directory: string): string[] {
 describe("transfer contract", () => {
   it("keeps the greenfield search_logs primary key compatible with production", () => {
     const schema = readFileSync(join(root, "migrations/00000000_core_schema.sql"), "utf8");
-    const block = schema.match(/create table if not exists public\.search_logs \(([\s\S]*?)\n\);/)?.[1];
+    const block = schema.match(
+      /create table if not exists public\.search_logs \(([\s\S]*?)\n\);/
+    )?.[1];
     expect(block).toBeDefined();
     expect(block).toMatch(/id uuid primary key default gen_random_uuid\(\)/);
     expect(block).not.toMatch(/id bigint|identity/i);
@@ -33,8 +35,14 @@ describe("transfer contract", () => {
   });
 
   it("keeps every server-side sale-readiness RPC in the migration set", () => {
-    const saleMigration = readFileSync(join(root, "migrations/20260720_sale_readiness.sql"), "utf8");
-    const affiliateMigration = readFileSync(join(root, "migrations/add_affiliate_program.sql"), "utf8");
+    const saleMigration = readFileSync(
+      join(root, "migrations/20260720_sale_readiness.sql"),
+      "utf8"
+    );
+    const affiliateMigration = readFileSync(
+      join(root, "migrations/add_affiliate_program.sql"),
+      "utf8"
+    );
     for (const name of [
       "consume_api_usage",
       "release_api_usage",
@@ -61,6 +69,10 @@ describe("transfer contract", () => {
       join(root, "migrations/20260803210704_referral_reversal_lock_order.sql"),
       "utf8"
     ).toLowerCase();
+    const affiliateHardening = readFileSync(
+      join(root, "migrations/20260803214340_affiliate_commission_hardening.sql"),
+      "utf8"
+    ).toLowerCase();
 
     expect(hardening).toContain("buddy_pass_one_reward_per_user_unique");
     expect(hardening).toContain("referral code does not belong to referrer");
@@ -72,6 +84,10 @@ describe("transfer contract", () => {
     expect(affiliateMigration).toContain("referrals_checkout_session_unique");
     expect(reversalLockOrder).toContain("order by referrer_id, id");
     expect(reversalLockOrder).toContain("and status = 'rewarded'");
+    expect(affiliateHardening).toContain("affiliate_payment_reversals");
+    expect(affiliateHardening).toContain("function public.record_affiliate_commission(");
+    expect(affiliateHardening).toContain("function public.reconcile_affiliate_commissions(");
+    expect(affiliateHardening).toContain("pg_advisory_xact_lock");
   });
 
   it("warns against loading production data into a pre-created greenfield schema", () => {
@@ -106,11 +122,17 @@ describe("transfer contract", () => {
       .join("\n")
       .toLowerCase();
 
-    const tables = new Set([...source.matchAll(/\.from\("([a-z0-9_]+)"\)/gi)].map((match) => match[1]));
-    const functions = new Set([...source.matchAll(/\.rpc\("([a-z0-9_]+)"/gi)].map((match) => match[1]));
+    const tables = new Set(
+      [...source.matchAll(/\.from\("([a-z0-9_]+)"\)/gi)].map((match) => match[1])
+    );
+    const functions = new Set(
+      [...source.matchAll(/\.rpc\("([a-z0-9_]+)"/gi)].map((match) => match[1])
+    );
 
     for (const table of tables) {
-      expect(sql, `migration set is missing table ${table}`).toContain(`public.${table.toLowerCase()}`);
+      expect(sql, `migration set is missing table ${table}`).toContain(
+        `public.${table.toLowerCase()}`
+      );
     }
     for (const name of functions) {
       expect(sql, `migration set is missing RPC ${name}`).toMatch(

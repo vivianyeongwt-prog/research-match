@@ -13,7 +13,7 @@ import {
 import {
   recordAffiliateAttribution,
   recordRenewalCommission,
-  voidCommissionsForRefs,
+  reconcileAffiliateCommissions,
 } from "@/lib/stripe-affiliates";
 import {
   checkoutSessionIdsForPaymentRefs,
@@ -25,10 +25,7 @@ import {
 import { voidBuddyPassRewardsForCheckoutSessions } from "@/lib/stripe-buddy-pass";
 
 function retryResponse() {
-  return NextResponse.json(
-    { error: "transient failure, please retry" },
-    { status: 500 }
-  );
+  return NextResponse.json({ error: "transient failure, please retry" }, { status: 500 });
 }
 
 export async function POST(req: NextRequest) {
@@ -57,15 +54,17 @@ export async function POST(req: NextRequest) {
 
   // Claim the event before processing. Failed handlers remain retryable, while
   // completed events are acknowledged without repeating financial side effects.
-  const { data: claimState, error: guardError } = await supabaseAdmin.rpc(
-    "claim_stripe_event",
-    { p_event_id: event.id }
-  );
+  const { data: claimState, error: guardError } = await supabaseAdmin.rpc("claim_stripe_event", {
+    p_event_id: event.id,
+  });
   if (claimState === "completed") {
     return NextResponse.json({ received: true, duplicate: true });
   }
   if (guardError || claimState !== "claimed") {
-    console.error("Stripe event claim failed", { eventId: event.id, guardError });
+    console.error("Stripe event claim failed", {
+      eventId: event.id,
+      guardError,
+    });
     return retryResponse();
   }
 
@@ -73,7 +72,20 @@ export async function POST(req: NextRequest) {
 
   try {
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const eventSession = event.data.object as Stripe.Checkout.Session;
+      // Use a current, expanded object instead of depending on the webhook
+      // endpoint's snapshot API version or sparse event fields.
+      const session = await stripe.checkout.sessions.retrieve(eventSession.id, {
+        expand: ["discounts"],
+      });
+      if (
+        session.status !== "complete" ||
+        !["paid", "no_payment_required"].includes(session.payment_status)
+      ) {
+        throw new Error(
+          `Checkout ${session.id} completed without a settled payment (${session.payment_status})`
+        );
+      }
       let planType: PaidPlanType | null = null;
       let paidPriceId: string | null = null;
 
@@ -92,23 +104,13 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Affiliate accounting is independent of profile provisioning: the creator
-      // earned commission when the payment succeeded, even if account repair retries.
-      try {
-        needsRetry =
-          (await recordAffiliateAttribution(stripe, session)) || needsRetry;
-      } catch (error) {
-        console.error("Affiliate attribution failed", error);
-        needsRetry = true;
-      }
-
       const userId =
-        verifiedUserId(session.metadata?.userId) ??
-        verifiedUserId(session.client_reference_id);
+        verifiedUserId(session.metadata?.userId) ?? verifiedUserId(session.client_reference_id);
       if (!userId) {
         console.warn("Checkout has no verified Research Match user ID", {
           sessionId: session.id,
         });
+        needsRetry = true;
       } else if (!planType) {
         console.error("Checkout uses an unmapped Stripe price", {
           sessionId: session.id,
@@ -116,6 +118,16 @@ export async function POST(req: NextRequest) {
         });
         needsRetry = true;
       } else {
+        // Only Research Match checkouts with an authenticated user and a mapped
+        // product can earn affiliate commission. Attribution stays independent
+        // of profile repair, so a temporary provisioning failure remains retryable.
+        try {
+          needsRetry = (await recordAffiliateAttribution(session)) || needsRetry;
+        } catch (error) {
+          console.error("Affiliate attribution failed", error);
+          needsRetry = true;
+        }
+
         const provisioned = await provisionPlan(userId, planType);
         if (provisioned.error) {
           console.error("Plan provisioning failed", {
@@ -129,7 +141,10 @@ export async function POST(req: NextRequest) {
             provisioned.keptLifetime
               ? "Existing lifetime access preserved"
               : "Paid access provisioned",
-            { userId, planType }
+            {
+              userId,
+              planType,
+            }
           );
 
           if (planType === "lifetime") {
@@ -176,7 +191,10 @@ export async function POST(req: NextRequest) {
                 console.error("Buddy Pass reward transaction failed", rewardError);
                 needsRetry = true;
               } else if (granted) {
-                console.info("Buddy Pass reward granted", { referrerId, userId });
+                console.info("Buddy Pass reward granted", {
+                  referrerId,
+                  userId,
+                });
               }
             } catch (error) {
               console.error("Buddy Pass reward failed", error);
@@ -193,13 +211,10 @@ export async function POST(req: NextRequest) {
       if (userId) {
         const endedPlan = paidPlanFromPriceId(subscription.items.data[0]?.price.id);
         if (!endedPlan) {
-          throw new Error(
-            `Unrecognized deleted subscription price for ${subscription.id}`
-          );
+          throw new Error(`Unrecognized deleted subscription price for ${subscription.id}`);
         }
         needsRetry =
-          (await downgradeToFree(userId, endedPlan, "Subscription deleted")) ||
-          needsRetry;
+          (await downgradeToFree(userId, endedPlan, "Subscription deleted")) || needsRetry;
       }
     }
 
@@ -215,9 +230,7 @@ export async function POST(req: NextRequest) {
         if (userId) {
           const endedPlan = paidPlanFromPriceId(subscription.items.data[0]?.price.id);
           if (!endedPlan) {
-            throw new Error(
-              `Unrecognized updated subscription price for ${subscription.id}`
-            );
+            throw new Error(`Unrecognized updated subscription price for ${subscription.id}`);
           }
           needsRetry =
             (await downgradeToFree(
@@ -238,18 +251,14 @@ export async function POST(req: NextRequest) {
           if (!subscription.cancel_at_period_end) {
             const userId = await userIdFromSubscription(stripe, subscriptionId);
             if (userId) {
-              const planType = paidPlanFromPriceId(
-                subscription.items.data[0]?.price.id
-              );
+              const planType = paidPlanFromPriceId(subscription.items.data[0]?.price.id);
               if (!planType) {
                 throw new Error(`Unrecognized renewal price for ${subscriptionId}`);
               }
 
               // A renewal cannot lower access granted by a stronger plan.
               const outrankingPlans =
-                planType === "weekly"
-                  ? '("lifetime","semester")'
-                  : '("lifetime")';
+                planType === "weekly" ? '("lifetime","semester")' : '("lifetime")';
               const { error: renewalError } = await supabaseAdmin
                 .from("profiles")
                 .update({ plan_type: planType, plan_expires_at: null })
@@ -269,9 +278,7 @@ export async function POST(req: NextRequest) {
           }
 
           try {
-            needsRetry =
-              (await recordRenewalCommission(invoice, subscriptionId)) ||
-              needsRetry;
+            needsRetry = (await recordRenewalCommission(invoice, subscriptionId)) || needsRetry;
           } catch (error) {
             console.error("Affiliate renewal commission failed", error);
             needsRetry = true;
@@ -296,31 +303,26 @@ export async function POST(req: NextRequest) {
       const charge = event.data.object as Stripe.Charge & {
         invoice?: string | Stripe.Invoice | null;
       };
+      const paymentIntentId = stripeId(charge.payment_intent);
+      const invoiceIds = await invoiceRefsForPaymentIntent(stripe, paymentIntentId);
+      const checkoutSessionIds = await checkoutSessionIdsForPaymentRefs(
+        stripe,
+        paymentIntentId,
+        invoiceIds
+      );
+      needsRetry =
+        (await reconcileAffiliateCommissions(
+          [stripeId(charge.invoice), paymentIntentId, ...invoiceIds, ...checkoutSessionIds],
+          Math.max(0, charge.amount - charge.amount_refunded),
+          "refund"
+        )) || needsRetry;
+
       if (charge.amount_refunded >= charge.amount) {
-        const paymentIntentId = stripeId(charge.payment_intent);
-        const invoiceIds = await invoiceRefsForPaymentIntent(
-          stripe,
-          paymentIntentId
-        );
-        const checkoutSessionIds = await checkoutSessionIdsForPaymentRefs(
-          stripe,
-          paymentIntentId,
-          invoiceIds
-        );
         needsRetry =
-          (await voidCommissionsForRefs(
-            [stripeId(charge.invoice), paymentIntentId, ...invoiceIds],
-            "refund"
-          )) || needsRetry;
+          (await voidBuddyPassRewardsForCheckoutSessions(checkoutSessionIds)) || needsRetry;
         needsRetry =
-          (await voidBuddyPassRewardsForCheckoutSessions(checkoutSessionIds)) ||
+          (await revokeAccessForPaymentIntent(stripe, paymentIntentId, "Full refund")) ||
           needsRetry;
-        needsRetry =
-          (await revokeAccessForPaymentIntent(
-            stripe,
-            paymentIntentId,
-            "Full refund"
-          )) || needsRetry;
       }
     }
 
@@ -328,13 +330,11 @@ export async function POST(req: NextRequest) {
       const dispute = event.data.object as Stripe.Dispute;
       const paymentIntentId = stripeId(dispute.payment_intent);
       const invoiceIds = await invoiceRefsForPaymentIntent(stripe, paymentIntentId);
-      const references: Array<string | null> = [
-        paymentIntentId,
-        ...invoiceIds,
-      ];
+      const references: Array<string | null> = [paymentIntentId, ...invoiceIds];
       const buddyCheckoutSessionIds = new Set(
         await checkoutSessionIdsForPaymentRefs(stripe, paymentIntentId, invoiceIds)
       );
+      references.push(...buddyCheckoutSessionIds);
       const chargeId = stripeId(dispute.charge);
       if (chargeId) {
         try {
@@ -342,36 +342,27 @@ export async function POST(req: NextRequest) {
             invoice?: string | Stripe.Invoice | null;
           };
           const chargePaymentIntentId = stripeId(charge.payment_intent);
-          const chargeInvoiceIds = await invoiceRefsForPaymentIntent(
-            stripe,
-            chargePaymentIntentId
-          );
-          references.push(
-            stripeId(charge.invoice),
-            chargePaymentIntentId,
-            ...chargeInvoiceIds
-          );
+          const chargeInvoiceIds = await invoiceRefsForPaymentIntent(stripe, chargePaymentIntentId);
+          references.push(stripeId(charge.invoice), chargePaymentIntentId, ...chargeInvoiceIds);
           const chargeCheckoutSessionIds = await checkoutSessionIdsForPaymentRefs(
             stripe,
             chargePaymentIntentId,
-            [stripeId(charge.invoice), ...chargeInvoiceIds].filter(
-              (id): id is string => Boolean(id)
+            [stripeId(charge.invoice), ...chargeInvoiceIds].filter((id): id is string =>
+              Boolean(id)
             )
           );
           for (const sessionId of chargeCheckoutSessionIds) {
             buddyCheckoutSessionIds.add(sessionId);
+            references.push(sessionId);
           }
         } catch (error) {
           console.error("Disputed charge lookup failed", { chargeId, error });
           needsRetry = true;
         }
       }
+      needsRetry = (await reconcileAffiliateCommissions(references, 0, "dispute")) || needsRetry;
       needsRetry =
-        (await voidCommissionsForRefs(references, "dispute")) || needsRetry;
-      needsRetry =
-        (await voidBuddyPassRewardsForCheckoutSessions([
-          ...buddyCheckoutSessionIds,
-        ])) || needsRetry;
+        (await voidBuddyPassRewardsForCheckoutSessions([...buddyCheckoutSessionIds])) || needsRetry;
     }
   } catch (error) {
     console.error("Unhandled Stripe webhook error", {

@@ -22,7 +22,11 @@ usage ledger and atomic Buddy Pass reward used by the current server routes.
 `migrations/20260803205117_referral_system_hardening.sql` is also required: it
 locks down the reward RPCs, prevents duplicate referral counts, and adds atomic
 refund/dispute reversals. Apply the immediately following
-`20260803210704_referral_reversal_lock_order.sql` as well.
+`20260803210704_referral_reversal_lock_order.sql` and
+`20260803214340_affiliate_commission_hardening.sql` as well. The latter makes
+affiliate commission creation and refund reconciliation safe when Stripe
+webhooks are duplicated, concurrent, partially refunded, or delivered out of
+order.
 
 ## Checks
 

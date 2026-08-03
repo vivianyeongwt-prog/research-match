@@ -12,10 +12,10 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS public.affiliates (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text,
-  email text,
+  name text NOT NULL,
+  email text NOT NULL,
   payout_email text,
-  code text,
+  code text NOT NULL,
   stripe_promotion_code_id text,
   commission_rate numeric NOT NULL DEFAULT 0.30,  -- 0.30 = 30%
   status text NOT NULL DEFAULT 'active',
