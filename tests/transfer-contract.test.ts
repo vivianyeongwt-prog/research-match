@@ -94,7 +94,8 @@ describe("transfer contract", () => {
     const runbook = readFileSync(join(root, "TRANSFER.md"), "utf8");
     expect(runbook).toContain("Do **not** run `00000000_core_schema.sql` first");
     expect(runbook).toContain("production `search_logs.id` values are\nUUIDs");
-    expect(runbook).toContain("Never use 17,621 as an expected final count");
+    expect(runbook).toMatch(/Never use \d[\d,]* as an expected final count/);
+    expect(runbook).toContain("generate a\nfresh source snapshot immediately before handoff");
   });
 
   it("documents fail-closed legacy Stripe prices and non-destructive financial cleanup", () => {

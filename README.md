@@ -13,9 +13,9 @@ npm run check
 npm run dev
 ```
 
-For a brand-new Supabase project with no production data, apply
-`migrations/00000000_core_schema.sql` first, then the remaining migrations in
-filename order. Do not use that greenfield sequence before importing an existing
+For a brand-new Supabase project with no production data, follow the exact route
+in [`migrations/README.md`](./migrations/README.md). Do not run every migration in
+filename order, and do not use the greenfield route before importing an existing
 project backup; restore the source schema and data first, as described in
 `TRANSFER.md`. `migrations/20260720_sale_readiness.sql` contains the durable API
 usage ledger and atomic Buddy Pass reward used by the current server routes.
@@ -38,6 +38,15 @@ npm audit --omit=dev
 ```
 
 The detailed operational and ownership checklist is in [TRANSFER.md](./TRANSFER.md).
+For a sale or ownership change, start with the buyer-facing
+[handoff guide](./handoff/README.md) and run `npm run handoff:check` before any
+asset is transferred.
+
+The new owner does not need to hunt through source files for configuration. After
+the native service transfers, run `npm run buyer:setup` to open the private local
+setup page. It accepts each buyer-owned key once, writes the paired variables
+correctly, generates the abuse-prevention secret, and runs the secret-safe handoff
+check. See [the buyer quick start](./handoff/BUYER-QUICKSTART.md).
 
 ## Architecture
 

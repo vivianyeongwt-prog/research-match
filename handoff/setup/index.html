@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f5f7fb" />
+    <title>ResearchMatch owner setup</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="ResearchMatch setup home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span>ResearchMatch</span>
+      </a>
+      <div class="privacy-chip">
+        <span class="privacy-dot" aria-hidden="true"></span>
+        Private on this computer
+      </div>
+    </header>
+
+    <main id="top" class="shell">
+      <aside class="rail" aria-label="Setup progress">
+        <div class="rail-card">
+          <div class="progress-orb" id="progress-orb" aria-hidden="true">
+            <div><strong id="progress-number">0</strong><span>%</span></div>
+          </div>
+          <p class="rail-kicker">Owner setup</p>
+          <h1>Everything in one calm handoff.</h1>
+          <p class="rail-copy">
+            Paste each key once. This page saves it privately and checks the app without ever
+            showing an existing secret.
+          </p>
+          <nav id="section-nav" class="section-nav" aria-label="Setup sections"></nav>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <section class="hero" aria-labelledby="hero-title">
+          <p class="eyebrow">Welcome to your new SaaS</p>
+          <h2 id="hero-title">Let’s make ResearchMatch yours.</h2>
+          <p>
+            The live site, users, database, and domain move through their existing providers.
+            This page handles the only fiddly part: connecting your own credentials correctly.
+          </p>
+          <div class="hero-note">
+            <span class="note-icon" aria-hidden="true">✓</span>
+            <div>
+              <strong>Safe by design</strong>
+              <span>Blank fields keep their current value. Saved secrets are never sent to a website.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="transfer-card" id="transfer" aria-labelledby="transfer-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">First, receive the business</p>
+              <h2 id="transfer-title">Five ownership moves</h2>
+            </div>
+            <span class="count-chip" id="transfer-count">0 of 5</span>
+          </div>
+          <p class="section-intro">
+            These moves preserve the real customers and production history. API keys alone cannot
+            carry that live data.
+          </p>
+          <div id="transfer-list" class="transfer-list"></div>
+        </section>
+
+        <form id="setup-form" novalidate>
+          <div id="setup-sections"></div>
+
+          <section class="finish-card" id="finish" aria-labelledby="finish-title">
+            <div class="finish-glow" aria-hidden="true"></div>
+            <div class="finish-content">
+              <p class="eyebrow">The last mile</p>
+              <h2 id="finish-title">Save, verify, then update production.</h2>
+              <p>
+                Saving creates a private <code>.env.local</code> file and a backup of any previous
+                one. The check reports names and statuses only—never secret values.
+              </p>
+              <div class="command-card">
+                <div>
+                  <span>After saving the buyer Stripe keys</span>
+                  <code id="stripe-command">npm run buyer:stripe:apply</code>
+                </div>
+                <button class="icon-button" type="button" data-copy-target="stripe-command" aria-label="Copy Stripe setup command">
+                  <span aria-hidden="true">⧉</span>
+                </button>
+              </div>
+              <p class="command-help">
+                Creates the three prices, both discounts, Oxford code, webhook, and affiliate link. It never touches a customer or subscription.
+              </p>
+              <div class="command-card">
+                <div>
+                  <span>After the Vercel project is linked</span>
+                  <code id="vercel-command">npm run buyer:vercel:apply</code>
+                </div>
+                <button class="icon-button" type="button" data-copy-target="vercel-command" aria-label="Copy Vercel setup command">
+                  <span aria-hidden="true">⧉</span>
+                </button>
+              </div>
+              <p class="command-help" id="vercel-help"></p>
+            </div>
+          </section>
+
+          <div class="action-bar">
+            <div class="action-status" aria-live="polite">
+              <span class="status-light" id="status-light" aria-hidden="true"></span>
+              <span id="action-status">Loading your setup…</span>
+            </div>
+            <div class="actions">
+              <button class="button secondary" id="check-button" type="button">Run check</button>
+              <button class="button primary" id="save-button" type="submit">
+                <span>Save &amp; verify</span>
+                <span class="button-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <section class="audit-card is-hidden" id="audit-card" aria-labelledby="audit-title">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Private verification</p>
+              <h2 id="audit-title">Handoff check</h2>
+            </div>
+            <span class="audit-result" id="audit-result"></span>
+          </div>
+          <pre id="audit-output" tabindex="0"></pre>
+        </section>
+
+        <section class="goodbye-card">
+          <div>
+            <p class="eyebrow">When every check is green</p>
+            <h2>You’re home.</h2>
+            <p>
+              Close this local setup page, redeploy the transferred Vercel project, and run the
+              production check one final time.
+            </p>
+          </div>
+          <button class="button quiet" id="close-button" type="button">Close setup</button>
+        </section>
+      </div>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="fatal is-hidden" id="fatal" role="alert">
+      <div class="fatal-card">
+        <div class="fatal-icon" aria-hidden="true">!</div>
+        <h1>Setup needs a fresh start.</h1>
+        <p id="fatal-message">Restart the local setup command and open the new private link.</p>
+      </div>
+    </div>
+  </body>
+</html>

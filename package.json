@@ -10,7 +10,20 @@
     "typecheck": "tsc --noEmit --incremental false",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run lint && npm run typecheck && npm test"
+    "check": "npm run lint && npm run typecheck && npm test",
+    "handoff:check": "node scripts/handoff-readiness.mjs",
+    "handoff:check:live": "node scripts/handoff-readiness.mjs --live",
+    "handoff:check:production": "node scripts/handoff-production-readiness.mjs",
+    "handoff:stripe:export": "node scripts/stripe-handoff-export.mjs",
+    "buyer:setup": "node scripts/buyer-setup.mjs",
+    "buyer:stripe:plan": "node scripts/buyer-stripe-bootstrap.mjs",
+    "buyer:stripe:apply": "node scripts/buyer-stripe-bootstrap.mjs --apply",
+    "buyer:vercel:plan": "node scripts/buyer-vercel-sync.mjs",
+    "buyer:vercel:apply": "node scripts/buyer-vercel-sync.mjs --apply",
+    "affiliate:earnings": "node scripts/affiliate-earnings.mjs"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",

@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# private buyer-handoff backups and provider exports
+/.handoff-private/
+
 # vercel
 .vercel
 
