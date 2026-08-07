@@ -7,7 +7,6 @@ export const STORAGE_KEYS = {
   visits: "research-match-visits",
   lastVisit: "research-match-last-visit",
   pendingSummary: "rm-pending-summarize",
-  pendingPromo: "rm-pending-promo",
   pendingBuddyReferral: "rm-pending-buddy-referral",
 } as const;
 

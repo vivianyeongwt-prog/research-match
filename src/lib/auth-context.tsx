@@ -4,8 +4,7 @@ import { supabase } from "./supabase";
 import type { User, AuthError } from "@supabase/supabase-js";
 import { generateReferralCode } from "./buddy-pass";
 import { track } from "./analytics";
-import { apiFetch } from "./client-fetch";
-import { STORAGE_KEYS, readAnonSummariesUsed } from "./browser-storage";
+import { readAnonSummariesUsed } from "./browser-storage";
 
 // Free summaries allowed across a user's lifetime on the free tier. Shared
 // between the anonymous (pre-account) and free-account states so creating an
@@ -56,10 +55,8 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, promoCode?: string) => Promise<{
+  signUp: (email: string, password: string) => Promise<{
     error: AuthError | null;
-    promoApplied: boolean;
-    promoPending: boolean;
     confirmationRequired: boolean;
   }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
@@ -73,8 +70,6 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signUp: async () => ({
     error: null,
-    promoApplied: false,
-    promoPending: false,
     confirmationRequired: false,
   }),
   signIn: async () => ({ error: null }),
@@ -126,22 +121,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
-        const pendingPromo = localStorage.getItem(STORAGE_KEYS.pendingPromo);
-        if (pendingPromo && session.access_token) {
-          // Email-confirmation signups do not receive a session immediately. Redeem
-          // their pending code once confirmation produces a verified access token.
-          void apiFetch("/api/promo", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({ code: pendingPromo }),
-          }).then(() => {
-            localStorage.removeItem(STORAGE_KEYS.pendingPromo);
-            return fetchProfile(session.user.id);
-          }).catch(() => undefined);
-        }
       } else {
         setProfile(null);
       }
@@ -150,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
-  const signUp = async (email: string, password: string, promoCode?: string) => {
+  const signUp = async (email: string, password: string) => {
     const emailRedirectTo = typeof window === "undefined" ? undefined : window.location.href;
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -166,43 +145,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Funnel: a free account was created (fires for every signup entry point).
       track("account_created");
 
-      // Apply promo code if provided
-      let promoApplied = false;
-      let promoPending = false;
-      if (promoCode?.trim()) {
-        const normalizedPromo = promoCode.trim().toUpperCase();
-        const token = data.session?.access_token;
-        if (!token) {
-          localStorage.setItem(STORAGE_KEYS.pendingPromo, normalizedPromo);
-          promoPending = true;
-        } else {
-          try {
-            const res = await apiFetch("/api/promo", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              },
-              body: JSON.stringify({ code: normalizedPromo }),
-            });
-            const promoData = await res.json();
-            if (promoData.success) promoApplied = true;
-          } catch { /* promo failed, user still gets a free account */ }
-        }
-      }
-
       await fetchProfile(data.user.id);
       return {
         error,
-        promoApplied,
-        promoPending,
         confirmationRequired: !data.session,
       };
     }
     return {
       error,
-      promoApplied: false,
-      promoPending: false,
       confirmationRequired: false,
     };
   };

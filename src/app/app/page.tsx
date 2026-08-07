@@ -286,7 +286,6 @@ function AppPageInner() {
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-  const [authPromoCode, setAuthPromoCode] = useState("");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeModalTitle, setUpgradeModalTitle] = useState("");
   const [upgradeModalSubtitle, setUpgradeModalSubtitle] = useState("");
@@ -686,17 +685,15 @@ function AppPageInner() {
     setAuthError("");
     try {
       if (authMode === "signup") {
-        const { error: signUpError, promoApplied, promoPending, confirmationRequired } = await signUp(
+        const { error: signUpError, confirmationRequired } = await signUp(
           authEmail,
-          authPassword,
-          authPromoCode || undefined
+          authPassword
         );
         if (signUpError) {
           setAuthError(signUpError.message);
         } else {
           setShowAuthModal(false);
-          setAuthPromoCode("");
-          showToast(signupSuccessMessage({ promoApplied, promoPending, confirmationRequired }));
+          showToast(signupSuccessMessage({ confirmationRequired }));
         }
       } else {
         const { error: signInError } = await signIn(authEmail, authPassword);
@@ -2517,7 +2514,6 @@ function AppPageInner() {
           copy={authModalCopy}
           email={authEmail}
           password={authPassword}
-          promoCode={authPromoCode}
           error={authError}
           loading={authLoading}
           dialogRef={authModalRef}
@@ -2525,7 +2521,6 @@ function AppPageInner() {
           onSubmit={handleAuthSubmit}
           onEmailChange={setAuthEmail}
           onPasswordChange={setAuthPassword}
-          onPromoCodeChange={setAuthPromoCode}
           onPasswordReset={sendPasswordReset}
           onModeChange={(mode) => { setAuthMode(mode); setAuthError(""); }}
         />

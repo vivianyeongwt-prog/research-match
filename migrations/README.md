@@ -31,6 +31,7 @@ Apply these files in this exact order:
 7. `20260803214340_affiliate_commission_hardening.sql`
 8. `add_professor_funding_status.sql`
 9. `harden_profiles_rls.sql`
+10. `20260806_remove_legacy_free_access_promo.sql`
 
 Then generate TypeScript types, run the Supabase security/performance advisors,
 and complete the test-mode acceptance paths in `TRANSFER.md` before deployment.

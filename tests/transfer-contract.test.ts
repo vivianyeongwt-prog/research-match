@@ -49,11 +49,23 @@ describe("transfer contract", () => {
       "consume_summary_quota",
       "release_summary_quota",
       "record_buddy_pass_reward",
-      "redeem_promo_code",
     ]) {
       expect(saleMigration).toContain(`function public.${name}(`);
     }
     expect(affiliateMigration.toLowerCase()).toContain("function public.claim_stripe_event(");
+  });
+
+  it("retires the test-only free-access promo without cascading or changing profiles", () => {
+    const removal = readFileSync(
+      join(root, "migrations/20260806_remove_legacy_free_access_promo.sql"),
+      "utf8"
+    ).toLowerCase();
+
+    expect(removal).toContain("drop function if exists public.redeem_promo_code(uuid, text)");
+    expect(removal).toContain("drop table if exists public.promo_codes");
+    expect(removal).toContain("where scope = 'rate:promo'");
+    expect(removal).not.toMatch(/drop table[^;]*\bcascade\b/);
+    expect(removal).not.toMatch(/\b(update|delete from)\s+public\.profiles\b/);
   });
 
   it("hardens referral rewards against direct calls and duplicate counting", () => {

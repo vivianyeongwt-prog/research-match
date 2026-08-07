@@ -7,7 +7,6 @@ interface AccountModalProps {
   copy: string;
   email: string;
   password: string;
-  promoCode: string;
   error: string;
   loading: boolean;
   dialogRef: RefObject<HTMLDivElement | null>;
@@ -15,7 +14,6 @@ interface AccountModalProps {
   onSubmit: FormEventHandler<HTMLFormElement>;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  onPromoCodeChange: (value: string) => void;
   onPasswordReset: () => void;
   onModeChange: (mode: AuthMode) => void;
 }
@@ -38,7 +36,6 @@ export function AccountModal({
   copy,
   email,
   password,
-  promoCode,
   error,
   loading,
   dialogRef,
@@ -46,7 +43,6 @@ export function AccountModal({
   onSubmit,
   onEmailChange,
   onPasswordChange,
-  onPromoCodeChange,
   onPasswordReset,
   onModeChange,
 }: AccountModalProps) {
@@ -63,11 +59,7 @@ export function AccountModal({
         <form onSubmit={onSubmit}>
           {error && <p role="alert" style={{ fontSize: "0.85rem", color: "#c45c5c", marginBottom: "16px", background: "rgba(196, 92, 92,0.08)", padding: "10px 14px", borderRadius: "10px" }}>{error}</p>}
           <input aria-label="Email address" autoComplete="email" required type="email" placeholder="Email" value={email} onChange={(event) => onEmailChange(event.target.value)} style={inputStyle} />
-          <input aria-label="Password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={6} type="password" placeholder="Password" value={password} onChange={(event) => onPasswordChange(event.target.value)} style={inputStyle} />
-          {mode === "signup" && (
-            <input aria-label="Promo code (optional)" autoComplete="off" type="text" placeholder="Promo code (optional)" value={promoCode} onChange={(event) => onPromoCodeChange(event.target.value)} style={{ ...inputStyle, marginBottom: "20px" }} />
-          )}
-          {mode !== "signup" && <div style={{ marginBottom: "8px" }} />}
+          <input aria-label="Password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={6} type="password" placeholder="Password" value={password} onChange={(event) => onPasswordChange(event.target.value)} style={{ ...inputStyle, marginBottom: "20px" }} />
           <button type="submit" disabled={loading} className="btn-cta rm-search-btn" style={{ width: "100%", padding: "14px", fontSize: "1rem" }}>
             {loading ? "Loading..." : mode === "signup" ? "Sign up" : "Log in"}
           </button>
