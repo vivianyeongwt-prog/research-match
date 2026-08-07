@@ -108,7 +108,14 @@ async function retrieveCoupon(stripe, id) {
 
 export async function inspectBuyerStripe(stripe, env) {
   const site = new URL(String(env.NEXT_PUBLIC_SITE_URL ?? ""));
-  const webhookUrl = new URL("/api/webhooks/stripe", site).toString();
+  const webhookOverride = String(env.STRIPE_WEBHOOK_URL ?? "").trim();
+  const webhookUrl = webhookOverride
+    ? new URL(webhookOverride).toString()
+    : new URL("/api/webhooks/stripe", site).toString();
+  const parsedWebhookUrl = new URL(webhookUrl);
+  if (parsedWebhookUrl.protocol !== "https:" || parsedWebhookUrl.pathname !== "/api/webhooks/stripe") {
+    throw new Error("The Stripe webhook URL must use HTTPS and end at /api/webhooks/stripe.");
+  }
   const [account, products, prices, promotionCodes, webhooks, ...coupons] = await Promise.all([
     stripe.accounts.retrieve(),
     stripe.products.list({ active: true, limit: 100 }),

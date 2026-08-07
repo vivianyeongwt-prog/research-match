@@ -135,6 +135,32 @@ describe("automatic buyer Stripe setup", () => {
     expect(stripe.webhookEndpoints.create).toHaveBeenCalledTimes(1);
   });
 
+  it("supports a stable deployment alias for the webhook", async () => {
+    const { stripe } = fakeStripe();
+    const url = "https://research-match-handoff.vercel.app/api/webhooks/stripe";
+
+    await provisionBuyerStripe(
+      stripe,
+      { ...baseEnvironment, STRIPE_WEBHOOK_URL: url },
+      { apply: true }
+    );
+
+    expect(stripe.webhookEndpoints.create).toHaveBeenCalledWith(
+      expect.objectContaining({ url }),
+      expect.any(Object)
+    );
+  });
+
+  it("rejects a webhook override outside the exact HTTPS route", async () => {
+    const { stripe } = fakeStripe();
+    await expect(
+      provisionBuyerStripe(stripe, {
+        ...baseEnvironment,
+        STRIPE_WEBHOOK_URL: "https://example.com/not-the-webhook",
+      })
+    ).rejects.toThrow(/must use HTTPS and end at \/api\/webhooks\/stripe/i);
+  });
+
   it("fails closed if a deterministic lookup key has the wrong price", async () => {
     const { state, stripe } = fakeStripe();
     const spec = RESEARCHMATCH_PRICE_SPECS[0];

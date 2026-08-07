@@ -15,7 +15,8 @@ handoff documents remain the reusable recovery and operating instructions.
   affiliate configuration is intact; Storage has zero buckets.
 - **Stripe catalog:** the three ResearchMatch prices, Buddy Pass coupon, Oxford
   coupon and `OXFORDPHD777` promotion code exist in the buyer account. The
-  production webhook is enabled for every event handled by the application.
+  production webhook is enabled for every event handled by the application and
+  targets the clean Vercel handoff project's stable alias.
 - **Stripe customer data:** all 17 active subscribers and their supported payment
   methods were copied and verified one-to-one in the buyer account.
 - **Stripe subscriptions:** all 17 buyer-side schedules were validated against

@@ -141,6 +141,18 @@ export const BUYER_SETUP_FIELDS = Object.freeze([
     helpUrl: "https://dashboard.stripe.com/webhooks",
   },
   {
+    id: "stripeWebhookUrl",
+    group: "stripe",
+    label: "Webhook endpoint URL",
+    description: "Optional stable deployment URL. Defaults to the main website's /api/webhooks/stripe path.",
+    placeholder: "https://your-project.vercel.app/api/webhooks/stripe",
+    envNames: ["STRIPE_WEBHOOK_URL"],
+    level: "optional",
+    kind: "url",
+    advanced: true,
+    helpUrl: "https://dashboard.stripe.com/webhooks",
+  },
+  {
     id: "stripeWeeklyPrice",
     group: "stripe",
     label: "$7 weekly price",
