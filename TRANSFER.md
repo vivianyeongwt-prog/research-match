@@ -11,7 +11,7 @@ The repository contains the application, public assets, reproducible database sc
 2. Supabase project, including Auth users, production rows, database settings, backups, and service credentials.
 3. A supported migration of ResearchMatch customers/subscriptions into the buyer's Stripe account, plus products, prices, coupons, portal configuration, webhook endpoint, commissions, and payout records.
 4. Vercel project, production environment variables, deployment history, domains, and DNS.
-5. Buyer-owned Groq, Anthropic, Serper, OpenAlex contact identity, and PostHog configuration, plus Vercel Analytics ownership.
+5. Buyer-owned Anthropic and optional Serper credentials, OpenAlex contact identity, and PostHog configuration, plus Vercel Analytics ownership.
 6. Support/admin mailboxes, social accounts, brand assets, testimonials and their permissions, legal documents, and refund/support procedures.
 
 Secrets must be transferred through a password manager or another encrypted channel, never committed to Git or sent in plain email.

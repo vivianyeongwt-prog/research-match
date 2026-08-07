@@ -1,7 +1,8 @@
 # ResearchMatch service map
 
-Read-only audit date: **2026-08-04**. Counts can increase while production is
-live; use `npm run handoff:check:production` for the delivery snapshot.
+Original read-only audit date: **2026-08-04**; handoff configuration refreshed
+**2026-08-07**. Counts can increase while production is live; use
+`npm run handoff:check:production` for the delivery snapshot.
 
 | Service | Audited current state | Handoff method | Buyer action |
 | --- | --- | --- | --- |
@@ -10,8 +11,7 @@ live; use `npm run handoff:check:production` for the delivery snapshot.
 | Supabase | Free organization plan; project `okvpopbghjvzpjbqgoqy`, healthy, Postgres 17, `us-west-2`; 1,126 Auth users and 1,126 profiles; 0 Storage buckets; 0 Edge Functions | Native project transfer to buyer organization | Create target org, add seller temporarily, confirm target plan/billing |
 | Stripe | Account display name `InverseEnergy`; 45 subscriptions total: 17 active and 28 canceled; one enabled ResearchMatch webhook | Copy ResearchMatch payment data and migrate subscriptions into buyer's Stripe account | Activate live account, create the three plans, run Stripe migration, replace keys |
 | Namecheap/DNS | `researchmatch.site`; expires 2027-04-06; Namecheap BasicDNS; apex points to Vercel and `www` uses Vercel CNAME; Namecheap forwarding MX records | Free Namecheap account push | Send username/email, accept ownership, verify DNS and forwarding |
-| Groq | Required for core AI features and configured in production; the account's usage/billing tier was not available in this audit | New buyer-owned key | Create key and set it in Vercel |
-| Anthropic | Preferred structured-output provider, but the audited production variable is blank; production currently falls back to Groq | New buyer-owned key | Create key and set it in Vercel if the buyer wants Claude |
+| Anthropic | Sole runtime AI provider after the 2026-08-07 handoff cleanup; all AI routes use pinned Claude Haiku 4.5 structured output | New buyer-owned key | Create one key and set it in Vercel |
 | Serper | Optional enhancement for professor-email discovery; not found in the audited Vercel environment | New buyer-owned key or keep DuckDuckGo fallback | Optional |
 | OpenAlex/ORCID | Public APIs; no transferable account | Change the polite-pool/contact email | Set `NEXT_PUBLIC_OPENALEX_MAILTO` to buyer-controlled email |
 | NIH/NSF APIs | Public data used only by the optional funding updater script | No account transfer | No action unless running the updater |
@@ -22,16 +22,15 @@ live; use `npm run handoff:check:production` for the delivery snapshot.
 
 - Verified fixed monthly hosting plan cost: **$0** before overages (Vercel Hobby
   plus a Supabase Free organization).
-- Production currently uses Groq. The Anthropic value is blank, so Claude is not
-  the current $5 expense; Groq's actual trailing usage bill still needs to be
-  checked in its dashboard.
+- The buyer's Anthropic usage is variable and starts only after the buyer installs
+  a buyer-owned key. Use the Anthropic usage dashboard for the exact running cost.
 - Serper and PostHog are currently off. OpenAlex, ORCID, NIH, and NSF are public
   data sources used without a transferable paid account.
 - Stripe charges transaction-related fees when revenue is collected, and the
   domain has an annual renewal rather than a monthly hosting fee.
 
 So "very low operating costs" is supported, but **do not quote an exact $5/month
-as verified**. Use the last Groq/provider invoices plus the annual domain renewal
+as verified**. Use the provider usage dashboard plus the annual domain renewal
 to give the buyer an exact trailing figure.
 
 ## Stripe inventory that matters

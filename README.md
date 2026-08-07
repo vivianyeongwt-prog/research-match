@@ -54,7 +54,7 @@ check. See [the buyer quick start](./handoff/BUYER-QUICKSTART.md).
 - Supabase provides authentication and PostgreSQL data storage.
 - Stripe provides checkout, subscriptions, the billing portal, refunds, and webhook events.
 - OpenAlex and ORCID provide public research metadata.
-- Groq and Anthropic power AI-assisted search expansion, summaries, and email tools.
+- Anthropic Claude Haiku powers AI-assisted search expansion, summaries, and email tools.
 - Serper supports public faculty-page discovery for the paid email finder.
 
 ### Backend layout

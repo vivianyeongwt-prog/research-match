@@ -11,12 +11,13 @@ ResearchMatch has one active creator arrangement with **The Oxford PhD (Hira)**.
 
 ## Current snapshot
 
-Verified 2026-08-04:
+Verified 2026-08-07 after removing the old test-run records:
 
-- One referred subscription was recorded.
-- Its $2.10 commission was voided after the underlying payments were refunded.
+- Referral records: **0**.
+- Commission records: **0**.
 - Pending creator balance: **$0.00**.
 - Paid commission balance: **$0.00**.
+- Void/refunded commission balance: **$0.00**.
 - Payout records: **0**.
 
 Run this any time for a fresh, read-only balance:

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { generateJSON } from "@/lib/llm";
 import {
   allowRequestRate,
   consumeUsage,
@@ -7,8 +7,6 @@ import {
   requestAccess,
   requestSubject,
 } from "@/lib/server-access";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: NextRequest) {
   let quotaReservation: { scope: string; subject: string } | null = null;
@@ -63,34 +61,21 @@ Return JSON exactly like this:
   "followUp2": "full email text here"
 }`;
 
-    const extract = (s: string | null | undefined): { followUp1?: string; followUp2?: string } | null => {
-      if (!s) return null;
-      try { return JSON.parse(s); } catch { /* not clean JSON */ }
-      const m = s.match(/\{[\s\S]*\}/);
-      if (m) { try { return JSON.parse(m[0]); } catch { /* still bad */ } }
-      return null;
-    };
-
-    // Retry + salvage on Groq's occasional json_validate_failed, like summarize/email.
-    let parsed: { followUp1?: string; followUp2?: string } | null = null;
-    for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
-      try {
-        const chat = await groq.chat.completions.create({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: "You write short, genuine follow-up emails for students reaching out to professors. Return only valid JSON. No extra text." },
-            { role: "user", content: userContent },
-          ],
-          max_tokens: 700,
-          temperature: attempt === 0 ? 0.65 : 0.5,
-          response_format: { type: "json_object" },
-        });
-        parsed = extract(chat.choices[0]?.message?.content);
-      } catch (err) {
-        const e = err as { error?: { failed_generation?: string }; failed_generation?: string };
-        parsed = extract(e.error?.failed_generation ?? e.failed_generation);
-      }
-    }
+    const parsed = await generateJSON<{ followUp1?: string; followUp2?: string }>({
+      system:
+        "You write short, genuine follow-up emails for students reaching out to professors. Return only the requested fields.",
+      prompt: userContent,
+      maxTokens: 700,
+      schema: {
+        type: "object",
+        properties: {
+          followUp1: { type: "string" },
+          followUp2: { type: "string" },
+        },
+        required: ["followUp1", "followUp2"],
+        additionalProperties: false,
+      },
+    });
 
     if (
       !parsed ||

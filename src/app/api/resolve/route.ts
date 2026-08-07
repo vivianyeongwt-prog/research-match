@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { generateJSON } from "@/lib/llm";
 import { oaUrl } from "@/lib/openalex";
 import { allowRequestRate } from "@/lib/server-access";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Step 1: Use LLM to expand a user query into OpenAlex-friendly search terms.
 // OpenAlex's topic taxonomy uses specific academic phrases — "applied math" doesn't
 // exist but "mathematical modeling", "numerical analysis", etc. do.
 async function expandToSearchTerms(topic: string): Promise<string[]> {
   try {
-    const chat = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: `You convert an informal research-topic query into formal academic search terms that match an academic paper database's topic taxonomy. Return only a JSON array of strings. No explanation.
+    const parsed = await generateJSON<{ terms?: string[] }>({
+      system: `You convert an informal research-topic query into formal academic search terms that match an academic paper database's topic taxonomy.
 
 Decide first whether the query is BROAD or SPECIFIC:
 - BROAD field with many distinct sub-areas (e.g. "materials science", "chemistry", "biology", "physics", "climate science", "economics"): return 6-8 terms naming the MAJOR DISTINCT SUB-FIELDS that together span the field — NOT near-synonyms of the umbrella term. Naming real sub-fields is what surfaces specialists across the whole field instead of one narrow corner of it.
@@ -30,20 +24,16 @@ Use full formal names, not abbreviations. Examples:
 - "DNA methylation" → ["DNA methylation", "epigenetics", "epigenetic regulation", "chromatin modification"]
 - "CRISPR" → ["CRISPR", "gene editing", "genome engineering", "Cas9 nuclease"]
 - "ML" → ["machine learning", "deep learning", "artificial intelligence", "neural networks"]`,
-        },
-        {
-          role: "user",
-          content: `Research topic query: "${topic}"\n\nReturn 3-5 formal academic search terms as a JSON array.`,
-        },
-      ],
-      max_tokens: 220,
-      temperature: 0,
-      response_format: { type: "json_object" },
+      prompt: `Research topic query: "${topic}"\n\nReturn the formal academic search terms in the terms field.`,
+      maxTokens: 220,
+      schema: {
+        type: "object",
+        properties: { terms: { type: "array", items: { type: "string" } } },
+        required: ["terms"],
+        additionalProperties: false,
+      },
     });
-    const raw = chat.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(raw);
-    // Accept array at root or under any key
-    const arr = Array.isArray(parsed) ? parsed : Object.values(parsed).find(Array.isArray) as string[] ?? [];
+    const arr = Array.isArray(parsed?.terms) ? parsed.terms : [];
     return arr.filter((s): s is string => typeof s === "string").slice(0, 8);
   } catch {
     // Fallback: just return the original query
@@ -58,30 +48,26 @@ async function pickBestIndices(
   maxPick: number
 ): Promise<number[]> {
   const list = candidates.map((c, i) => `${i}: ${c.display_name}`).join("\n");
-  const chat = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "system",
-        content: `You pick the best matching items from a list. Reply with only comma-separated numbers (e.g. "0,2,4"); no explanation, no punctuation besides commas. Pick up to ${maxPick} items that are good matches. If none are a good match, return -1.`,
-      },
-      {
-        role: "user",
-        content: `Original user query: "${query}"\n\nCandidates:\n${list}\n\nWhich indices best match the ${entityType} for this query, including closely related variations? Return up to ${maxPick} comma-separated indices, or -1 if nothing matches.`,
-      },
-    ],
-    max_tokens: 20,
-    temperature: 0,
+  const parsed = await generateJSON<{ indices?: number[] }>({
+    system: `Pick up to ${maxPick} candidate indices that are good matches. Return an empty indices array if none match.`,
+    prompt: `Original user query: "${query}"\n\nCandidates:\n${list}\n\nWhich indices best match the ${entityType}, including closely related variations?`,
+    maxTokens: 80,
+    schema: {
+      type: "object",
+      properties: { indices: { type: "array", items: { type: "integer" } } },
+      required: ["indices"],
+      additionalProperties: false,
+    },
   });
-  const raw = chat.choices[0]?.message?.content?.trim() ?? "0";
-  if (raw === "-1") return [];
-  const indices = raw.split(",").map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 0 && n < candidates.length);
+  const indices = Array.isArray(parsed?.indices)
+    ? parsed.indices.filter((n) => Number.isInteger(n) && n >= 0 && n < candidates.length)
+    : [];
   return [...new Set(indices)].slice(0, maxPick);
 }
 
 // --- In-memory resolution cache ----------------------------------------------
 // Topic/university resolution is effectively static but runs on every search and is
-// the heaviest user of Groq + OpenAlex calls. Caching it sharply cuts that load and
+// the heaviest user of Anthropic + OpenAlex calls. Caching it sharply cuts that load and
 // is a main lever for staying under daily rate limits. Per-serverless-instance and
 // ephemeral, but a warm instance serves many requests. Only successful (non-empty)
 // results are cached, so a transient upstream failure never becomes sticky.

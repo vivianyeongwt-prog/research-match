@@ -27,7 +27,7 @@ export default function PrivacyPage() {
         </ul>
       </LegalSection>
       <LegalSection title="Service providers">
-        <p>Information is processed only as needed by providers that help operate the service. These may include Supabase for authentication and data storage, Vercel for hosting and performance analytics, Stripe for payments, PostHog for product analytics, Groq and Anthropic for AI-assisted features, Serper for web search, and OpenAlex or ORCID for public research information.</p>
+        <p>Information is processed only as needed by providers that help operate the service. These may include Supabase for authentication and data storage, Vercel for hosting and performance analytics, Stripe for payments, PostHog for product analytics, Anthropic for AI-assisted features, Serper for web search, and OpenAlex or ORCID for public research information.</p>
         <p>Email drafts and other content submitted to an AI feature are sent to the provider used for that request. Do not submit sensitive personal, health, financial, or confidential research information.</p>
       </LegalSection>
       <LegalSection title="Sharing and sale of data">

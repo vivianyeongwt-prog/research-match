@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { generateJSON } from "@/lib/llm";
 import { oaUrl } from "@/lib/openalex";
 import { allowRequestRate, requestAccess } from "@/lib/server-access";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 interface NearbyAuthor {
   id?: string;
@@ -38,34 +36,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 1: Ask AI for geographically nearby universities
-    const chat = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: "You return a JSON array of university names; nothing else. No explanation, no markdown, no extra text.",
+    const parsed = await generateJSON<{ universities?: string[] }>({
+      system: "Return geographically nearby university names in the requested field.",
+      prompt: `List 8 universities geographically closest to "${institutionName}". Do not include "${institutionName}" itself.`,
+      maxTokens: 200,
+      schema: {
+        type: "object",
+        properties: {
+          universities: { type: "array", items: { type: "string" } },
         },
-        {
-          role: "user",
-          content: `List 8 universities geographically closest to "${institutionName}". Do not include "${institutionName}" itself. Return only a JSON array of university names, e.g. ["Harvard University", "Boston University"]`,
-        },
-      ],
-      max_tokens: 200,
-      temperature: 0,
+        required: ["universities"],
+        additionalProperties: false,
+      },
     });
-
-    const raw = chat.choices[0]?.message?.content?.trim() ?? "[]";
-    let nearbyNames: string[] = [];
-    try {
-      nearbyNames = JSON.parse(raw);
-    } catch {
-      // Try to extract JSON array from response
-      const match = raw.match(/\[[\s\S]*\]/);
-      if (match) nearbyNames = JSON.parse(match[0]);
-    }
-
-    nearbyNames = Array.isArray(nearbyNames)
-      ? nearbyNames.filter((name): name is string => typeof name === "string" && !!name.trim() && name.length <= 200)
+    const nearbyNames = Array.isArray(parsed?.universities)
+      ? parsed.universities.filter((name): name is string => typeof name === "string" && !!name.trim() && name.length <= 200)
       : [];
 
     if (!nearbyNames.length) {

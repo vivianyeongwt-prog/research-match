@@ -51,7 +51,7 @@ const GROUPS = [
     id: "ai",
     eyebrow: "Step 4",
     title: "Turn on the AI features",
-    description: "Groq is required today. Anthropic and Serper are optional upgrades.",
+    description: "Add one buyer-owned Anthropic key. Serper is optional.",
   },
   {
     id: "analytics",

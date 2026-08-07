@@ -25,7 +25,7 @@ interface OpenAlexWork {
   doi?: string | null;
 }
 
-// Structured-output schema for the Haiku path; the Groq fallback relies on the prompt.
+// Structured-output schema for Claude Haiku.
 const SUMMARY_SCHEMA = {
   type: "object",
   additionalProperties: false,

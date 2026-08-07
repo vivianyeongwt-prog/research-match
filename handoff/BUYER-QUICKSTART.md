@@ -9,6 +9,10 @@ subscriptions in the buyer account.
 You do **not** need to implement the application or search through the code for
 variable names.
 
+> **Current handoff:** Read [DELIVERY-STATUS.md](./DELIVERY-STATUS.md) first.
+> The Supabase and Stripe migration work recorded there is already complete and
+> must not be repeated.
+
 ## 1. Receive the five assets
 
 1. Accept the GitHub repository transfer.

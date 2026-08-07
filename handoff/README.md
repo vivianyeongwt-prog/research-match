@@ -5,6 +5,10 @@ If you are the new owner, begin with
 `npm run buyer:setup` opens one private local page for every buyer-owned key and
 runs the handoff checker automatically.
 
+The live August 7 delivery record is in
+[DELIVERY-STATUS.md](./DELIVERY-STATUS.md). Read it before running any Stripe or
+Supabase migration command; those transfers have already been completed.
+
 ResearchMatch is not sent as a ZIP full of passwords. The clean handoff is a
 series of ownership transfers, followed by one verified production cutover. The
 buyer receives the live product and its history; the seller keeps personal
@@ -22,7 +26,6 @@ account name or ID requested below — never a password or recovery code.
 | Supabase | Target organization name; invite the seller temporarily | [Supabase](https://supabase.com/dashboard) |
 | Stripe | Activated live account ID beginning with `acct_` | [Stripe](https://dashboard.stripe.com/register) |
 | Namecheap | Namecheap username or account email | [Namecheap](https://www.namecheap.com/myaccount/signup/) |
-| Groq | Nothing in chat; create a buyer-owned API key | [Groq keys](https://console.groq.com/keys) |
 | Anthropic | Nothing in chat; create a buyer-owned API key | [Anthropic keys](https://console.anthropic.com/settings/keys) |
 | Serper | Optional buyer-owned API key | [Serper](https://serper.dev/) |
 | PostHog | Target organization/project or a new buyer-owned project | [PostHog](https://us.posthog.com/) |
@@ -77,7 +80,7 @@ the subscriptions into the buyer's Stripe account.
    `metadata.userId`, map old to new customer/subscription IDs, recreate the
    three current prices and two coupons, and update the affiliate's Stripe IDs.
 7. Replace or remove **every** seller-owned Vercel secret before the Vercel
-   transfer. Install the buyer's Supabase, Stripe, Groq, Anthropic, Serper,
+   transfer. Install the buyer's Supabase, Stripe, Anthropic, Serper,
    PostHog, support, and admin settings; redeploy and rerun the production check.
 8. Transfer the Vercel project to the buyer's team.
 9. Push `researchmatch.site` to the buyer's Namecheap account and confirm both

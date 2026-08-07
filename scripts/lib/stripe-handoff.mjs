@@ -106,6 +106,72 @@ function csvCell(value) {
   return /[",\r\n]/.test(source) ? `"${source.replaceAll('"', '""')}"` : source;
 }
 
+export function parseCsv(source) {
+  const records = [];
+  let record = [];
+  let field = "";
+  let quoted = false;
+  let quoteClosed = false;
+
+  const finishField = () => {
+    record.push(field.replace(/\r$/, ""));
+    field = "";
+    quoteClosed = false;
+  };
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quoted) {
+      if (character === '"' && source[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else if (character === '"') {
+        quoted = false;
+        quoteClosed = true;
+      } else {
+        field += character;
+      }
+    } else if (quoteClosed) {
+      if (character === ",") {
+        finishField();
+      } else if (character === "\n") {
+        finishField();
+        records.push(record);
+        record = [];
+      } else if (character !== "\r" || source[index + 1] !== "\n") {
+        throw new Error("CSV contains characters after a closing quote.");
+      }
+    } else if (character === '"') {
+      if (field) throw new Error("CSV contains a quote inside an unquoted field.");
+      quoted = true;
+    } else if (character === ",") {
+      finishField();
+    } else if (character === "\n") {
+      finishField();
+      records.push(record);
+      record = [];
+    } else {
+      field += character;
+    }
+  }
+
+  if (quoted) throw new Error("CSV contains an unterminated quoted field.");
+  if (field || quoteClosed || record.length > 0) {
+    finishField();
+    records.push(record);
+  }
+
+  const [header, ...body] = records.filter((row) => row.some((value) => value !== ""));
+  if (!header) return [];
+  if (new Set(header).size !== header.length) throw new Error("CSV contains duplicate headers.");
+  if (body.some((row) => row.length !== header.length)) {
+    throw new Error("CSV row length does not match its header.");
+  }
+  return body.map((row) =>
+    Object.fromEntries(header.map((name, index) => [name, row[index] ?? ""]))
+  );
+}
+
 export function rowsToCsv(rows, columns) {
   const lines = [columns.map(csvCell).join(",")];
   for (const row of rows) lines.push(columns.map((column) => csvCell(row[column])).join(","));

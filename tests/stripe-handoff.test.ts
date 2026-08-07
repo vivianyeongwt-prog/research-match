@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   STRIPE_INVENTORY_COLUMNS,
   classifySubscription,
+  parseCsv,
   rowsToCsv,
   stripePricePlanMap,
   subscriptionInventoryRow,
@@ -75,6 +76,15 @@ describe("Stripe handoff inventory", () => {
   it("escapes CSV cells safely", () => {
     const csv = rowsToCsv([{ value: 'one,"two"' }], ["value"]);
     expect(csv).toBe('value\n"one,""two"""\n');
+    expect(parseCsv(csv)).toEqual([{ value: 'one,"two"' }]);
+  });
+
+  it("rejects malformed quoted CSV", () => {
+    expect(() => parseCsv('value\n"unfinished')).toThrow(/unterminated quoted field/i);
+    expect(() => parseCsv('value\n"closed"trailing')).toThrow(/after a closing quote/i);
+    expect(() => parseCsv('value\nnot"quoted')).toThrow(/quote inside an unquoted field/i);
+    expect(() => parseCsv("one,two\nonly-one")).toThrow(/row length/i);
+    expect(() => parseCsv("value,value\none,two")).toThrow(/duplicate headers/i);
   });
 
   it("flags unresolved source statuses for review", () => {

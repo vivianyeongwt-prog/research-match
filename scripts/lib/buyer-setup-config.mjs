@@ -229,25 +229,13 @@ export const BUYER_SETUP_FIELDS = Object.freeze([
     advanced: true,
   },
   {
-    id: "groqKey",
-    group: "ai",
-    label: "Groq API key",
-    description: "Required for the current AI-powered search and email features.",
-    placeholder: "gsk_…",
-    envNames: ["GROQ_API_KEY"],
-    level: "required",
-    kind: "groq-key",
-    secret: true,
-    helpUrl: "https://console.groq.com/keys",
-  },
-  {
     id: "anthropicKey",
     group: "ai",
     label: "Anthropic API key",
-    description: "Optional higher-quality structured-output provider; Groq remains the fallback.",
+    description: "Required for AI search expansion, summaries, and email tools.",
     placeholder: "sk-ant-…",
     envNames: ["ANTHROPIC_API_KEY"],
-    level: "optional",
+    level: "required",
     kind: "anthropic-key",
     secret: true,
     helpUrl: "https://console.anthropic.com/settings/keys",
@@ -305,7 +293,6 @@ export const VERCEL_ENV_NAMES = Object.freeze([
 export const SECRET_ENV_NAMES = Object.freeze(
   new Set([
     "SUPABASE_SERVICE_ROLE_KEY",
-    "GROQ_API_KEY",
     "ANTHROPIC_API_KEY",
     "SERPER_API_KEY",
     "STRIPE_SECRET_KEY",
@@ -450,9 +437,6 @@ export function normalizeAndValidateField(field, rawValue) {
     splitCsv(value).some((price) => !price.startsWith("price_"))
   ) {
     error = "Every Stripe price ID must begin with price_.";
-  }
-  if (field.kind === "groq-key" && !value.startsWith("gsk_")) {
-    error = "Groq API keys begin with gsk_.";
   }
   if (field.kind === "anthropic-key" && !value.startsWith("sk-ant-")) {
     error = "Anthropic API keys begin with sk-ant-.";

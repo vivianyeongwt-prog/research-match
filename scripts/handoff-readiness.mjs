@@ -376,7 +376,9 @@ try {
   if (!dirty) pass("Git working tree is clean");
   else warn("Git working tree has uncommitted changes");
   const origin = runGit(["remote", "get-url", "origin"]);
-  if (/github\.com[:/]jacekimmy\/research-match(?:\.git)?$/i.test(origin)) pass("Git origin is the ResearchMatch repository");
+  if (/github\.com[:/](?:jacekimmy|vivianyeongwt-prog)\/research-match(?:\.git)?$/i.test(origin)) {
+    pass("Git origin is the ResearchMatch repository");
+  }
   else warn("Git origin does not match the audited ResearchMatch repository");
   try {
     runGit(["ls-files", "--error-unmatch", ".env.local"]);
@@ -404,7 +406,7 @@ const required = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "GROQ_API_KEY",
+  "ANTHROPIC_API_KEY",
   "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
@@ -433,7 +435,6 @@ if (missingRecommended.length === 0) pass("All ownership and operations settings
 else warn(`Recommended ownership settings still use defaults or are blank: ${missingRecommended.join(", ")}`);
 
 const optionalGroups = [
-  ["Anthropic preferred AI provider", ["ANTHROPIC_API_KEY"]],
   ["Serper email discovery", ["SERPER_API_KEY"]],
   ["creator and Buddy Pass setup", ["STRIPE_AFFILIATE_COUPON_ID", "STRIPE_BUDDY_PASS_COUPON_ID"]],
   ["PostHog analytics", ["NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN", "NEXT_PUBLIC_POSTHOG_KEY"]],

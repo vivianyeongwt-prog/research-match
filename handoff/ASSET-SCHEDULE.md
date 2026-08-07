@@ -28,7 +28,7 @@ does not replace Escrow's transaction terms.
   bank accounts, tax/KYC identity, or payment-account login credentials.
 - The seller's entire InverseEnergy Stripe account, account balance, unrelated
   products, or unrelated customers.
-- Seller-owned Groq, Anthropic, Serper, PostHog, or other API accounts/credits;
+- Seller-owned Anthropic, Serper, PostHog, or other API accounts/credits;
   those are replaced with buyer-owned accounts.
 - A right to impersonate the seller or imply a continuing personal endorsement.
   The source currently contains historical founder/byline references to "Jace";

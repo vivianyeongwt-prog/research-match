@@ -1,4 +1,4 @@
-// Phase 3: generate the per-field copy in field_content using Groq, grounded in
+// Phase 3: generate the per-field copy in field_content using Claude Haiku, grounded in
 // each field's REAL subfields and the actual recent_topic values pulled for its
 // professors — so the output is specific per field, not templated mush.
 //
@@ -7,15 +7,14 @@
 //   node scripts/seo-generate-content.mjs neuroscience             # write to Supabase
 //   node scripts/seo-generate-content.mjs all
 //
-// Reuses the existing Groq setup (groq-sdk, GROQ_API_KEY, llama-3.3-70b-versatile)
-// exactly as src/app/api/summarize/route.ts does. Field anchors come from the
-// shared scripts/lib/research-anchors.mjs.
+// Uses the same buyer-owned Anthropic key as the runtime AI tools. Field anchors
+// come from the shared scripts/lib/research-anchors.mjs.
 
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
+import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
-import Groq from "groq-sdk";
 import { FIELDS, resolveAnchorTopics, fetchFieldProfessors, sleep } from "./lib/research-anchors.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,8 +30,47 @@ try {
   process.exit(1);
 }
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const MODEL = "llama-3.3-70b-versatile";
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error("ANTHROPIC_API_KEY is required.");
+  process.exit(1);
+}
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const MODEL = "claude-haiku-4-5-20251001";
+
+const CONTENT_SCHEMA = {
+  type: "object",
+  properties: {
+    meta_title: { type: "string" },
+    meta_description: { type: "string" },
+    research_overview: { type: "string" },
+    remote_friendly: {
+      type: "string",
+      enum: ["remote-friendly", "hands-on", "mixed"],
+    },
+    email_angle: { type: "string" },
+    faq: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          answer: { type: "string" },
+        },
+        required: ["question", "answer"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: [
+    "meta_title",
+    "meta_description",
+    "research_overview",
+    "remote_friendly",
+    "email_angle",
+    "faq",
+  ],
+  additionalProperties: false,
+};
 
 function uniq(arr) {
   return [...new Set(arr.filter(Boolean))];
@@ -112,23 +150,22 @@ function fallbackTitle(field) {
 
 async function generate(field, supabase) {
   const g = await groundingFor(field, supabase);
-  const chat = await groq.chat.completions.create({
+  const message = await anthropic.messages.create({
     model: MODEL,
-    messages: [
-      { role: "system", content: "You write specific, grounded, plain-language web content for students. You never use filler or hype. You always return valid JSON." },
-      { role: "user", content: buildPrompt(field, g) },
-    ],
+    system:
+      "You write specific, grounded, plain-language web content for students. You never use filler or hype.",
+    messages: [{ role: "user", content: buildPrompt(field, g) }],
     max_tokens: 2200,
-    temperature: 0.6,
-    response_format: { type: "json_object" },
+    output_config: { format: { type: "json_schema", schema: CONTENT_SCHEMA } },
   });
 
-  const raw = chat.choices[0]?.message?.content?.trim() ?? "{}";
+  const text = message.content.find((block) => block.type === "text");
+  const raw = text?.type === "text" ? text.text.trim() : "{}";
   let parsed;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error("Groq returned invalid JSON");
+    throw new Error("Anthropic returned invalid JSON");
   }
 
   // Validate + normalize.

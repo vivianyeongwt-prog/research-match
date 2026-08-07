@@ -39,14 +39,14 @@ export const RESEARCHMATCH_COUPON_SPECS = Object.freeze([
   {
     key: "buddy",
     id: "research_buddy_pass_25",
-    name: "ResearchMatch Buddy Pass — 25% off first payment",
+    name: "ResearchMatch Buddy Pass — 25% once",
     percentOff: 25,
     envName: "STRIPE_BUDDY_PASS_COUPON_ID",
   },
   {
     key: "affiliate",
     id: "research_oxfordphd_20",
-    name: "The Oxford PhD — 20% off first payment",
+    name: "Oxford PhD — 20% off first payment",
     percentOff: 20,
     envName: "STRIPE_AFFILIATE_COUPON_ID",
   },
