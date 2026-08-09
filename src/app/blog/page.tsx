@@ -46,6 +46,7 @@ const CATEGORIES: { label: string; slugs: string[] }[] = [
       "how-to-follow-up-with-a-professor",
       "do-professors-respond-to-cold-emails",
       "what-professors-look-for-in-research-students",
+      "professor-said-no-funding-should-i-still-ask-to-join",
     ],
   },
   {
