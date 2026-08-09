@@ -446,7 +446,7 @@ content: `<h2>Yes, You Can Still Ask, But Do Not Assume You Should Work for Free
 <p>But finding a mentor is not like finding a job. You do not apply to a posting and get assigned one. It is a relationship that develops over time, and it starts with you making the first move.</p>
 
 <h2>Cold Emailing vs Warm Introductions</h2>
-<p>There are two main ways to connect with a potential mentor: <a href="https://www.researchmatch.site/blog/cold-email-vs-warm-intro">cold emailing and warm introductions</a>. Both work, but they have different strengths.</p>
+<p>There are two main ways to connect with a potential mentor: <a href="/blog/cold-email-vs-warm-intro">cold emailing and warm introductions</a>. Both work, but they have different strengths.</p>
 <p><strong>Cold emailing</strong> is reaching out to a professor you have never met. It is the most common approach, and it works surprisingly well when done right. The advantage is that you can target anyone whose research interests you, regardless of whether you have any connections. Read our full guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor</a> for the exact approach that works.</p>
 <p><strong>Warm introductions</strong> come through someone who already knows the professor, like a TA, another professor, or a grad student in their lab. These have a higher success rate because the professor already trusts the person vouching for you. If you can get a warm intro, always take it.</p>
 <p>The best strategy is to pursue both. Email professors directly while also building connections that could lead to warm introductions. Do not wait for the perfect introduction to fall into your lap.</p>
