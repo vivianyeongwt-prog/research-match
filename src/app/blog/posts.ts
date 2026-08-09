@@ -1009,7 +1009,6 @@ content: `<h2>Yes, You Can Still Ask, But Do Not Assume You Should Work for Free
     datePublished: "2026-04-01",
   },
   {
-    {
 slug: "cold-email-vs-warm-intro",
 title: "Cold Email vs Warm Intro: Which Works Better for Research?",
 description: "Is it better to cold email a professor or get introduced first? Here is how cold emails and warm introductions actually work when you are trying to find a research opportunity.",
