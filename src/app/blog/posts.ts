@@ -525,57 +525,207 @@ Alex
     relatedSlugs: ["how-to-cold-email-a-professor", "cold-email-mistakes", "how-to-follow-up-with-a-professor"],
     datePublished: "2026-03-01",
   },
-  {
+{
     slug: "how-to-get-research-experience-undergrad",
-    title: "How to Get Research Experience as an Undergrad (Complete Guide)",
-    description: "Complete guide to getting research experience as an undergraduate. Learn cold emailing, REU programs, lab websites, and other proven strategies to land your first position.",
-    keyword: "how to get research experience undergrad",
-    content: `<h2>You Do Not Need Experience to Get Experience</h2>
-<p>The biggest myth about undergraduate research is that you need prior experience to get started. You do not. Professors expect undergrads to start from zero. What they are looking for is interest, commitment, and the ability to learn.</p>
-<p>If you are newer to research and have no lab experience, that is completely fine. Plenty of students start research with nothing more than a genuine interest and a willingness to show up. The hard part is getting your foot in the door, and this guide will show you how.</p>
+    title: "How to Get Research Experience as an Undergraduate (Even With No Experience)",
+    description: "Learn how to get research experience as an undergraduate, even if you have no previous experience. Find professors, labs, summer programs, research opportunities, and practical ways to get your first position.",
+    keyword: "how to get research experience as an undergraduate",
+    content: `<h2>How Do You Get Research Experience as an Undergraduate?</h2>
+<p>The most common ways to get research experience as an undergraduate are to join a professor's research group, apply for a structured undergraduate research program, work on a summer research project, complete an independent study or thesis, or help a graduate student with an existing project.</p>
+<p>You do not necessarily need previous research experience to get your first position. That would create an obvious problem: nobody would ever be able to start.</p>
+<p>What you do need is a way to find researchers whose work interests you and a convincing reason for them to consider involving you.</p>
+<p>That is where many students get stuck. They search their university's job board for "research assistant," find three positions requiring experience they do not have, and assume there is nothing available.</p>
+<p>Undergraduate research does not always work like a normal job search. Some opportunities are advertised, but others begin with a conversation, an email to a professor, a recommendation from a teaching assistant, or simply finding a lab at the right time.</p>
 
-<h2>Strategy 1: Cold Email Professors</h2>
-<p>This is the single most effective way to find research as an undergrad. It is also the most underused because students are afraid of rejection. But rejection is not a big deal when you are emailing 10-15 professors.</p>
-<p>The key is personalization. Read a professor's recent paper (even just the abstract), find something that interests you, and write a short email about it. We have a full breakdown of <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor</a> that covers everything you need to know.</p>
-<p>Expect a response rate of about 20-30 percent. That means if you email 10 professors, you will probably hear back from 2-3. Those are good odds.</p>
+<h2>Can You Get Undergraduate Research Experience With No Experience?</h2>
+<p><strong>Yes. It is possible to get an undergraduate research position without previous research experience.</strong> Your first research position is, after all, where that experience has to begin.</p>
+<p>The mistake is assuming that "no research experience" means "nothing relevant to offer."</p>
+<p>Think about what you have already done. A statistics course could be useful in a behavioural science lab. Python might matter to a computational research group. Chemistry practicals may give you some familiarity with laboratory work. Strong writing skills could be useful for literature reviews or qualitative research.</p>
+<p>Even a class project can be relevant if it introduced you to the subject the professor studies.</p>
+<p>Do not exaggerate what you know. A professor is unlikely to expect a first-time undergraduate researcher to operate like a PhD student. It is much better to say that you have basic experience with R and want to develop it than to call yourself "proficient" and struggle with the first task you receive.</p>
 
-<h2>Strategy 2: Talk to TAs and Grad Students</h2>
-<p>Your TAs are graduate students who work in labs. They know which professors are looking for undergrads, which labs have good cultures, and what the work actually involves. Ask them after class or during office hours.</p>
-<p>Grad students are often more approachable than professors, and they have significant influence. If a grad student tells their professor "hey, there is this undergrad who seems really interested in our work," that is basically a warm introduction. It skips the cold email entirely.</p>
-<p>Do not be weird about it. Just say something like "Hey, I am interested in getting into research. Do you know if your lab or any labs in the department are looking for undergrads?" Simple as that.</p>
+<h2>1. Find Professors Working on Topics You Actually Like</h2>
+<p>Do not begin by searching for any professor who might give you a position. Start with the research.</p>
+<p>Pick one or two subjects that you would genuinely be interested in spending a semester exploring. They can still be broad: cancer biology, machine learning, developmental psychology, climate policy, robotics or behavioural economics are perfectly reasonable starting points.</p>
+<p>Then find researchers working on those subjects.</p>
+<p>This distinction matters because research rarely follows department boundaries neatly. Someone interested in Alzheimer's disease might find relevant researchers in neuroscience, psychology, medicine, genetics or biomedical engineering.</p>
+<p>Search faculty directories, research institutes and lab websites rather than limiting yourself to your own department.</p>
+<p>You can also use <a href="/app">Research Match</a> to search by research interest and find professors whose published work overlaps with your topic. This can be much faster than opening faculty profiles one at a time, particularly if you do not yet know which department your interest belongs to.</p>
 
-<h2>Strategy 3: Check Lab Websites</h2>
-<p>Go to your department's faculty page and click through every professor's lab website. Many have a "Join Us" or "Opportunities" section that lists whether they are taking undergrads. Some even have application forms.</p>
-<p>Even if there is no explicit "we are hiring undergrads" message, lab websites give you crucial information. You can see what projects are active, who is in the lab, and what the group's research focus is. All of this is gold for writing a personalized cold email.</p>
+<h2>2. Look at What the Professor Is Researching Now</h2>
+<p>Once you find someone interesting, do a little more digging before contacting them.</p>
+<p>Start with the lab website. Look at current projects, recent publications and the people already working there.</p>
+<p>You do not need to read the professor's entire publication history. Pick one or two recent papers that seem relevant and start with the abstract. Try to understand the question being investigated and the main finding.</p>
+<p>Then ask yourself a more useful question than "Is this professor impressive?"</p>
+<p><strong>Would I actually be interested in working on something like this?</strong></p>
+<p>If the answer is yes, add the professor to your shortlist.</p>
+<p>Research Match can also help here by explaining recent papers in plain English, so you can understand what a researcher is actually working on before trying to write to them.</p>
 
-<h2>Strategy 4: Apply to REU Programs</h2>
-<p>Research Experience for Undergraduates programs are NSF-funded summer programs that pay you to do research at a university. They provide a stipend (usually around 5,000 to 7,000 dollars for the summer), housing, and sometimes travel funds.</p>
-<p>REUs are competitive, but they are an amazing way to get structured research experience, especially at a university that is not your own. This is great for grad school applications because it shows you can do research in different environments. Check out our <a href="/blog/summer-research-opportunities">summer research opportunities guide</a> for more details.</p>
-<p>Applications are typically due in February, so start planning early. Apply to at least 5-10 programs to improve your chances.</p>
+<h2>3. Check Whether the Lab Already Works With Undergraduates</h2>
+<p>One of the most useful pages on a lab website is the People page.</p>
+<p>Look at who is already there. If the lab lists undergraduate research assistants, honors students or undergraduate thesis students, that is encouraging. It suggests the group has some experience bringing students into its research.</p>
+<p>It is not proof that there is an opening right now, but it gives you useful context.</p>
+<p>Also look for pages called "Join Us," "Opportunities," "Prospective Students" or "Work With Us." Some professors explain exactly how students should approach them. Others have an application form or specify the minimum time commitment they expect.</p>
+<p>Follow those instructions if they exist.</p>
+<p>A surprisingly easy way to hurt your chances is to email a professor asking how to join their lab when the answer is already sitting on a page titled "How to Join Our Lab."</p>
 
-<h2>Strategy 5: Volunteer First</h2>
-<p>If you cannot find a paid position, offer to volunteer in a lab. Many professors have more work than funding, and a reliable volunteer who shows up consistently is incredibly valuable. Most volunteers eventually get offered paid positions or course credit.</p>
-<p>Volunteering also lowers the barrier to entry. Professors are more willing to take a chance on an unproven student when there is no financial commitment. Once you prove yourself, doors open fast.</p>
+<h2>4. Cold Email Professors About Research</h2>
+<p><strong>You can email a professor about undergraduate research even if they have not advertised an open position.</strong></p>
+<p>This is particularly useful because not every possible undergraduate project becomes a formal job listing.</p>
+<p>Your email should be short and written specifically for that researcher. Mention what interested you about their work, briefly explain your relevant background, and ask whether there may be an opportunity for an undergraduate to get involved.</p>
+<p>You might write:</p>
+<blockquote>Dear Professor Lee,<br><br>
+I came across your recent work on how social environments affect adolescent decision-making and was particularly interested in your study on peer influence. I am a second-year psychology student currently taking behavioural statistics, and I have become interested in how these questions are studied experimentally.<br><br>
+I wanted to ask whether you are currently taking undergraduate researchers, or expect to have any opportunities in the coming semester. I would be happy to send my CV if useful.<br><br>
+Best,<br>
+[Your Name]</blockquote>
+<p>You do not need to make the email sound more academic than you actually are. A clear explanation of why the research caught your attention is more convincing than several sentences about the professor's "esteemed work."</p>
+<p>For more examples, see our <a href="/blog/cold-email-professor-template">cold email professor template</a> and our complete guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor for research</a>.</p>
 
-<h2>Strategy 6: Go to Office Hours</h2>
-<p>Go to your professor's office hours and ask about their research. Not about the homework. About their actual research. Most professors light up when students show genuine interest in their work outside of class.</p>
-<p>After a conversation or two about their research, mention that you would love to get involved. This is not awkward. This is how academic mentorship has worked for centuries. Professors expect this.</p>
+<h2>5. Talk to Professors You Already Know</h2>
+<p>Cold emailing is useful, but your first research opportunity does not have to come from a stranger.</p>
+<p>Think about professors whose classes you have taken. If one teaches an area you are interested in, go to office hours and ask about research.</p>
+<p>You do not have to walk in and immediately ask for a position.</p>
+<p>Try:</p>
+<blockquote>I've become interested in research on memory after taking this class. I'd like to get some undergraduate research experience. Are there any professors or labs you think I should look into?</blockquote>
+<p>The professor might suggest their own lab. They might also point you toward a colleague whose research is a much better fit.</p>
+<p>That recommendation can be particularly useful because faculty generally have a better sense of what is happening inside their department than you can get from a university website.</p>
 
-<h2>Strategy 7: Use NIH Reporter</h2>
-<p>NIH Reporter (reporter.nih.gov) lets you search for funded research grants at your university. Professors with active funding are more likely to have positions available because they have the budget for it.</p>
-<p>Search for your university plus a topic you are interested in. You will discover professors doing work you had no idea about. This is especially useful at large universities where there are hundreds of faculty members.</p>
+<h2>6. Talk to TAs and Graduate Students</h2>
+<p>Your teaching assistants can also be useful people to ask.</p>
+<p>Many TAs are graduate students doing research themselves. They may know which labs regularly work with undergraduates, which professors have new projects starting, or who is currently looking for help.</p>
+<p>You can simply ask after class or during office hours:</p>
+<blockquote>I'm trying to get some research experience in this area. Do you know of any labs I should look into?</blockquote>
+<p>If a particular graduate student's research interests you, you can also ask them about their work. Undergraduate researchers often work much more closely with graduate students or postdocs than with the principal investigator, so understanding who you would actually be working with matters.</p>
 
-<h2>Getting Started Today</h2>
-<p>Here is your action plan: spend one hour this week browsing lab websites in your department. Pick 5 professors whose work sounds interesting. Read one recent paper from each (even just the abstract is fine). Then write 5 personalized cold emails.</p>
-<p>That one hour of work could land you a research position that changes the trajectory of your career. The students who get research experience are not smarter or more connected. They are simply the ones who reached out. If you want to understand <a href="/blog/undergraduate-research-benefits">why research matters for your future</a>, we cover that too.</p>
-<p>You can also check out <a href="/blog/how-to-find-a-research-mentor">how to find a research mentor</a> for guidance on building a relationship with a professor once you get your foot in the door.</p>
+<h2>7. Apply for Undergraduate Research Programs</h2>
+<p>Not all undergraduate research requires contacting professors individually.</p>
+<p>Many universities run structured undergraduate research programs during the academic year or summer. These may match students with faculty mentors, advertise specific projects or provide funding for students who arrange their own research placement.</p>
+<p>Start with your university's undergraduate research office, honors program and individual academic departments.</p>
+<p>Search for terms such as:</p>
+<p><strong>undergraduate research program + [your university]</strong></p>
+<p><strong>summer research + [your university]</strong></p>
+<p><strong>undergraduate research fellowship + [your university]</strong></p>
+<p><strong>student research grant + [your university]</strong></p>
+<p>These programs can be particularly helpful for students looking for their first experience because the process is designed around undergraduate participation.</p>
+
+<h2>8. Look at Summer Research Programs and REUs</h2>
+<p>Summer can be one of the best times to get concentrated research experience because you are not trying to fit lab work around a full class schedule.</p>
+<p>In the United States, the National Science Foundation supports Research Experiences for Undergraduates, better known as REUs. Individual universities also run summer research programs that may be open to students from other institutions.</p>
+<p>These programs often provide structured mentorship and may include a stipend, although funding and benefits vary by program.</p>
+<p>They can also be competitive, so do not apply to only one program and assume it will work out.</p>
+<p>More importantly, look early. Summer research applications can close months before summer begins.</p>
+<p>See our <a href="/blog/summer-research-opportunities">guide to summer research opportunities</a> for more places to search.</p>
+
+<h2>9. Look Beyond Your Own University</h2>
+<p><strong>You can sometimes get undergraduate research experience at a university you do not attend.</strong></p>
+<p>Summer research programs are the clearest route, but they are not the only possibility. Research institutes, hospitals, museums, government laboratories and other universities may also have student research opportunities.</p>
+<p>Whether an external student can join a particular lab depends on the institution and project. There may be restrictions involving funding, data access, insurance, laboratory access or academic credit.</p>
+<p>Still, if your university has limited research in the subject you care about, there is no reason your search has to stop at the edge of campus.</p>
+
+<h2>10. Look for Research in Hospitals, Institutes and Other Organizations</h2>
+<p>Research does not only happen inside university departments.</p>
+<p>Depending on your field, you may find undergraduate opportunities at teaching hospitals, medical centres, policy institutes, museums, government agencies, nonprofit research organizations or independent research institutes.</p>
+<p>This is particularly worth exploring if you are interested in clinical research, public health, policy, conservation or other fields where research is spread across different types of institutions.</p>
+<p>Search for the topic rather than simply "undergraduate research." Finding the people doing the work first can reveal organizations you did not know existed.</p>
+
+<h2>11. Consider Research for Academic Credit</h2>
+<p>Some universities allow students to conduct research as an independent study, research module, honors project or thesis.</p>
+<p>This can be another route into a lab when there is no paid research assistant position available.</p>
+<p>Ask your academic adviser or department how research credit works at your university. There may be prerequisites, paperwork and minimum time commitments.</p>
+<p>Academic credit should also involve a genuine educational experience rather than simply replacing a paid position with unpaid work.</p>
+
+<h2>12. Be Careful About Automatically Offering to Volunteer</h2>
+<p>If a professor says they do not have funding, it can be tempting to immediately respond that you are willing to work for free.</p>
+<p>Do not assume that is your only option.</p>
+<p>Your university may have undergraduate research grants, work-study funding, fellowships or research-for-credit arrangements. There may also be paid opportunities in other labs.</p>
+<p>And a lack of funding is not always the only issue. Supervising an undergraduate takes time, so a professor who cannot take another student may still say no even if you volunteer.</p>
+<p>If funding comes up, ask what alternatives exist. Our guide on <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a> covers this situation in more detail.</p>
+
+<h2>What Counts as Research Experience for an Undergraduate?</h2>
+<p>Research experience does not have to mean standing at a laboratory bench in a white coat.</p>
+<p>What counts depends on the field.</p>
+<p>You might collect experimental data, recruit participants, conduct interviews, review academic literature, clean datasets, write code, run statistical analyses, work with archival material, assist with fieldwork or help develop experimental materials.</p>
+<p>An independent study or undergraduate thesis can also provide substantial research experience.</p>
+<p>What matters is whether you are participating in the process of answering a research question rather than simply completing routine administrative work unrelated to the research itself.</p>
+
+<h2>Are Undergraduate Research Positions Paid?</h2>
+<p><strong>Some undergraduate research positions are paid, while others are funded through stipends, fellowships or academic credit.</strong></p>
+<p>The arrangement varies considerably between universities, labs and programs.</p>
+<p>Do not be afraid to ask how a position is funded before accepting it. You should also understand how many hours you are expected to work, what you will actually be doing and who will supervise you.</p>
+<p>A research opportunity is not automatically good simply because you can put it on your CV.</p>
+
+<h2>Can First-Year Students Get Research Experience?</h2>
+<p><strong>Yes, first-year students can get research experience, although some labs prefer students who have completed certain introductory courses.</strong></p>
+<p>If you are a freshman or first-year undergraduate, look for labs that already have younger undergraduate researchers and programs specifically designed for early-stage students.</p>
+<p>You may initially be given fairly basic tasks. That is normal. What matters is whether there is an opportunity to learn more and take on greater responsibility over time.</p>
+<p>Starting early can be useful because you have more time to develop within a research group, but there is no requirement that you begin research in your first year.</p>
+
+<h2>When Should You Start Looking for Research Experience?</h2>
+<p>Start before you urgently need a position.</p>
+<p>If you want research during the academic year, begin exploring professors and programs during the preceding semester. If you want a summer position, start looking several months ahead because structured programs can have early application deadlines.</p>
+<p>Professors may also need time to work out supervision, funding and project assignments.</p>
+<p>You do not need to wait until you feel completely qualified. Researching potential labs and reading about their work costs you nothing and gives you a much clearer idea of what skills you might need.</p>
+
+<h2>How Many Professors Should You Contact?</h2>
+<p>There is no magic number.</p>
+<p>You should contact enough professors that your entire search does not depend on one person replying, but not so many that you resort to sending generic emails.</p>
+<p>Start with a small group of strong matches. Contact them individually and continue finding other researchers while you wait.</p>
+<p>Some professors will not respond. Some will already have enough students. Others may like your background but have no suitable project available at the moment.</p>
+<p>That is part of the process rather than evidence that you are not suited to research.</p>
+
+<h2>What If Professors Do Not Reply?</h2>
+<p>If a professor does not respond, wait about one to two weeks and send one short follow-up.</p>
+<p>Academic inboxes are busy, and a non-response does not necessarily mean the professor rejected you.</p>
+<p>If you still receive no response after following up, move on. Continue contacting other researchers rather than repeatedly emailing the same professor.</p>
+<p>See our guide on <a href="/blog/how-to-follow-up-with-a-professor">how to follow up with a professor</a> for examples.</p>
+
+<h2>How to Get Your First Research Position: A Practical Starting Point</h2>
+<p>If you want to start today, do not spend the next month preparing to look for research.</p>
+<p>Choose one research topic you are genuinely curious about. Find several professors working on it. Look at their current projects and recent papers. Check whether their labs work with undergraduates.</p>
+<p>From there, contact the strongest matches.</p>
+<p>At the same time, check your university's undergraduate research office and summer programs, and talk to professors or TAs you already know.</p>
+<p>Then keep looking while you wait for replies.</p>
+<p>Your first research position does not have to be the perfect project with the perfect professor at the perfect university. It needs to give you a chance to see how research is actually done, learn useful skills and decide whether you want to keep doing it.</p>
+
+<h2>Frequently Asked Questions About Undergraduate Research Experience</h2>
+
+<h3>How do I get research experience as an undergraduate?</h3>
+<p>Find professors and labs working on subjects that interest you, check university undergraduate research programs, apply for summer research opportunities and contact relevant professors directly. You can also ask professors, teaching assistants and graduate students you already know for recommendations.</p>
+
+<h3>How do I get research experience with no experience?</h3>
+<p>Apply for entry-level undergraduate research opportunities and focus on relevant skills you already have from coursework, class projects, coding, statistics, writing or laboratory classes. Your first research position is where you begin building formal research experience.</p>
+
+<h3>Can I do research as a freshman?</h3>
+<p>Yes. Some professors and undergraduate research programs accept first-year students. Others may require certain introductory courses, so check the requirements of individual labs and programs.</p>
+
+<h3>Do you need a high GPA to get undergraduate research experience?</h3>
+<p>Not always. Some formal programs have minimum GPA requirements, while individual professors may care more about your relevant coursework, skills, interest in their research and ability to commit consistently to the project.</p>
+
+<h3>Can I do research outside my major?</h3>
+<p>Yes. Research is often interdisciplinary, and you do not necessarily have to work with a professor in your own department. Look for researchers whose actual work matches your interests and skills.</p>
+
+<h3>Can I do research at another university?</h3>
+<p>Sometimes. Summer research programs, research internships and individual labs may accept students from other universities. Eligibility varies, so check the requirements of the specific program or institution.</p>
+
+<h3>Are undergraduate research positions paid?</h3>
+<p>Some are paid hourly or through a stipend, while others are supported by fellowships or completed for academic credit. Funding varies by institution and project, so clarify the arrangement before accepting a position.</p>
+
+<h3>What counts as research experience?</h3>
+<p>Research experience can include laboratory experiments, data analysis, coding, participant recruitment, interviews, fieldwork, archival research, literature reviews, independent studies and undergraduate thesis projects. The exact work depends on your field.</p>
+
+<h3>Should I cold email professors for research?</h3>
+<p>Yes, particularly when you find a professor whose research closely matches your interests and there is no advertised application process. Keep your email short, specific and based on their actual work.</p>
+
+<h3>When should I start looking for summer research?</h3>
+<p>Start several months before summer. Many formal summer research programs have application deadlines during the preceding fall or winter, and individual labs may also plan their summer staffing well in advance.</p>
 
 <div class="blog-cta">
-<h2>Find Your Professor Match</h2>
-<p>Research Match helps you find the right professor in 5 minutes. Search by interest, read their papers in plain English, and check your email before sending.</p>
-<a href="/app" class="btn-cta rm-search-btn">Try Research Match for free</a>
+<h2>Find a Professor Working on What You Actually Want to Research</h2>
+<p>Research Match helps you search for professors by research interest, explore their recent work in plain English, and narrow down who is genuinely worth contacting.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
 </div>`,
-    relatedSlugs: ["undergraduate-research-benefits", "how-to-find-research-opportunities", "how-to-find-a-research-mentor"],
+    relatedSlugs: ["how-to-find-research-positions", "how-to-cold-email-a-professor", "cold-email-professor-template", "how-to-find-a-research-mentor"],
     datePublished: "2026-03-01",
   },
   {
