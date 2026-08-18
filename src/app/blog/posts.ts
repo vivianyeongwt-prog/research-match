@@ -9,6 +9,201 @@ export interface BlogPost {
 }
 
 export const posts: BlogPost[] = [
+
+{
+    slug: "what-is-an-reu-how-to-get-into-one",
+    title: "What Is an REU and How Do You Get Into One?",
+    description: "What is an REU? Learn how NSF Research Experiences for Undergraduates work, who can apply, how competitive REUs are, what applications require, and how to improve your chances.",
+    keyword: "what is an REU",
+    content: `<h2>What Is an REU?</h2>
+<p><strong>An REU, or Research Experiences for Undergraduates, is a program that gives undergraduate students the chance to take part in hands-on research, usually during the summer.</strong> In the United States, many REU programs are funded by the National Science Foundation (NSF) and hosted by universities and research institutions around the country.</p>
+<p>Instead of spending the summer taking classes or working a conventional internship, you join a research group and work on an actual project under the supervision of faculty, graduate students or other researchers.</p>
+<p>Most summer REUs run for several weeks and are designed as full-time experiences. Depending on the program, students may receive a stipend as well as support for housing, travel or other expenses.</p>
+<p>REUs are particularly useful if you are considering graduate school, want to find out whether you actually enjoy research, or attend a university where there are limited opportunities in the field you want to explore.</p>
+<p>There is one important thing to understand before applying: there is no single application that gets you into every REU. Individual REU sites recruit their own students, set their own deadlines and evaluate applications separately.</p>
+
+<h2>What Does REU Stand For?</h2>
+<p><strong>REU stands for Research Experiences for Undergraduates.</strong></p>
+<p>The term is most commonly associated with the NSF's REU program. The NSF supports research opportunities across fields including biology, chemistry, computer science, engineering, mathematics, physics, social sciences, geosciences and other STEM-related areas.</p>
+<p>You may also come across university summer research programs that look very similar to REUs but are funded through another source. Students sometimes use "REU" loosely to describe summer undergraduate research, but technically an NSF REU refers to opportunities supported through the NSF program.</p>
+
+<h2>What Do You Actually Do in an REU?</h2>
+<p>The exact experience depends on your field and host institution, but research is normally the main part of the program.</p>
+<p>A biology student might work in a laboratory collecting and analysing experimental data. A computer science student might write code, work with datasets or test a new model. Someone in environmental science could spend part of the summer doing fieldwork, while a social science student might work with surveys, interviews or quantitative data.</p>
+<p>You will usually be assigned to a faculty mentor or research group and given a project, or a defined part of a larger project, that is realistic to work on during the program.</p>
+<p>Many REUs include activities outside the research itself. There may be seminars, workshops on graduate school, research ethics training, career discussions and social events with the other students in the cohort.</p>
+<p>Programs often end with a poster session, presentation or research report. You are not expected to solve a major scientific problem in ten weeks. The point is to learn what doing research actually involves.</p>
+
+<h2>Are REUs Paid?</h2>
+<p><strong>NSF-supported REUs generally provide students with a stipend.</strong> The exact amount varies between programs.</p>
+<p>Some programs also provide housing, a housing allowance, travel assistance, meals or other support. Do not assume that every cost is covered, however. Read the individual program page carefully before applying or accepting an offer.</p>
+<p>This is one reason REUs can be attractive compared with trying to arrange an informal summer position in a lab. Funding and the basic structure of the experience are normally established before students arrive.</p>
+
+<h2>How Long Is an REU?</h2>
+<p><strong>Summer REUs commonly last around eight to ten weeks, although the exact length varies by program.</strong></p>
+<p>They are usually full-time. That can make it difficult to combine an REU with summer classes, another internship or a substantial job.</p>
+<p>Always check the program dates before applying. Some REUs require students to participate for the entire period and may not be able to accommodate late arrivals or early departures.</p>
+
+<h2>Who Can Apply for an REU?</h2>
+<p>Eligibility varies, so the individual REU listing should always be your source of truth.</p>
+<p>For NSF-funded REU Sites, participants generally need to be undergraduate students, and NSF-funded participants are subject to citizenship or permanent-residency requirements. Individual programs may add other criteria based on academic level, coursework, research interests or the nature of the project.</p>
+<p>Do not rule yourself out simply because you are not studying at the university hosting the program. A major point of REU Sites is that they can bring students to research environments beyond their home institution.</p>
+<p>If you are an international student or do not meet the NSF funding eligibility requirements, check the program carefully. A university may have other summer research programs or funding sources with different eligibility rules.</p>
+
+<h2>Do You Need Research Experience to Apply for an REU?</h2>
+<p><strong>Not necessarily.</strong> Some REUs are specifically interested in students who have had limited access to research opportunities.</p>
+<p>That means having no previous lab position does not automatically make you a weak applicant.</p>
+<p>If you have no formal research experience, focus on what has prepared you to begin. That could include relevant courses, laboratory classes, coding, statistics, a substantial class project or independent reading in the field.</p>
+<p>You should also be able to explain why you want research experience now.</p>
+<p>"I need research for graduate school" is understandable, but it does not say much about what you actually want to investigate. An application becomes much more interesting when the reader can see which questions or areas have caught your attention.</p>
+<p>If you are trying to get your first research experience more generally, see our guide on <a href="/blog/how-to-get-research-experience-undergrad">how to get research experience as an undergraduate</a>.</p>
+
+<h2>How Competitive Are REUs?</h2>
+<p><strong>REUs can be competitive, particularly programs in popular fields or at well-known institutions.</strong> There is no meaningful acceptance rate that applies to every REU because each site receives a different number of applications and has a different number of places.</p>
+<p>This is why it is risky to apply to one famous program and treat it as your entire summer research plan.</p>
+<p>Look beyond university names.</p>
+<p>A smaller program may have a research project that fits your interests much more closely than a famous university where none of the available projects particularly excite you.</p>
+<p>The quality of the mentor, the project you work on and the amount of research you actually get to do can matter considerably more than the name printed at the top of the program website.</p>
+
+<h2>What Do REU Programs Look for?</h2>
+<p>There is no universal REU selection formula. Different programs value different things.</p>
+<p>In general, selectors want to understand why you are interested in research, whether your interests fit the work available at the site, what has prepared you for the experience and what you hope to gain from the summer.</p>
+<p>Academic performance can matter, particularly when a project requires certain prerequisite knowledge, but an REU application is not simply a GPA competition.</p>
+<p>Your statement should make it possible for the reader to imagine you in the program.</p>
+<p>If you say you are "passionate about science and research," they learn almost nothing about you. If you explain that a genetics course made you curious about gene regulation and you now want experience studying those questions experimentally, there is something concrete to work with.</p>
+
+<h2>How Do You Find REU Programs?</h2>
+<p><strong>The NSF maintains information about REU Sites, but you should also search university and research institution websites for individual programs.</strong></p>
+<p>Start with the research area rather than the university name.</p>
+<p>For example, if you are interested in computational neuroscience, look for REUs and summer research programs related to neuroscience, computation, cognitive science, biomedical engineering and computer science.</p>
+<p>Research interests do not always fit neatly into one academic department.</p>
+<p>Once you find a program, look at the faculty mentors and research projects associated with it. Do not apply simply because the university is prestigious.</p>
+<p>If the program lists participating professors, investigate what those researchers are actually working on. <a href="/app">Research Match</a> can help you find professors by research interest and understand their recent papers in plain English, which can make it easier to decide whether a particular REU is genuinely a good fit.</p>
+
+<h2>When Should You Apply for an REU?</h2>
+<p><strong>Start looking for summer REUs during the fall and winter before the summer you want to participate.</strong></p>
+<p>Application deadlines vary substantially by site, and many close well before summer begins.</p>
+<p>Do not wait until April or May to begin searching and assume summer research applications will still be open.</p>
+<p>Starting early also gives you time to request recommendation letters, write a proper personal or research statement and investigate the faculty involved in each program.</p>
+<p>A simple spreadsheet can help. Track the program, research area, deadline, required documents, recommendation letters, program dates and application status.</p>
+
+<h2>What Do You Need for an REU Application?</h2>
+<p>Requirements vary, but an REU application may ask for your academic transcript, resume or CV, statement of interest, information about relevant coursework and one or more recommendation letters.</p>
+<p>Some applications also ask you to rank projects or faculty mentors.</p>
+<p>Read the requirements before you start writing. If a program asks you to discuss three specific questions, answering a generic "why I love research" essay instead is not going to help.</p>
+<p>It is also worth checking requirements early because recommendation letters take time. Asking a professor the night before an REU deadline puts both of you in a difficult position.</p>
+
+<h2>How Do You Write a Strong REU Personal Statement?</h2>
+<p>A good REU statement should connect three things: <strong>what you have done, what you are interested in now, and why this particular program makes sense as your next step.</strong></p>
+<p>You do not need a dramatic story about knowing you wanted to become a scientist at age six.</p>
+<p>Start with what actually led you toward the research area. Maybe it was a course, class project, previous lab experience or a question you encountered while reading.</p>
+<p>Then explain what you want to explore further.</p>
+<p>Finally, connect that interest to the program. Mention relevant research areas, projects or mentors where appropriate. The reader should be able to tell that you did not submit the same statement to every REU.</p>
+<p>Specificity helps here for the same reason it helps when <a href="/blog/how-to-cold-email-a-professor">cold emailing professors about research</a>: it shows that you have thought about why this particular research environment fits you.</p>
+
+<h2>Should You Mention Specific Professors in Your REU Application?</h2>
+<p><strong>If the program asks about faculty or project preferences, mentioning specific researchers can strengthen your application when there is a genuine fit.</strong></p>
+<p>Do some research first.</p>
+<p>Do not choose the professor whose biography sounds most impressive. Look at what they have published recently and whether you would actually want to spend your summer working on related questions.</p>
+<p>You might write that you are particularly interested in Professor X's work because of a specific research question or method that connects to your previous coursework.</p>
+<p>A sentence like that is more useful than writing that you would be "honoured to work with any of the world-renowned faculty."</p>
+
+<h2>How Important Is GPA for an REU?</h2>
+<p><strong>GPA can matter, but it is only one part of an REU application.</strong></p>
+<p>Some programs have minimum academic requirements. Others evaluate applicants more broadly and consider research interests, preparation, recommendation letters, access to research opportunities and fit with available projects.</p>
+<p>If your GPA is not exceptional, do not assume there is no point applying unless you fail to meet an explicit eligibility requirement.</p>
+<p>Spend your effort showing why the research interests you and what has prepared you to take part in it.</p>
+
+<h2>Who Should Write Your REU Recommendation Letter?</h2>
+<p>Choose someone who can say something meaningful about how you work as a student.</p>
+<p>A professor who knows you from class, laboratory work, a project or office hours can often write a more useful letter than a famous professor who barely remembers you.</p>
+<p>Give your recommender enough notice. Send them the program information, deadline, your CV and a short explanation of why you are applying.</p>
+<p>If you are applying to several REUs, tell them upfront rather than returning every few days with another unexpected request.</p>
+
+<h2>Can You Apply to Multiple REUs?</h2>
+<p><strong>Yes. Applying to multiple REUs is sensible because individual programs can be competitive.</strong></p>
+<p>That does not mean sending an identical application everywhere.</p>
+<p>Create a solid base CV and keep notes about your research interests, but tailor the parts of each application that ask why you want that particular program.</p>
+<p>You should be able to explain why each REU made your list.</p>
+
+<h2>Can International Students Apply for REUs?</h2>
+<p>International students need to check eligibility particularly carefully.</p>
+<p>NSF-funded undergraduate participants are generally subject to U.S. citizenship, national or permanent-residency requirements. However, universities may run other summer research programs using different funding sources, and those programs can have different rules.</p>
+<p>If you are an international student, do not search only for the term "REU." Also look for <strong>summer undergraduate research programs</strong>, <strong>summer research internships</strong> and university-specific research schemes that explicitly state their eligibility requirements.</p>
+
+<h2>Can You Do an REU at Another University?</h2>
+<p><strong>Yes. Many students participate in REUs hosted by universities other than the one they attend.</strong></p>
+<p>That is one of the biggest advantages of the format.</p>
+<p>If your university does not have researchers working in the area you want to explore, a summer program can give you access to a completely different research environment.</p>
+<p>It can also give you a useful glimpse of another institution if you are considering graduate school later.</p>
+
+<h2>Does an REU Help With Graduate School?</h2>
+<p><strong>An REU can strengthen a graduate school application, but the value is not simply having "REU" written on your CV.</strong></p>
+<p>The useful part is the research experience itself.</p>
+<p>You may finish the summer with a clearer idea of what questions interest you, stronger technical skills, experience discussing research and a mentor who knows your work well enough to write a detailed recommendation letter.</p>
+<p>You may also discover that you do not enjoy full-time research as much as you expected. That is useful information too, and considerably better to learn during an undergraduate summer than halfway through a PhD.</p>
+
+<h2>What If You Don't Get Into an REU?</h2>
+<p>Not getting an REU does not mean you cannot do research that summer.</p>
+<p>Contact professors at your own university. Look for other summer research programs, hospitals, institutes and research centres. Ask whether your university offers undergraduate research funding. You can also investigate professors at nearby institutions if their rules allow external students to participate.</p>
+<p>This is why it is better to think about your goal as <strong>getting useful research experience</strong> rather than simply "getting an REU."</p>
+<p>If your REU applications do not work out, go back to the researchers themselves. Our guide on <a href="/blog/how-to-find-research-positions">how to find research positions</a> covers several ways to find opportunities that are never advertised through formal programs.</p>
+
+<h2>How to Improve Your Chances of Getting Into an REU</h2>
+<p>Start early enough that you have time to investigate each program properly. Apply to several programs where the research genuinely fits your interests rather than choosing only famous universities.</p>
+<p>Read about the available projects and faculty. Make your statement specific enough that the reader can see why you chose their program. Ask for recommendation letters early and give your recommenders useful context.</p>
+<p>Most importantly, do not try to manufacture a version of yourself that you think sounds like a researcher.</p>
+<p>If you are new to research, say so. Explain what has made you curious about the field and what you want to learn. An undergraduate summer research program is supposed to involve learning.</p>
+
+<h2>Frequently Asked Questions About REUs</h2>
+
+<h3>What does REU mean?</h3>
+<p>REU stands for Research Experiences for Undergraduates. The term is commonly used for NSF-supported undergraduate research programs hosted by universities and research institutions in the United States.</p>
+
+<h3>Is an REU an internship?</h3>
+<p>An REU is similar to a research internship in that students spend a defined period working in a research environment. REUs are specifically structured around undergraduate research and often include mentoring, seminars and research presentations in addition to the project itself.</p>
+
+<h3>Are REUs only for STEM students?</h3>
+<p>NSF REU opportunities are concentrated in fields supported by the National Science Foundation, which includes a broad range of science, engineering, mathematics and some social science disciplines. Other universities also offer undergraduate summer research programs outside these areas.</p>
+
+<h3>Are REUs paid?</h3>
+<p>NSF-supported REU participants generally receive a stipend. Some sites also provide housing, travel or other support. The amount and benefits vary by program, so check the individual REU listing.</p>
+
+<h3>How long does an REU last?</h3>
+<p>Many summer REUs last around eight to ten weeks, although program lengths vary. They are generally designed as full-time summer research experiences.</p>
+
+<h3>Do you need research experience for an REU?</h3>
+<p>No, not necessarily. Some REUs actively seek students who have had limited access to research. Relevant coursework, projects, technical skills and a clear interest in the research area can all help demonstrate your preparation.</p>
+
+<h3>How hard is it to get into an REU?</h3>
+<p>Some REUs are highly competitive, but competitiveness varies considerably between programs. There is no single acceptance rate for REUs. Applying to several programs with research that genuinely matches your interests is generally more sensible than relying on one application.</p>
+
+<h3>What GPA do you need for an REU?</h3>
+<p>There is no universal GPA requirement for all REUs. Individual programs may set minimum requirements, while others evaluate applicants using several factors including research fit, coursework, recommendations and previous opportunities.</p>
+
+<h3>Can freshmen apply for REUs?</h3>
+<p>Some programs accept first-year students while others have academic-year or prerequisite requirements. Check the eligibility rules for each REU rather than assuming you are too early in your degree to apply.</p>
+
+<h3>Can international students apply for an REU?</h3>
+<p>NSF-funded REU participants are generally subject to U.S. citizenship, national or permanent-residency requirements. International students should check individual eligibility rules and also search for university summer research programs funded through other sources.</p>
+
+<h3>Can you apply to more than one REU?</h3>
+<p>Yes. Students can apply to multiple REU programs. Because programs can be competitive, applying to several strong-fit opportunities can give you more options.</p>
+
+<h3>When should I start applying for REUs?</h3>
+<p>Start researching programs during the fall and winter before the summer you want to participate. Deadlines vary, and many applications close months before summer begins.</p>
+
+<h3>Does an REU look good for grad school?</h3>
+<p>An REU can strengthen a graduate school application by giving you meaningful research experience, new skills and potentially a strong recommendation. The substance of what you did and learned is more important than the REU label itself.</p>
+
+<div class="blog-cta">
+<h2>Research the Professors Before You Apply</h2>
+<p>Found an REU but don't know which faculty or projects fit your interests? Research Match helps you find professors by research topic and understand their recent papers in plain English, so you can make more informed choices about the programs and mentors you apply to work with.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
+</div>`,
+    relatedSlugs: ["how-to-get-research-experience-undergrad", "how-to-find-research-positions", "how-to-cold-email-a-professor", "how-to-find-a-research-mentor"],
+    datePublished: "2026-08-18",
+  },
   {
 slug: "professor-said-no-funding-should-i-still-ask-to-join",
 title: "Professor Said They Have No Funding: Should I Still Ask to Join Their Research?",
