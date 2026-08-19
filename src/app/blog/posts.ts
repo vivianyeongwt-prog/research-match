@@ -11,6 +11,262 @@ export interface BlogPost {
 export const posts: BlogPost[] = [
 
 {
+    slug: "machine-learning-research-opportunities-undergraduate",
+    title: "How to Find Machine Learning Research Opportunities as an Undergraduate",
+    description: "Learn how to find machine learning research opportunities as an undergraduate, even with no previous research experience. Find ML professors, labs, REUs, summer programs, and research projects worth applying to.",
+    keyword: "machine learning research opportunities for undergraduates",
+    content: `<h2>How Can an Undergraduate Get Machine Learning Research Experience?</h2>
+<p><strong>The most practical way to get machine learning research experience as an undergraduate is to find professors and research groups working on ML topics you genuinely care about, look for structured summer research programs, and contact researchers directly when there is no advertised opening.</strong></p>
+<p>You do not need to wait until you have taken every advanced machine learning course or built an impressive portfolio of neural networks. Undergraduate researchers often enter labs with a foundation in programming, mathematics or data analysis and learn more specialised methods through the research itself.</p>
+<p>The difficult part is usually finding the opportunities.</p>
+<p>A search for "machine learning internship" tends to produce industry software and data science roles. Academic ML research is less straightforward. A professor may be looking for an undergraduate to help with an experiment, reproduce a model, clean a dataset or implement part of a research pipeline without ever posting a formal job advertisement.</p>
+<p>That means your search should begin with the research rather than the job title.</p>
+
+<h2>What Counts as Machine Learning Research?</h2>
+<p>Machine learning research is broader than training increasingly large neural networks.</p>
+<p>Some researchers develop new models or learning algorithms. Others investigate why models behave the way they do, how reliable they are, how efficiently they can be trained, or how they can be applied to problems in medicine, biology, climate science, robotics, language, economics and many other fields.</p>
+<p>Areas you might encounter include computer vision, natural language processing, reinforcement learning, generative AI, representation learning, trustworthy AI, interpretability, optimisation, multimodal learning, graph machine learning and machine learning for science.</p>
+<p>There is also plenty of ML research happening outside computer science departments.</p>
+<p>A medical researcher might use machine learning to analyse imaging data. A computational biologist may build models for protein interactions. A neuroscience group might use ML to decode neural activity. An economics lab might apply machine learning to large behavioural datasets.</p>
+<p>If you only search the computer science faculty page, you can miss a surprising amount of relevant work.</p>
+
+<h2>1. Decide Which Part of Machine Learning Actually Interests You</h2>
+<p>"I want to do AI research" is enough to start searching, but it is too broad to make a useful shortlist of professors.</p>
+<p>Try narrowing it one level.</p>
+<p>You might be interested in large language models, computer vision, healthcare AI, recommendation systems, reinforcement learning, AI safety, robotics, machine learning for biology or simply how neural networks learn representations.</p>
+<p>You do not need to understand the field well enough to choose a lifelong specialisation. You are simply giving yourself better search terms.</p>
+<p>If you are unsure, look at projects you enjoyed building, lectures that made you curious, papers you came across online or problems you would genuinely like to understand better.</p>
+<p>A student who enjoyed building an image classifier might explore computer vision. Someone interested in ChatGPT could look beyond the phrase "LLM research" into language modelling, evaluation, retrieval, reasoning or human-AI interaction.</p>
+
+<h2>2. Search for Professors by Research Topic</h2>
+<p>Once you have a rough area, find the people publishing research in it.</p>
+<p>Start with your own university. Search the computer science department, but also look at statistics, mathematics, electrical engineering, robotics, biomedical engineering, neuroscience and other departments where machine learning may be used.</p>
+<p>Research centres are particularly useful. Universities increasingly organise AI work through interdisciplinary institutes rather than a single department.</p>
+<p>Instead of searching:</p>
+<p><strong>machine learning professor</strong></p>
+<p>try searches such as:</p>
+<p><strong>multimodal learning professor + [university]</strong></p>
+<p><strong>machine learning healthcare lab + [university]</strong></p>
+<p><strong>reinforcement learning research + [university]</strong></p>
+<p><strong>computer vision lab + [university]</strong></p>
+<p>Research Match can make this part easier. With <a href="/app">Research Match</a>, you can search by a research interest such as "machine learning for drug discovery" or "LLM interpretability" and find professors whose published work overlaps with that topic instead of opening faculty directories one by one.</p>
+
+<h2>3. Look at What the Professor Has Published Recently</h2>
+<p>A faculty profile that says "machine learning and artificial intelligence" does not tell you enough.</p>
+<p>Look at the professor's recent papers and projects.</p>
+<p>You are trying to figure out what their group is actually working on now. Research interests change, and a broad faculty biography may have been written years ago.</p>
+<p>You do not need to understand the full mathematical derivation in every paper before you contact someone.</p>
+<p>Start with the title and abstract. Look at the problem the paper addresses, the approach taken and the main result. If the paper is still interesting after that, read further.</p>
+<p>For an undergraduate looking for their first opportunity, the most important question is not whether you can explain every equation.</p>
+<p>It is whether you are interested enough in the problem to spend weeks or months learning more about it.</p>
+<p>Research Match also gives you plain-English summaries of researchers' papers, which can help when you have found a promising professor but the publication list is full of terminology you have not encountered in class yet.</p>
+
+<h2>4. Check Whether the Lab Already Works With Undergraduates</h2>
+<p>Look at the lab's People page.</p>
+<p>If undergraduate students are already listed, that is useful information. It suggests the group has at least some experience giving research work to students at your level.</p>
+<p>Look at what those students are doing if the website tells you.</p>
+<p>One lab may have undergraduates working on independent projects. Another may involve them mainly in implementation, dataset preparation or experiments run by PhD students.</p>
+<p>Neither is automatically better. For a first research experience, working closely with a graduate student on a well-defined part of a larger project can be a very good way to learn.</p>
+<p>Also check for pages called "Join Us," "Prospective Students," "Open Positions" or "Undergraduate Research."</p>
+<p>If the professor has written instructions for prospective students, follow them. There is little point carefully personalising an email and then ignoring the application process described on the lab website.</p>
+
+<h2>5. Do You Need Machine Learning Experience Before Joining a Lab?</h2>
+<p><strong>You do not necessarily need previous machine learning research experience to join an ML lab as an undergraduate.</strong></p>
+<p>What you need depends on the project.</p>
+<p>Some research groups may expect students to already understand machine learning fundamentals. Others may have projects where strong Python skills, linear algebra, probability, statistics or general programming ability are enough to start.</p>
+<p>If you have taken an introductory ML course, mention it.</p>
+<p>If you have built a class project using PyTorch or TensorFlow, mention that.</p>
+<p>If you have not taken machine learning yet but are comfortable with Python and statistics, that can still be relevant.</p>
+<p>The important part is being accurate about your level.</p>
+<p>"I have used PyTorch in two class projects and am still learning how to implement models independently" is far more useful than calling yourself an "AI expert."</p>
+
+<h2>What Skills Help You Get an Undergraduate ML Research Position?</h2>
+<p>You do not need all of these, but several skills appear repeatedly across machine learning research.</p>
+<p><strong>Python</strong> is the most useful starting point for many ML projects. Familiarity with NumPy, pandas and basic data handling can be valuable even before you become comfortable with deep learning frameworks.</p>
+<p><strong>Machine learning fundamentals</strong> matter too. You should gradually understand ideas such as training and validation data, overfitting, loss functions, optimisation and model evaluation.</p>
+<p><strong>Linear algebra, probability and statistics</strong> become increasingly useful as you move beyond simply running existing code.</p>
+<p>Depending on the lab, familiarity with <strong>PyTorch, TensorFlow, JAX, scikit-learn, Git or Linux</strong> may help.</p>
+<p>But do not turn this into a six-month checklist that prevents you from ever contacting anyone.</p>
+<p>If a lab interests you, look at the tools used in its recent papers and projects. That gives you a much more realistic idea of what would actually be useful to learn.</p>
+
+<h2>6. Email Machine Learning Professors Directly</h2>
+<p><strong>You can email an ML professor about research even if their lab has not posted an undergraduate position.</strong></p>
+<p>Keep the message short.</p>
+<p>Explain which part of their work interests you, mention the background you have that could be relevant, and ask whether they currently take undergraduate researchers.</p>
+<p>For example:</p>
+<blockquote>Dear Professor Lee,<br><br>
+I came across your group's recent work on evaluating hallucinations in multimodal language models and was particularly interested in how you compared model confidence with factual accuracy.<br><br>
+I am a second-year computer science student and have completed introductory machine learning and probability courses. I have also been using PyTorch for a class project on image classification and would like to get some experience working on ML research rather than only coursework projects.<br><br>
+I wanted to ask whether you are currently taking undergraduate researchers, or expect to have any opportunities next semester. I would be happy to send my CV if useful.<br><br>
+Best,<br>
+[Your Name]</blockquote>
+<p>Notice that the email does not claim you have understood the professor's entire paper. It simply demonstrates that you spent enough time looking at the work to explain why you chose that lab.</p>
+<p>If you want more examples, see our <a href="/blog/cold-email-professor-template">cold email professor template</a> and guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor for research</a>.</p>
+
+<h2>7. Contact Graduate Students Working on ML Projects</h2>
+<p>Do not assume the professor is the only person worth talking to.</p>
+<p>A lot of undergraduate research is supervised day to day by PhD students or postdoctoral researchers.</p>
+<p>If a graduate student's project is especially close to your interests, read about what they are doing. You can send a short message asking about the work and whether the lab typically involves undergraduates.</p>
+<p>This can be particularly useful in large machine learning labs where the principal investigator oversees many projects at once.</p>
+<p>You may also get a much clearer picture of what undergraduate researchers actually do in the group.</p>
+
+<h2>8. Look for Machine Learning REUs and Summer Research Programs</h2>
+<p>Structured summer programs are another route into machine learning research.</p>
+<p>In the United States, NSF Research Experiences for Undergraduates programs can include computing, artificial intelligence and interdisciplinary projects that use machine learning.</p>
+<p>Do not search only for "machine learning REU."</p>
+<p>Try related areas including artificial intelligence, computer science, data science, robotics, computational biology, computational neuroscience, scientific computing and AI for science.</p>
+<p>A program may contain substantial ML research without putting "machine learning" in its title.</p>
+<p>If you are unfamiliar with these programs, read our guide on <a href="/blog/what-is-an-reu-how-to-get-into-one">what an REU is and how to get into one</a>.</p>
+
+<h2>9. Check Your University's Undergraduate Research Programs</h2>
+<p>Your university may already have a formal route into ML research that never appears on the normal jobs page.</p>
+<p>Look at the undergraduate research office, computer science department, honours program, AI institute and engineering school.</p>
+<p>Search for terms such as:</p>
+<p><strong>undergraduate AI research + [university]</strong></p>
+<p><strong>computer science undergraduate research + [university]</strong></p>
+<p><strong>machine learning research assistant + [university]</strong></p>
+<p><strong>summer AI research + [university]</strong></p>
+<p><strong>undergraduate research fellowship + [university]</strong></p>
+<p>Some programs match students with mentors. Others provide funding after you have already found a professor willing to supervise you.</p>
+
+<h2>10. Look Beyond Computer Science Departments</h2>
+<p>This is one of the easiest ways to expand your options.</p>
+<p>Machine learning is increasingly used as a research method rather than treated as a field that belongs only to computer science.</p>
+<p>If you are interested in healthcare, look at medical and biomedical engineering researchers using ML.</p>
+<p>If you like biology, search for computational biology and bioinformatics groups.</p>
+<p>If you are interested in climate change, look for researchers applying machine learning to weather, remote sensing or environmental modelling.</p>
+<p>For language, consider computational linguistics and cognitive science as well as NLP groups.</p>
+<p>This can also be a good strategy if the obvious ML labs at your university receive enormous numbers of student enquiries.</p>
+
+<h2>11. Consider Industry Research Programs</h2>
+<p>Academic labs are not the only places where undergraduate machine learning research happens.</p>
+<p>Technology companies and independent research organisations sometimes run student researcher programs, research internships or other placements involving AI and machine learning.</p>
+<p>These positions can be considerably different from normal software engineering internships, so read the description carefully. A role labelled "ML intern" may primarily involve production engineering, while another position may involve experiments that are closer to academic research.</p>
+<p>Do not assume one is better than the other. Decide whether your goal is to learn how ML systems are built in industry, experience academic-style research, prepare for graduate school or simply explore the field.</p>
+
+<h2>12. Build Projects That Make It Easier to Say Yes to You</h2>
+<p>You do not need an enormous portfolio before approaching a lab, but having something concrete to discuss helps.</p>
+<p>A useful project does not have to be a brand-new AI product.</p>
+<p>You could reproduce the result of a paper, compare two models on an interesting dataset, implement a simple algorithm from scratch, investigate why a model fails on certain examples or extend a class project beyond the assignment requirements.</p>
+<p>For research, the interesting part is often the question you investigated rather than the fact that you built another classifier.</p>
+<p>Be prepared to explain what you tried, what went wrong and what you would investigate next.</p>
+<p>That conversation sounds much closer to research than simply listing model accuracy on your CV.</p>
+
+<h2>Can You Get ML Research Experience With No Research Experience?</h2>
+<p><strong>Yes. Your first ML research opportunity does not require you to already be an experienced researcher.</strong></p>
+<p>If you have never done research, focus on the closest evidence you have.</p>
+<p>That might be a course project, programming experience, mathematics coursework, a Kaggle project, open-source work or independent reading.</p>
+<p>You can also look specifically for programs intended to introduce undergraduates to research.</p>
+<p>Be realistic about which projects you approach. If a professor is looking for someone to modify a complex distributed training system and you have only just learned Python, that probably is not the right first project.</p>
+<p>But "I don't know enough yet" can easily turn into an excuse to never approach anyone. Read the project requirements rather than rejecting yourself in advance.</p>
+
+<h2>Do You Need Publications to Get Into Machine Learning Research?</h2>
+<p><strong>No. Undergraduate students do not need publications before they can begin doing machine learning research.</strong></p>
+<p>A publication can certainly become valuable later if you are considering research-oriented graduate programs, but it is an outcome of some research experiences, not a prerequisite for starting your first one.</p>
+<p>Your first goal should be to learn how research works: reading papers critically, defining questions, designing experiments, dealing with results that do not work and communicating what you found.</p>
+<p>Publication may or may not come from that work.</p>
+
+<h2>Should You Learn PyTorch Before Applying to ML Labs?</h2>
+<p>Knowing PyTorch can make you more useful to many machine learning labs, but you should not treat it as a universal admission requirement.</p>
+<p>Look at the lab's actual work.</p>
+<p>If its repositories and recent projects use PyTorch heavily, learning the basics before contacting them is sensible. If the group works mainly on theoretical machine learning, your mathematical background may matter much more.</p>
+<p>For another lab, data engineering, statistics or domain expertise could be more valuable.</p>
+<p>Prepare for the research you want to do rather than accumulating tools simply because they appear on lists of "ML skills."</p>
+
+<h2>Can You Do Machine Learning Research Outside Your University?</h2>
+<p><strong>Yes. Undergraduates can sometimes do ML research at another university or research institution.</strong></p>
+<p>Structured summer programs are the easiest route because eligibility, supervision and funding arrangements are already defined.</p>
+<p>You can also investigate professors at nearby universities or research institutes, although whether they can take external students depends on their institution and project.</p>
+<p>If your university has relatively little machine learning research, widening the geographical search can make a substantial difference.</p>
+
+<h2>Are Undergraduate Machine Learning Research Positions Paid?</h2>
+<p>Some are paid and some are not.</p>
+<p>You may be hired as a research assistant, receive funding through an undergraduate research grant, receive a summer stipend, work through a structured program or complete research for academic credit.</p>
+<p>If a professor is interested in working with you but says funding is unavailable, do not immediately assume you must volunteer indefinitely.</p>
+<p>Ask whether undergraduate research funding, fellowships or credit-bearing options exist. You can read more in <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a>.</p>
+
+<h2>What Will You Actually Do as an Undergraduate ML Researcher?</h2>
+<p>Your first research role may be less glamorous than the phrase "AI researcher" suggests.</p>
+<p>You might reproduce experiments from an existing paper, clean datasets, implement baselines, run ablation studies, evaluate models, debug research code, review literature or build tools that support a larger project.</p>
+<p>That is not a bad thing.</p>
+<p>These tasks expose you to how research actually happens. Experiments fail. Libraries break. Results contradict expectations. A dataset turns out to have problems nobody noticed at the beginning.</p>
+<p>Over time, you may take ownership of a more independent question, but you do not need your own groundbreaking model in week one for the experience to count.</p>
+
+<h2>How to Choose Between Machine Learning Research Labs</h2>
+<p>Do not choose a lab entirely because the professor is famous.</p>
+<p>For an undergraduate, supervision matters enormously.</p>
+<p>Ask who you would work with most closely, what undergraduate students usually do, how frequently the group meets and what kind of time commitment is expected.</p>
+<p>A well-known lab where you receive almost no guidance may not teach you as much as a smaller group where a PhD student or professor actually has time to help you develop.</p>
+<p>The research topic matters too. Ten weeks spent investigating a problem you genuinely care about is very different from joining a fashionable AI project merely because "LLMs" looks good on a resume.</p>
+
+<h2>How Early Should You Start Looking for ML Research?</h2>
+<p>Start before you urgently need the experience.</p>
+<p>If you want a position during the academic year, begin exploring labs in the semester before you hope to start. For summer research, search several months ahead because many structured programs have early deadlines.</p>
+<p>You can begin even earlier by reading papers and identifying researchers you may eventually want to approach.</p>
+<p>That gives you time to learn a useful tool or take a relevant course rather than discovering an ideal lab three days before applications close.</p>
+
+<h2>What If No Machine Learning Professor Replies?</h2>
+<p>Do not conclude that you are not qualified for ML research after three unanswered emails.</p>
+<p>Professors may be busy, their labs may be full or they may not have a suitable undergraduate project at that moment.</p>
+<p>Send one short follow-up after roughly one to two weeks if you have not heard back. If there is still no response, continue with other researchers.</p>
+<p>You should also broaden the search. Look at adjacent departments, newer faculty members, interdisciplinary centres and structured programs.</p>
+<p>Our guide on <a href="/blog/how-to-follow-up-with-a-professor">how to follow up with a professor</a> covers what to send when your first email gets no response.</p>
+
+<h2>A Practical Plan for Finding Your First ML Research Opportunity</h2>
+<p>If you are starting from scratch, choose one or two areas of machine learning that interest you and find researchers working on them.</p>
+<p>Read enough of their recent work to understand the questions their groups are asking. Check whether they work with undergraduates and what skills their projects seem to use.</p>
+<p>Then contact your strongest matches individually.</p>
+<p>At the same time, look at your university's undergraduate research programs, AI institutes and summer opportunities. Search REUs and programs outside your university as well.</p>
+<p>Keep building your technical skills while you search, but do not wait until you feel like an expert. You probably will not.</p>
+<p>The point of an undergraduate research position is not to prove that you already know how to be a machine learning researcher. It is to give you somewhere to begin becoming one.</p>
+
+<h2>Frequently Asked Questions About Undergraduate Machine Learning Research</h2>
+
+<h3>How do I get machine learning research experience as an undergraduate?</h3>
+<p>Find professors and labs working on machine learning topics you care about, investigate their recent work, and contact strong matches directly. You should also apply to undergraduate research programs, REUs, summer research opportunities and relevant industry research programs.</p>
+
+<h3>Can undergraduates do machine learning research?</h3>
+<p>Yes. Undergraduate students can work on machine learning research through university labs, research assistant positions, independent studies, summer programs, REUs and industry research placements.</p>
+
+<h3>Can I get an ML research position with no experience?</h3>
+<p>Yes. For your first position, use relevant coursework, programming, mathematics, statistics and class projects to demonstrate your preparation. Look particularly for labs and programs that already work with undergraduate students.</p>
+
+<h3>What skills do I need for undergraduate machine learning research?</h3>
+<p>Python is useful for many projects, along with basic machine learning concepts, statistics and linear algebra. Frameworks such as PyTorch may help for deep learning projects, but the most valuable skills depend on the research group and project.</p>
+
+<h3>Do I need PyTorch for machine learning research?</h3>
+<p>Not always. PyTorch is widely useful for deep learning research, but theoretical ML, statistics-heavy research and domain-specific projects may require different skills. Check what the lab actually uses before deciding what to learn.</p>
+
+<h3>Do I need publications before joining an ML lab?</h3>
+<p>No. Publications are not a normal prerequisite for getting your first undergraduate research experience. They may result from research you do later, but your initial goal should be learning how research is conducted.</p>
+
+<h3>Where can I find machine learning research opportunities?</h3>
+<p>Check university faculty and lab websites, AI research institutes, undergraduate research offices, NSF REU programs, summer research programs and research opportunities at other universities or organisations. Directly contacting professors can also uncover opportunities that were never advertised.</p>
+
+<h3>Should I cold email machine learning professors?</h3>
+<p>Yes, if their work genuinely matches your interests and they do not provide another application process. Mention a specific part of their research, briefly describe your relevant background and ask whether they take undergraduate researchers.</p>
+
+<h3>Can I do ML research outside the computer science department?</h3>
+<p>Yes. Machine learning research appears in fields including medicine, biology, neuroscience, engineering, climate science, economics and linguistics. Searching by research topic rather than department can reveal many more opportunities.</p>
+
+<h3>Can I do machine learning research at another university?</h3>
+<p>Sometimes. Summer research programs and REUs commonly bring students to other institutions, while some individual labs may also accept external students depending on university rules, funding and supervision.</p>
+
+<h3>Are undergraduate machine learning research positions paid?</h3>
+<p>Some are. Students may receive hourly research assistant pay, summer stipends, fellowships or undergraduate research funding. Other research may be completed for academic credit. Funding arrangements vary by institution and program.</p>
+
+<h3>Does machine learning research help with graduate school?</h3>
+<p>It can be particularly useful if you are considering research-oriented master's or PhD programs because it gives you experience reading papers, conducting experiments and working with research mentors. The substance of the experience matters more than simply having "machine learning research" on your CV.</p>
+
+<div class="blog-cta">
+<h2>Find Machine Learning Researchers Working on Your Interests</h2>
+<p>Research Match helps you search for professors by the ML topic you actually want to explore. Find researchers working on everything from LLMs and computer vision to healthcare AI, understand their recent papers in plain English, and decide who is worth contacting.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find ML researchers with Research Match</a>
+</div>`,
+    relatedSlugs: ["how-to-get-research-experience-undergrad", "how-to-find-research-positions", "what-is-an-reu-how-to-get-into-one", "how-to-cold-email-a-professor"],
+    datePublished: "2026-08-19",
+  },
+{
     slug: "what-is-an-reu-how-to-get-into-one",
     title: "What Is an REU and How Do You Get Into One?",
     description: "What is an REU? Learn how NSF Research Experiences for Undergraduates work, who can apply, how competitive REUs are, what applications require, and how to improve your chances.",
