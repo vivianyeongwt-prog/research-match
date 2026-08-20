@@ -11,6 +11,196 @@ export interface BlogPost {
 export const posts: BlogPost[] = [
 
 {
+    slug: "should-you-use-university-email-contacting-professors",
+    title: "Should You Use Your University Email When Contacting Professors?",
+    description: "Should you use your university email when contacting professors about research? Learn when a school email is better, when a personal email is fine, and what matters more than the address you send from.",
+    keyword: "should you use your university email when contacting professors",
+    content: `<h2>Should You Use Your University Email When Emailing a Professor?</h2>
+<p><strong>Yes, if you have an active university email address, it is usually the best account to use when contacting professors about research.</strong> It immediately shows that you are a student, looks more credible than an unfamiliar personal address, and is less likely to make your message look like spam.</p>
+<p>That said, using a university email is not what determines whether a professor responds.</p>
+<p>A short, specific email that clearly explains why you are interested in the professor's research matters much more than whether your message comes from a .edu address or Gmail.</p>
+<p>If you do not have access to a university email, or you are applying after graduation, using a professional personal email address is completely reasonable.</p>
+
+<h2>Why Is a University Email Usually Better?</h2>
+<p>The main advantage is context.</p>
+<p>If Professor Chen receives an email from <strong>yourname@university.edu</strong>, they can immediately see that the sender is connected to an academic institution.</p>
+<p>That matters because professors receive large amounts of email, including spam, automated messages and generic outreach.</p>
+<p>A university address removes one small piece of uncertainty.</p>
+<p>It can also make your introduction feel more consistent. If you write that you are a second-year biology student at a particular university and the email comes from that institution, the professor does not have to wonder whether the message is legitimate.</p>
+
+<h2>Does a University Email Improve Your Chances of Getting a Reply?</h2>
+<p><strong>A university email can make your message look more credible, but it does not compensate for a weak email.</strong></p>
+<p>If your message says:</p>
+<blockquote>Dear Professor, I am extremely impressed by your prestigious research and would be honoured to work in your lab. Please let me know if you have any positions.</blockquote>
+<p>the fact that it came from a university account is unlikely to rescue it.</p>
+<p>Professors care much more about whether you have looked at their actual work, whether your interests make sense for the lab, and whether your request is easy to understand.</p>
+<p>Your email address may help the professor trust the message. Your content is what gives them a reason to answer it.</p>
+
+<h2>What If You Are Emailing a Professor at Another University?</h2>
+<p><strong>You can still use your own university email when contacting professors at another institution.</strong></p>
+<p>In fact, that is usually preferable.</p>
+<p>You might write:</p>
+<blockquote>Dear Professor Patel,<br><br>
+I am a second-year computer science student at [University], and I came across your recent work on multimodal learning while looking into research in this area...</blockquote>
+<p>The fact that you attend another university is not a problem. Students regularly contact professors outside their own institution about summer research, graduate programs, collaborations and other opportunities.</p>
+<p>If you are looking for researchers beyond your university, our guide on <a href="/blog/how-to-find-research-positions">how to find research positions</a> covers ways to broaden your search beyond your own department or campus.</p>
+
+<h2>Can You Use Gmail to Email a Professor?</h2>
+<p><strong>Yes. Gmail is perfectly acceptable if you do not have a university email or cannot access it.</strong></p>
+<p>The important part is that the address looks professional.</p>
+<p>An address based on your name, such as <strong>firstname.lastname@gmail.com</strong>, is fine.</p>
+<p>An address you created when you were 13 may be less ideal.</p>
+<p>If your current personal email contains nicknames, random numbers or something you would not want printed on a CV, create a separate professional email account for academic and career-related correspondence.</p>
+
+<h2>What Is a Professional Email Address for Contacting Professors?</h2>
+<p>A professional email address should usually contain your real name and be easy to recognise.</p>
+<p>Examples include:</p>
+<p><strong>maya.chen@gmail.com</strong></p>
+<p><strong>daniel.lee96@gmail.com</strong></p>
+<p><strong>alex.wong.research@gmail.com</strong></p>
+<p>There is no need to make it overly complicated.</p>
+<p>Avoid addresses that look anonymous or unserious, particularly when you are contacting someone who has never met you.</p>
+
+<h2>What If Your University Email Is About to Expire?</h2>
+<p>If you are close to graduation and know your university account will soon be disabled, consider whether you want to begin an important conversation from an address you may lose access to.</p>
+<p>For short-term communication, your university email is still fine.</p>
+<p>But if you are contacting potential research mentors, graduate supervisors or collaborators and expect the conversation to continue for months, you may prefer to use a professional personal email.</p>
+<p>You can also add your personal address to your email signature so the professor has another way to reach you later.</p>
+
+<h2>What If You Have Already Graduated?</h2>
+<p><strong>If you no longer have access to your university email, use a professional personal address.</strong></p>
+<p>There is nothing unusual about this.</p>
+<p>Simply explain your academic background in the email:</p>
+<blockquote>I recently graduated from [University] with a degree in neuroscience and am looking to gain additional research experience before applying to graduate programs.</blockquote>
+<p>That gives the professor the context they need without requiring an institutional email address.</p>
+
+<h2>Should High School Students Use Their School Email?</h2>
+<p>High school students can use a school-provided email if it works normally for outside communication, but this is not always the best option.</p>
+<p>Some school systems block messages to external addresses, filter replies aggressively or disable student accounts after graduation.</p>
+<p>If your school email has those restrictions, a professional personal email may be safer.</p>
+<p>The same principle applies: the email address should make it easy for the professor to identify you and reply.</p>
+
+<h2>Should International Students Use Their University Email?</h2>
+<p>Yes. There is no special reason for international students to avoid their university email when contacting professors.</p>
+<p>If anything, the institutional address can provide useful context when you are contacting researchers in another country.</p>
+<p>You should still introduce yourself clearly because a professor may not recognise the university name or understand your degree structure.</p>
+<p>For example:</p>
+<blockquote>I am a third-year undergraduate studying biomedical engineering at [University] in Singapore...</blockquote>
+<p>That is clearer than assuming the professor understands your academic background from the email domain alone.</p>
+
+<h2>Could Your Email Go to Spam?</h2>
+<p>It is possible for any email to be filtered, although using a recognised university account may sometimes help your message look more legitimate.</p>
+<p>Your writing can also affect how suspicious the email appears.</p>
+<p>A short, individually written message is preferable to sending dozens of nearly identical emails in a short period.</p>
+<p>Avoid unnecessary links, multiple attachments and overly promotional language.</p>
+<p>If you attach a CV, a straightforward PDF with a clear filename such as <strong>Firstname_Lastname_CV.pdf</strong> is enough.</p>
+
+<h2>Should You Use Your University Email for Cold Emailing Professors?</h2>
+<p><strong>Yes, in most cases.</strong> If you are currently enrolled and have an active university account, it is a sensible default for cold emailing professors about research.</p>
+<p>But do not spend too much time worrying about this detail.</p>
+<p>Students sometimes optimise the least important parts of an email while avoiding the difficult part: finding professors whose work genuinely matches their interests.</p>
+<p>The sender address is a small credibility signal. The research fit is far more important.</p>
+
+<h2>What Matters More Than the Email Address?</h2>
+<p>The first thing that matters is whether you chose the right professor.</p>
+<p>If you are emailing someone whose research has almost nothing to do with your interests simply because they are a famous professor, changing from Gmail to a university email is unlikely to help.</p>
+<p>Spend your effort finding researchers whose recent work actually overlaps with what you want to study.</p>
+<p>With <a href="/app">Research Match</a>, you can search professors by research interest, look through their recent work and read plain-English paper summaries before deciding who is worth contacting.</p>
+<p>Then your email can mention something real rather than relying on generic compliments.</p>
+
+<h2>What Should You Put in the Email Itself?</h2>
+<p>A research email usually only needs three parts.</p>
+<p>First, explain why you are contacting that professor specifically. Mention a paper, project or research area that genuinely interested you.</p>
+<p>Second, briefly introduce the background that is relevant to their work.</p>
+<p>Third, ask a clear question about whether they are currently taking undergraduate researchers or expect to have opportunities available.</p>
+<p>If you are unsure how to structure the message, see our <a href="/blog/cold-email-professor-template">cold email professor template</a> and our guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor for research</a>.</p>
+
+<h2>Should You Put Your University in the Subject Line?</h2>
+<p>You usually do not need to include your university name in the subject line unless it adds useful context.</p>
+<p>A subject such as:</p>
+<p><strong>Undergraduate interested in your research on protein folding</strong></p>
+<p>is already clear.</p>
+<p>You could also use:</p>
+<p><strong>MIT undergraduate interested in your robotics research</strong></p>
+<p>if your institutional affiliation is particularly relevant to the conversation.</p>
+<p>The subject line should mainly help the professor understand what the email is about. It is not a place to squeeze in every credential you have.</p>
+
+<h2>Should You Include an Email Signature?</h2>
+<p>A simple signature is useful because it gives the professor a little context without forcing you to include everything in the body of the email.</p>
+<p>For example:</p>
+<blockquote>Maya Chen<br>
+BSc Psychology, Class of 2028<br>
+University of Example</blockquote>
+<p>You do not need a corporate-style signature with logos, quotes, social media icons and multiple links.</p>
+<p>Your name, degree or major and university are usually enough.</p>
+
+<h2>Should You Email From Your University Account During Summer?</h2>
+<p>Yes. You can continue using your university email during summer as long as the account remains active.</p>
+<p>Professors do not assume a university email should only be used during the teaching semester.</p>
+<p>If you are contacting someone about summer research, however, try to reach out well before the summer begins. Labs may need time to organise supervision, funding and project access.</p>
+
+<h2>Should You Switch Accounts in the Middle of a Conversation?</h2>
+<p>Usually, no.</p>
+<p>If you have already started a conversation with a professor from one email address, keep replying in the same thread unless there is a reason to change.</p>
+<p>Switching accounts can make the conversation harder to follow.</p>
+<p>If your university account is about to expire, mention it briefly and provide your new address:</p>
+<blockquote>My university email will be deactivated after graduation, so I have copied my personal email here for future correspondence.</blockquote>
+<p>That is enough.</p>
+
+<h2>Does Using a University Email Make You Look More Professional?</h2>
+<p>It can help, but professionalism comes much more from how you write.</p>
+<p>A concise email from Gmail that clearly discusses the professor's research will usually look more professional than an overlong, generic email from a university account.</p>
+<p>Check the professor's name, proofread the message and make sure you have attached anything you said you attached.</p>
+<p>Those small details matter more than whether your email address ends in .edu.</p>
+
+<h2>So, Which Email Should You Use?</h2>
+<p>If you are currently enrolled and your university email works reliably, use it.</p>
+<p>If you no longer have access to one, your school account blocks external email, or the address is about to expire, use a professional personal account instead.</p>
+<p>There is no need to delay contacting a professor because you do not have the "perfect" sender address.</p>
+<p>Your time is better spent identifying the right researchers, understanding enough of their work to explain why you are interested, and writing an email that sounds like it was actually meant for them.</p>
+
+<h2>Frequently Asked Questions About Emailing Professors</h2>
+
+<h3>Should I use my university email to contact a professor?</h3>
+<p>Yes, if you have an active university email, it is usually the best option. It immediately identifies you as a student and can make your message look more credible. A professional personal email is also fine if you do not have access to a university account.</p>
+
+<h3>Can I email a professor from Gmail?</h3>
+<p>Yes. Professors do not require students to use institutional accounts. Use a professional address based on your real name and make sure your email clearly explains your academic background and reason for contacting them.</p>
+
+<h3>Will a professor ignore me if I use a personal email?</h3>
+<p>Not necessarily. The content of your email and how closely your interests match the professor's research matter much more than the email provider you use.</p>
+
+<h3>Is a .edu email better for cold emailing professors?</h3>
+<p>A university email can provide a small credibility advantage because it shows an institutional affiliation, but it will not compensate for a generic or poorly targeted cold email.</p>
+
+<h3>Should I use my school email after graduation?</h3>
+<p>You can use it while it remains active, but if the account will soon be disabled, consider using a professional personal address for conversations that may continue after graduation.</p>
+
+<h3>What should my personal email address look like?</h3>
+<p>Use an address based on your real name, such as firstname.lastname@gmail.com. Avoid usernames that are difficult to identify or would look out of place on a CV.</p>
+
+<h3>Should I put my university in my email signature?</h3>
+<p>Yes. A short signature containing your name, major or degree and university can give the professor useful context without making the email longer.</p>
+
+<h3>Should I use my university email when contacting professors at another university?</h3>
+<p>Yes. Your university account is still appropriate when contacting researchers at other institutions. Introduce yourself clearly and mention your current university and degree in the email.</p>
+
+<h3>Can high school students use a personal email to contact professors?</h3>
+<p>Yes. A professional personal email may actually be preferable if the student's school account restricts external messages or will be disabled after graduation.</p>
+
+<h3>What matters most when emailing a professor about research?</h3>
+<p>Research fit matters most. Find professors whose current work genuinely overlaps with your interests, mention a specific part of that work, briefly explain your relevant background and make a clear request.</p>
+
+<div class="blog-cta">
+<h2>Your Email Address Is the Easy Part. Finding the Right Professor Is Harder.</h2>
+<p>Research Match helps you search professors by research interest, understand their recent papers in plain English, and decide who is actually worth emailing before you hit send.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
+</div>`,
+    relatedSlugs: ["how-to-cold-email-a-professor", "cold-email-professor-template", "how-to-follow-up-with-a-professor", "how-to-find-research-positions"],
+    datePublished: "2026-08-20",
+  },
+
+{
     slug: "machine-learning-research-opportunities-undergraduate",
     title: "How to Find Machine Learning Research Opportunities as an Undergraduate",
     description: "Learn how to find machine learning research opportunities as an undergraduate, even with no previous research experience. Find ML professors, labs, REUs, summer programs, and research projects worth applying to.",
