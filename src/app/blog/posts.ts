@@ -11,6 +11,206 @@ export interface BlogPost {
 export const posts: BlogPost[] = [
 
 {
+    slug: "should-you-mention-gpa-emailing-professor",
+    title: "Should You Mention Your GPA When Emailing a Professor?",
+    description: "Should you mention your GPA when emailing a professor about research? Learn when GPA helps, when to leave it out, what to say instead, and whether it belongs in your CV.",
+    keyword: "should you mention GPA when emailing a professor",
+    content: `<h2>Should You Mention Your GPA When Emailing a Professor?</h2>
+<p><strong>Usually, you do not need to mention your GPA in the body of a cold email to a professor.</strong> If your GPA is strong and clearly relevant, you can include it, but in most research outreach emails your space is better used explaining why you are interested in the professor's work and what relevant skills or coursework you bring.</p>
+<p>A professor deciding whether to reply to you is generally trying to answer a few basic questions: Why are you contacting me? Does your background make sense for this research? And what exactly are you asking for?</p>
+<p>Your GPA may help answer the second question, but it is rarely the most interesting part of the email.</p>
+<p>If you are attaching a CV, that is usually the better place to include your GPA.</p>
+
+<h2>Does GPA Matter When Contacting Professors for Research?</h2>
+<p><strong>It can matter, but not in the same way for every professor or research position.</strong></p>
+<p>Some labs care quite a lot about academic performance, particularly if the work requires a strong foundation in difficult coursework. A theoretical machine learning group, for example, may pay attention to your performance in linear algebra, probability or algorithms. A chemistry lab may care more about relevant laboratory courses than your overall GPA.</p>
+<p>Other professors may care more about your research fit, technical skills, reliability, availability and genuine interest in the project.</p>
+<p>This is why GPA should be treated as one piece of your academic background rather than the main argument for why a professor should work with you.</p>
+
+<h2>When Should You Mention Your GPA?</h2>
+<p>There are a few situations where including it makes sense.</p>
+<p>If the professor or lab specifically asks students to include their GPA, include it. Do not ignore application instructions simply because you would prefer not to share the number.</p>
+<p>If your GPA is particularly strong and you have very little else to point to yet, it can also provide useful context. A first-year student without research experience may reasonably mention strong academic performance alongside relevant coursework.</p>
+<p>You might write:</p>
+<blockquote>I am a second-year biology student with a 3.9 GPA, and I have completed coursework in genetics and molecular biology.</blockquote>
+<p>That works because the GPA is part of a broader explanation of your preparation rather than the entire pitch.</p>
+
+<h2>When Should You Leave Your GPA Out?</h2>
+<p>If nobody asked for it and it does not add much to your email, leave it out.</p>
+<p>You have very limited space in a cold email. Mentioning your GPA means giving up a sentence that could instead explain a relevant project, programming skill, lab technique or reason you are interested in the professor's research.</p>
+<p>For example, this:</p>
+<blockquote>I have a 3.72 GPA and have maintained strong academic performance throughout my degree.</blockquote>
+<p>is usually less useful than this:</p>
+<blockquote>I recently completed a behavioural statistics course and used R for a class project analysing survey data.</blockquote>
+<p>The second sentence gives the professor a better sense of what you might actually be able to contribute.</p>
+
+<h2>Should You Mention a Low GPA?</h2>
+<p><strong>You usually do not need to volunteer a low GPA in an initial email unless the professor, lab or program specifically asks for it.</strong></p>
+<p>That does not mean you should hide or misrepresent your academic record. If you are asked for your GPA, answer accurately.</p>
+<p>But a cold email is not an admissions form. Its purpose is to start a conversation about a possible research opportunity.</p>
+<p>If your GPA is not your strongest selling point, focus on the parts of your background that are more relevant to the work.</p>
+<p>That could include your performance in specific courses, technical skills, independent projects, work experience or a strong upward academic trend.</p>
+
+<h2>What If Your Overall GPA Is Low but Your Major GPA Is Strong?</h2>
+<p>If your major GPA or performance in relevant coursework is much stronger than your overall GPA, that may be more useful to mention.</p>
+<p>For example:</p>
+<blockquote>My overall GPA is 3.2, but I have earned A grades in my machine learning, probability and linear algebra courses.</blockquote>
+<p>You would not normally need to write that in an initial cold email unless academic performance has already come up, but it can be useful context later if the professor asks.</p>
+<p>Relevant academic strength often tells a better story than one cumulative number.</p>
+
+<h2>What If You Have a Very High GPA?</h2>
+<p>A high GPA can help, especially if you are early in your degree and do not yet have much research experience.</p>
+<p>Still, avoid making it the centrepiece of your email.</p>
+<p>A professor is unlikely to choose between students based only on who has the higher GPA. Research requires patience, curiosity, technical ability, communication and the willingness to deal with experiments that do not work.</p>
+<p>A 4.0 GPA may show that you perform well academically. It does not automatically show that you understand the professor's research or would be a good fit for their lab.</p>
+
+<h2>Where Should You Put Your GPA?</h2>
+<p><strong>Your CV is usually the best place for your GPA.</strong></p>
+<p>If you attach a one-page academic CV, you can include your GPA under your education section. This keeps the email short while still making the information available if the professor wants it.</p>
+<p>For example:</p>
+<blockquote>University of Example<br>
+BSc Computer Science, Expected 2028<br>
+GPA: 3.87/4.00</blockquote>
+<p>If you are unsure whether to attach a CV, see our <a href="/blog/cold-email-professor-template">cold email professor template</a> for examples of how to structure the message.</p>
+
+<h2>Should You Put GPA in the Subject Line?</h2>
+<p>No.</p>
+<p>Your subject line should help the professor understand why you are contacting them, not advertise your academic statistics.</p>
+<p>A subject such as:</p>
+<p><strong>Undergraduate interested in your computational neuroscience research</strong></p>
+<p>is much more useful than:</p>
+<p><strong>3.9 GPA student seeking research opportunity</strong></p>
+<p>The second can sound transactional and gives no indication that you chose the professor because of their actual work.</p>
+
+<h2>Should You Mention GPA If You Have No Research Experience?</h2>
+<p><strong>You can, but it should not be the only evidence that you are prepared for research.</strong></p>
+<p>If you have no formal research experience, think about your coursework and class projects.</p>
+<p>For example:</p>
+<blockquote>I have not worked in a research lab before, but I have completed courses in molecular biology and genetics and currently have a 3.8 GPA.</blockquote>
+<p>That is more useful than simply saying:</p>
+<blockquote>I have a 3.8 GPA and am a hardworking student.</blockquote>
+<p>The first version tells the professor what academic background might actually be relevant to their lab.</p>
+
+<h2>Do Professors Care More About GPA or Research Fit?</h2>
+<p><strong>For an initial cold email, research fit is usually more important.</strong></p>
+<p>A professor is far more likely to care that you have taken the time to understand what their lab studies than to be impressed by an unexplained GPA.</p>
+<p>If your email says that you are interested in a specific project, explains why, and shows that your background connects to it, you are giving the professor a reason to continue the conversation.</p>
+<p>This is one reason it helps to research professors before emailing them. With <a href="/app">Research Match</a>, you can search by research interest and read plain-English summaries of recent papers before deciding who is worth contacting.</p>
+
+<h2>What Should You Mention Instead of GPA?</h2>
+<p>If you have limited space, prioritise information that tells the professor what you can actually do or why their research interests you.</p>
+<p>That could include a relevant course, programming language, lab technique, statistics experience, class project, thesis idea or research question you want to explore.</p>
+<p>For example:</p>
+<blockquote>I recently completed a machine learning course where I used PyTorch to compare CNN architectures on an image-classification project.</blockquote>
+<p>That sentence gives the professor much more information than:</p>
+<blockquote>I have a 3.85 GPA.</blockquote>
+<p>You can always include both later if the conversation continues.</p>
+
+<h2>What If the Professor Asks for Your GPA?</h2>
+<p>Answer directly and accurately.</p>
+<p>There is no need to over-explain unless there is something genuinely important to clarify.</p>
+<p>You might write:</p>
+<blockquote>My current cumulative GPA is 3.54/4.00. I have also earned A grades in statistics and cognitive neuroscience, which are the courses most closely related to your lab's work.</blockquote>
+<p>If your GPA is lower than you would like, resist the urge to write a long defensive paragraph unless the professor specifically asks about it.</p>
+
+<h2>Should You Explain a Low GPA in Your First Email?</h2>
+<p>Usually, no.</p>
+<p>An initial research email is not the right place for a detailed explanation of a difficult semester, personal circumstances or why certain grades were lower.</p>
+<p>If academic performance becomes relevant later, you can provide context then.</p>
+<p>The first message should stay focused on the research and your request.</p>
+
+<h2>Does GPA Matter More for Competitive Labs?</h2>
+<p>Sometimes.</p>
+<p>Labs that receive a very large number of undergraduate enquiries may use academic performance as one way to narrow the pool. Structured research programs may also have formal GPA requirements.</p>
+<p>But even then, GPA is only one factor.</p>
+<p>A student whose background closely matches a project may be more useful to a lab than someone with a slightly higher GPA but little connection to the research.</p>
+<p>This is particularly true when the work requires a specific skill, such as Python, microscopy, statistical analysis or a particular language.</p>
+
+<h2>What GPA Is Good Enough for Research?</h2>
+<p><strong>There is no universal GPA that makes someone qualified or unqualified for undergraduate research.</strong></p>
+<p>Some programs publish minimum requirements, and those should be followed. Individual professors may have their own preferences, but many do not state a specific cutoff.</p>
+<p>Do not reject yourself from every research opportunity because your GPA is below an arbitrary number you saw online.</p>
+<p>Look at the actual requirements. If none are listed, focus on finding research that genuinely matches your background and interests.</p>
+
+<h2>Should You Mention Your GPA When Emailing About Summer Research?</h2>
+<p>The same rule applies.</p>
+<p>If the summer program or professor asks for your GPA, include it. If not, it can usually stay on your CV.</p>
+<p>Your email should primarily explain why you are interested in the summer project, what relevant background you have and when you are available.</p>
+<p>For structured summer programs such as REUs, GPA may be requested as part of the formal application. You can read more in our guide on <a href="/blog/what-is-an-reu-how-to-get-into-one">what an REU is and how to get into one</a>.</p>
+
+<h2>Should You Mention GPA When Emailing About Machine Learning Research?</h2>
+<p>You can, but relevant technical preparation usually tells the professor more.</p>
+<p>If you are contacting a machine learning researcher, performance in linear algebra, probability, algorithms, statistics or machine learning coursework may be particularly relevant.</p>
+<p>You might write:</p>
+<blockquote>I have completed courses in linear algebra, probability and introductory machine learning, and have been using PyTorch for a small computer vision project.</blockquote>
+<p>That gives the professor a much clearer picture of your preparation than your cumulative GPA alone.</p>
+<p>If you are specifically looking for ML opportunities, see our guide on <a href="/blog/machine-learning-research-opportunities-undergraduate">how to find machine learning research opportunities as an undergraduate</a>.</p>
+
+<h2>How to Mention GPA Without Sounding Like You Are Bragging</h2>
+<p>If you decide to include it, state it once and move on.</p>
+<p>There is no need to describe your GPA as "exceptional," "outstanding" or "top-tier."</p>
+<p>For example:</p>
+<blockquote>I am a second-year economics student with a 3.9 GPA and have completed coursework in econometrics and statistics.</blockquote>
+<p>is enough.</p>
+<p>The number can speak for itself.</p>
+
+<h2>What Matters More Than GPA in a Research Email?</h2>
+<p>A good research email should make three things clear.</p>
+<p>Why are you emailing this professor specifically?</p>
+<p>What part of your background is relevant to their work?</p>
+<p>What are you asking for?</p>
+<p>If those answers are clear, the professor can quickly decide whether there is a reason to continue the conversation.</p>
+<p>For a complete structure, read our guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor for research</a>.</p>
+
+<h2>So, Should You Include Your GPA?</h2>
+<p>If the professor asks for it, include it.</p>
+<p>If your GPA is strong and helps establish your preparation, mentioning it briefly is fine.</p>
+<p>Otherwise, put it on your CV and use the email itself to talk about things that are more directly connected to the research.</p>
+<p>Students often spend too much time trying to optimise small details like GPA, subject lines and email timing while overlooking the bigger question: whether they are contacting professors whose work actually fits their interests.</p>
+<p>That is where most of your effort should go.</p>
+
+<h2>Frequently Asked Questions About GPA and Professor Emails</h2>
+
+<h3>Should I include my GPA in a cold email to a professor?</h3>
+<p>Usually, you do not need to include your GPA in the email body unless the professor asks for it or the number adds useful context. Your CV is generally the better place for it.</p>
+
+<h3>Do professors care about GPA when choosing undergraduate researchers?</h3>
+<p>Some do, especially when the project requires strong academic preparation, but professors may also consider research fit, coursework, technical skills, availability and interest in the topic.</p>
+
+<h3>Is a 3.5 GPA good enough for undergraduate research?</h3>
+<p>There is no universal GPA requirement for undergraduate research. If a professor or program does not state a minimum, you should consider applying if your interests and preparation fit the project.</p>
+
+<h3>Should I mention a 4.0 GPA when emailing a professor?</h3>
+<p>You can mention it briefly, especially if you have little other experience, but it should not dominate the email. Explain your relevant coursework and interest in the professor's research as well.</p>
+
+<h3>Should I tell a professor if my GPA is low?</h3>
+<p>You generally do not need to volunteer a low GPA in an initial research email unless the professor asks for it. If asked, answer honestly and provide relevant academic context if useful.</p>
+
+<h3>Should GPA go on my CV when emailing professors?</h3>
+<p>Yes, if you want the professor to see it. The education section of your academic CV is usually a more natural place for GPA than the body of a short cold email.</p>
+
+<h3>Should I include my major GPA instead of my overall GPA?</h3>
+<p>If your major GPA is more relevant and particularly strong, it can be useful to include it on your CV. If a professor specifically asks for your cumulative GPA, provide that figure rather than substituting another number.</p>
+
+<h3>Can I get research experience with a low GPA?</h3>
+<p>Yes. GPA is only one part of your background. Relevant skills, coursework, research fit, persistence and finding a professor with an appropriate project can all matter.</p>
+
+<h3>What should I mention instead of GPA in a professor email?</h3>
+<p>Prioritise relevant coursework, technical skills, class projects, previous research, methods you know and a specific reason you are interested in the professor's work.</p>
+
+<h3>Does GPA matter more than research experience?</h3>
+<p>Not necessarily. Once you have meaningful research experience, the details of what you did, learned and contributed may tell a professor much more about your preparation than GPA alone.</p>
+
+<div class="blog-cta">
+<h2>Your GPA Is Only One Part of the Match</h2>
+<p>Research Match helps you find professors whose work actually overlaps with your interests, understand their recent papers in plain English, and decide who is worth contacting before you worry about what numbers to put in the email.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
+</div>`,
+    relatedSlugs: ["how-to-cold-email-a-professor", "cold-email-professor-template", "should-you-use-university-email-contacting-professors", "how-to-get-research-experience-undergrad"],
+    datePublished: "2026-08-21",
+  },
+
+{
     slug: "should-you-use-university-email-contacting-professors",
     title: "Should You Use Your University Email When Contacting Professors?",
     description: "Should you use your university email when contacting professors about research? Learn when a school email is better, when a personal email is fine, and what matters more than the address you send from.",
