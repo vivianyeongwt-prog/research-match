@@ -11,6 +11,237 @@ export interface BlogPost {
 export const posts: BlogPost[] = [
 
 {
+    slug: "should-you-contact-assistant-professors-for-research",
+    title: "Should You Contact Assistant Professors for Research?",
+    description: "Should you contact assistant professors for research? Learn why early-career faculty can be excellent research mentors, what to look for before emailing, and how to approach them about joining their lab.",
+    keyword: "should you contact assistant professors for research",
+    content: `<h2>Should You Contact Assistant Professors About Research?</h2>
+<p><strong>Yes. Assistant professors can be excellent people to contact about undergraduate research, and students should not limit their search to associate professors or full professors.</strong></p>
+<p>In fact, overlooking assistant professors simply because they are earlier in their faculty careers can mean missing some very good research opportunities.</p>
+<p>An assistant professor is generally an independent faculty member. They may run their own research group, supervise students, apply for research funding and publish work under their own research program. "Assistant" does not mean they are an assistant to another professor.</p>
+<p>For an undergraduate trying to find a research position, the more useful questions are whether the professor's current work interests you, whether they have a project suitable for an undergraduate, and whether they have the capacity to supervise you.</p>
+<p>The title on their faculty page matters considerably less.</p>
+
+<h2>What Is an Assistant Professor?</h2>
+<p><strong>An assistant professor is typically an early-career faculty member and, in many university systems, the first professorial rank before associate professor and full professor.</strong></p>
+<p>At universities with a tenure system, assistant professors are often working toward tenure. At other institutions, titles and promotion systems may work differently, so you should not assume every university uses the rank in exactly the same way.</p>
+<p>What matters for students is that assistant professors are usually researchers in their own right.</p>
+<p>They may have their own laboratory, research group, grants, graduate students and undergraduate researchers. Some are building a new lab from the ground up, while others already supervise sizeable research teams.</p>
+<p>So if you see "Assistant Professor" next to someone's name, do not interpret that as "junior researcher who cannot take students."</p>
+
+<h2>Are Assistant Professors Good Research Mentors for Undergraduates?</h2>
+<p>They certainly can be.</p>
+<p>One possible advantage of working with a newer professor is that their research group may still be relatively small. In some cases, that can mean more direct interaction with the professor than you might get in a very large established lab.</p>
+<p>There can also be opportunities to join projects relatively early in their development. A professor who has recently established a lab may be building datasets, developing experimental methods, setting up new research directions or starting projects that will continue for several years.</p>
+<p>None of this is guaranteed, however.</p>
+<p>Some assistant professors are extremely busy. Building a lab, applying for grants, teaching, supervising students and working toward promotion can leave very little spare time.</p>
+<p>That is why it is better to evaluate the individual lab than assume assistant professors are automatically better or worse mentors.</p>
+
+<h2>Should You Prioritize Assistant Professors When Looking for Research?</h2>
+<p><strong>You should include assistant professors in your search, but you do not need to prioritize them purely because of their rank.</strong></p>
+<p>Start with research fit.</p>
+<p>If an assistant professor is publishing work on exactly the question you want to explore, they are probably more relevant to you than a famous full professor whose research only loosely overlaps with your interests.</p>
+<p>Look at what the professor has published recently, what projects their group is currently pursuing and whether undergraduate students already appear on the lab website.</p>
+<p>With <a href="/app">Research Match</a>, you can search for professors based on research interests rather than academic rank and look through their recent work before deciding who is worth contacting.</p>
+
+<h2>Why Assistant Professors Can Be Worth Contacting</h2>
+<p>One reason is simple: newer faculty are often actively developing their research programs.</p>
+<p>A professor starting a lab needs experiments run, software written, datasets organised, literature reviewed and ideas tested. Depending on the field and project, some of that work may be suitable for an undergraduate researcher.</p>
+<p>There may also be fewer layers between you and the professor. In a large established lab, an undergraduate might primarily work with a graduate student or postdoctoral researcher. In a smaller group, the professor may be more directly involved in day-to-day discussions.</p>
+<p>Again, this varies enormously. A small lab is not automatically a better lab, and a new professor is not automatically more available.</p>
+<p>But there is no good reason to exclude someone from your search merely because their title says Assistant Professor.</p>
+
+<h2>What Are the Downsides of Joining a Newer Lab?</h2>
+<p>There are tradeoffs.</p>
+<p>An established professor may have a larger research group, more experienced graduate students, established laboratory procedures and a wider range of ongoing projects.</p>
+<p>A very new lab may still be setting some of those things up.</p>
+<p>Funding can also vary. Some new faculty arrive with substantial startup funding, while others may be waiting for grants or have limited capacity to pay undergraduate researchers.</p>
+<p>There is also the question of mentorship. A professor can be an outstanding researcher without yet having much experience supervising undergraduates.</p>
+<p>None of these are reasons to avoid assistant professors. They are simply things worth understanding before committing to a lab.</p>
+
+<h2>Assistant Professor vs Full Professor: Who Is Better for Undergraduate Research?</h2>
+<p><strong>Neither rank is inherently better for undergraduate research.</strong></p>
+<p>A full professor may have a large, established lab with plenty of infrastructure and several experienced researchers who can mentor you. They may also have a strong record of helping students publish or continue to graduate school.</p>
+<p>On the other hand, you may have relatively little direct contact with the professor.</p>
+<p>An assistant professor may have a smaller team and potentially more opportunities for direct involvement, but their lab may have fewer established systems or fewer projects suitable for undergraduates.</p>
+<p>The better question is: <strong>What would your experience in this particular lab actually look like?</strong></p>
+<p>Who would supervise you? What would you work on? How often would you meet? What do current undergraduate researchers do?</p>
+<p>Those answers tell you much more than the professor's academic rank.</p>
+
+<h2>Are Assistant Professors More Likely to Reply to Cold Emails?</h2>
+<p>There is no reliable rule that assistant professors are more likely to answer student emails.</p>
+<p>A newer professor may receive fewer unsolicited emails than a famous senior academic. On the other hand, they may also be juggling the demands of establishing a research program and have very little time available.</p>
+<p>Do not choose professors based on who you think will be easiest to get a response from.</p>
+<p>Choose people whose research genuinely interests you, then send a short and specific email.</p>
+<p>If you are unsure what that should look like, read our guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor for research</a>.</p>
+
+<h2>Should You Contact Newly Hired Professors?</h2>
+<p><strong>Yes, newly hired professors can be particularly interesting researchers to investigate.</strong></p>
+<p>If someone has recently joined a university, look at the faculty announcement, their personal website and their previous publications.</p>
+<p>They may be recruiting students as they establish a new research group.</p>
+<p>But pay attention to timing. A professor who has only just arrived may still be setting up their laboratory, hiring staff or waiting for equipment and approvals.</p>
+<p>Instead of assuming there is an immediate opening, simply ask.</p>
+<p>You might write:</p>
+<blockquote>I saw that you recently joined the department and are establishing your group around computational approaches to protein design. I was particularly interested in your recent work on [topic]. I wanted to ask whether you expect to take undergraduate researchers as the lab develops.</blockquote>
+<p>That acknowledges the situation without pretending you know what opportunities are available.</p>
+
+<h2>How Do You Find New Assistant Professors?</h2>
+<p>University department websites are a good starting point. Look at faculty directories and recent news announcements about new hires.</p>
+<p>But do not stop with the job title.</p>
+<p>Once you find someone, search for their recent publications. A newly appointed professor may still have papers associated with their previous university or postdoctoral lab, so their new faculty page might not yet give you the full picture.</p>
+<p>You can also search by the research question itself. For example, instead of browsing every computer science professor at a university, search specifically for researchers working on <strong>LLM interpretability</strong>, <strong>robot learning</strong> or <strong>computational neuroscience</strong>.</p>
+<p>This is also where <a href="/app">Research Match</a> can help. Search by what you want to research first, then evaluate the professors who actually work in that area.</p>
+
+<h2>How Can You Tell If an Assistant Professor Takes Undergraduates?</h2>
+<p>Start with the lab website.</p>
+<p>Look for undergraduate students on the People or Team page. If several undergraduates are already working in the group, that is a useful indication that the professor has experience involving students at your level.</p>
+<p>Then check for a Join Us or Opportunities page.</p>
+<p>Some professors explicitly state that they welcome undergraduate researchers. Others provide an application form, list prerequisite courses or explain how many hours students are expected to commit each week.</p>
+<p>If there is no information, you can still email them.</p>
+<p>The absence of an advertised undergraduate position does not necessarily mean the professor never takes undergraduate students.</p>
+
+<h2>What Should You Read Before Contacting an Assistant Professor?</h2>
+<p>Read enough to understand what their group is currently interested in.</p>
+<p>You do not need to work through every paper they have ever published.</p>
+<p>Start with their lab website and look at two or three recent papers. Read the abstracts and introductions of the ones closest to your interests.</p>
+<p>Ask yourself what question the researchers were trying to answer and what you found interesting about it.</p>
+<p>That gives you something real to mention in your email.</p>
+<p>"I was interested in your recent work on how reinforcement learning agents adapt under distribution shifts" sounds like you chose the professor deliberately.</p>
+<p>"Your groundbreaking research aligns perfectly with my passion for artificial intelligence" sounds like it could have been sent to anyone.</p>
+
+<h2>How Should You Email an Assistant Professor About Research?</h2>
+<p>The structure is no different from contacting another professor.</p>
+<p>Keep it short. Explain why their research interests you, briefly introduce your relevant background, and ask whether they have opportunities for undergraduate involvement.</p>
+<p>For example:</p>
+<blockquote>Dear Professor Nguyen,<br><br>
+I came across your group's work on using machine learning to model neural activity and was particularly interested in your recent paper on neural decoding during decision-making.<br><br>
+I am a second-year computer science student and have completed courses in probability and introductory machine learning. I have also been using Python and PyTorch for a class project and would like to gain experience applying these methods to research.<br><br>
+I wanted to ask whether you are currently taking undergraduate researchers, or expect to have opportunities in the coming semester. I would be happy to send my CV if useful.<br><br>
+Best,<br>
+[Your Name]</blockquote>
+<p>You do not need to mention that they are an assistant professor. Their title has nothing to do with your reason for contacting them.</p>
+<p>For more examples, see our <a href="/blog/cold-email-professor-template">cold email professor template</a>.</p>
+
+<h2>Should You Mention That Their Lab Is New?</h2>
+<p>You can if it is genuinely relevant, but be careful how you phrase it.</p>
+<p>Saying:</p>
+<blockquote>I noticed that you recently launched your lab at [University], and I was interested in the new work your group is doing on...</blockquote>
+<p>is perfectly reasonable.</p>
+<p>Saying:</p>
+<blockquote>I thought you might need undergraduate researchers because your lab is new.</blockquote>
+<p>is less helpful.</p>
+<p>You do not know what their staffing situation looks like. Focus on your interest in the research and ask whether there is an opportunity rather than telling the professor what you think they need.</p>
+
+<h2>Do Assistant Professors Have Funding for Undergraduate Researchers?</h2>
+<p>Some do and some do not.</p>
+<p>Academic rank alone tells you very little about whether a professor currently has money available for an undergraduate position.</p>
+<p>A newly hired professor may have startup funding. Another may have recently received a grant. An established professor may have no funding available for additional students at that particular moment.</p>
+<p>If a professor tells you they cannot pay an undergraduate researcher, you can ask whether there are university fellowships, undergraduate research grants or credit-bearing options that could support the project.</p>
+<p>Our guide on <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a> goes into this situation in more detail.</p>
+
+<h2>What If the Assistant Professor Does Not Have a Lab Website Yet?</h2>
+<p>This is fairly common for newly hired faculty.</p>
+<p>Search for their personal academic website, Google Scholar profile, previous university page or recent publications instead.</p>
+<p>You can often get a much better sense of their work from their papers than from a newly created faculty biography anyway.</p>
+<p>If their most recent work was completed during a postdoc, keep in mind that their independent research program may move in a somewhat different direction. Look for a research statement or new-lab announcement if one exists.</p>
+
+<h2>Should You Contact an Assistant Professor If You Have No Research Experience?</h2>
+<p><strong>Yes. Having no previous research experience does not mean you should avoid assistant professors.</strong></p>
+<p>Instead, be clear about what preparation you do have.</p>
+<p>Relevant coursework, programming, statistics, laboratory classes or substantial class projects can all help a professor understand where you are starting from.</p>
+<p>Do not pretend you already know how to conduct independent research.</p>
+<p>You might say:</p>
+<blockquote>I have not worked in a research lab before, but I have completed coursework in genetics and molecular biology and would like to start gaining hands-on research experience.</blockquote>
+<p>That is straightforward and gives the professor enough context to decide whether they have an appropriate project.</p>
+<p>For more ways to get started, see <a href="/blog/how-to-get-research-experience-undergrad">how to get research experience as an undergraduate</a>.</p>
+
+<h2>What If You Want a Recommendation Letter Later?</h2>
+<p>Do not choose a professor solely because you hope their title or reputation will make a future recommendation letter look impressive.</p>
+<p>A useful recommendation comes from someone who actually knows how you work.</p>
+<p>An assistant professor who has supervised you closely for a year may be able to write a much more detailed letter than a famous senior professor who has spoken to you three times.</p>
+<p>If graduate school is eventually your goal, the quality of the research relationship matters.</p>
+
+<h2>Should You Contact Several Assistant Professors?</h2>
+<p>Yes, if several genuinely match your interests.</p>
+<p>You do not need to put your entire research search on hold while waiting for one professor to respond.</p>
+<p>Build a shortlist of strong matches and contact them individually.</p>
+<p>Do not send the same generic email to every assistant professor in a department. Academic rank is not a research interest.</p>
+<p>If you find six professors studying topics that genuinely interest you, contact those six. If only two are relevant, contact two and broaden your search to other departments or institutions.</p>
+
+<h2>What If an Assistant Professor Does Not Reply?</h2>
+<p>Wait around one to two weeks and send one polite follow-up.</p>
+<p>A non-response can mean many things. The professor may be travelling, teaching, dealing with grant deadlines or simply have missed your message.</p>
+<p>If there is still no response after a follow-up, move on to other researchers.</p>
+<p>Repeatedly emailing the same professor is unlikely to change the outcome.</p>
+<p>See our guide on <a href="/blog/how-to-follow-up-with-a-professor">how to follow up with a professor</a> for examples of what to send.</p>
+
+<h2>What Should You Ask Before Joining a New Lab?</h2>
+<p>If an assistant professor responds positively, use the meeting to learn what the opportunity actually involves.</p>
+<p>Ask what project you would work on, who would supervise you day to day, how many hours per week are expected and whether the professor sees the position continuing beyond one semester.</p>
+<p>You can also ask what previous undergraduate researchers have done, if there have been any.</p>
+<p>If the lab is brand new and you would be one of its first undergraduates, that is not necessarily a problem. You simply want a clear idea of how your work and supervision will be structured.</p>
+
+<h2>How Much Does Academic Rank Actually Matter?</h2>
+<p>Less than many students assume.</p>
+<p>When students first start looking for research, it is easy to treat the faculty directory like a hierarchy and assume the most senior person must offer the "best" opportunity.</p>
+<p>Research does not work quite that neatly.</p>
+<p>The professor whose name you recognise may have no suitable project for you. The assistant professor you almost skipped might be starting a project directly related to the question that made you interested in research in the first place.</p>
+<p>Search by the work first.</p>
+<p>Then investigate the person and the lab.</p>
+<p>Academic title can provide some context, but it should rarely determine who makes your shortlist.</p>
+
+<h2>So, Should You Email Assistant Professors for Research?</h2>
+<p><strong>Yes. Assistant professors should absolutely be part of your research search.</strong></p>
+<p>They are independent faculty researchers, and many supervise undergraduate students. Some may be building new labs and starting projects where an undergraduate can make a useful contribution.</p>
+<p>But do not email someone simply because you think newer professors are easier to approach.</p>
+<p>Find people whose current research genuinely interests you. Read enough of their work to understand why you are contacting them. Check whether their lab works with undergraduates, and then send a concise, specific email.</p>
+<p>A professor's title tells you where they are in an academic career. It does not tell you whether they are the right research mentor for you.</p>
+
+<h2>Frequently Asked Questions About Contacting Assistant Professors</h2>
+
+<h3>Can assistant professors take undergraduate researchers?</h3>
+<p>Yes. Assistant professors are typically independent faculty members and can supervise undergraduate researchers. Whether a particular professor is taking students depends on their projects, funding, supervision capacity and university policies.</p>
+
+<h3>Are assistant professors good research mentors?</h3>
+<p>They can be excellent mentors. Some have relatively small research groups that may allow closer interaction with students. Mentorship quality varies by individual professor, however, so investigate the lab rather than judging it by academic rank.</p>
+
+<h3>Is an assistant professor a real professor?</h3>
+<p>Yes. Assistant professor is a faculty rank used by many universities, commonly for professors earlier in their independent academic careers. The exact meaning of academic titles varies between institutions and countries.</p>
+
+<h3>Should I email an assistant professor or a full professor for research?</h3>
+<p>Email whichever professor's current research best matches your interests. Academic rank should be secondary to research fit, available projects and the quality of supervision you are likely to receive.</p>
+
+<h3>Are assistant professors easier to get research positions with?</h3>
+<p>Not necessarily. A newer professor may have a smaller lab or be recruiting students, but they may also have limited time, funding or supervision capacity. There is no reliable rule that assistant professors are easier to join.</p>
+
+<h3>Are assistant professors more likely to respond to cold emails?</h3>
+<p>There is no universal pattern. Response rates depend on the individual professor, their workload, available opportunities and how relevant your email is to their research.</p>
+
+<h3>Should I contact a professor who just started their lab?</h3>
+<p>Yes, if their research interests you. Newly established labs may be recruiting researchers and beginning new projects. Ask whether they expect to have opportunities for undergraduate involvement rather than assuming a position is available.</p>
+
+<h3>Do new professors have research funding?</h3>
+<p>Some do. Newly hired faculty may have startup funds or external research grants, but funding varies considerably. Academic rank alone cannot tell you whether a professor can currently pay an undergraduate researcher.</p>
+
+<h3>Can I contact an assistant professor with no research experience?</h3>
+<p>Yes. Explain your relevant coursework, skills or projects honestly and make it clear that you are looking for your first research experience. You do not need previous research experience to contact a professor.</p>
+
+<h3>Does working with an assistant professor look good for graduate school?</h3>
+<p>The professor's rank is generally less important than the quality of the research experience. Meaningful work, developing research skills and building a strong relationship with a mentor can all be valuable when you later apply to graduate school.</p>
+
+<h3>Should I only contact famous professors for research?</h3>
+<p>No. Fame is a poor way to choose an undergraduate research mentor. Focus on professors whose work matches your interests and who can provide an appropriate project and meaningful supervision.</p>
+
+<div class="blog-cta">
+<h2>Don't Search by Academic Title. Search by the Research.</h2>
+<p>Research Match helps you find professors whose actual work overlaps with what you want to study. Search by research interest, explore recent papers in plain English, and find researchers worth contacting whether they are new assistant professors or established faculty.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find your research match</a>
+</div>`,
+    relatedSlugs: ["how-to-find-research-positions", "how-to-get-research-experience-undergrad", "how-to-cold-email-a-professor", "professor-said-no-funding-should-i-still-ask-to-join"],
+    datePublished: "2026-08-23",
+  },
+
+{
     slug: "should-you-mention-gpa-emailing-professor",
     title: "Should You Mention Your GPA When Emailing a Professor?",
     description: "Should you mention your GPA when emailing a professor about research? Learn when GPA helps, when to leave it out, what to say instead, and whether it belongs in your CV.",
