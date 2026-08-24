@@ -2895,77 +2895,276 @@ content: `<h2>Warm Introductions Help, But You Do Not Need One</h2>
     datePublished: "2026-05-27",
   },
   {
+
+{
     slug: "how-to-email-a-research-professor",
-    title: "How to Email a Research Professor and Actually Get a Response",
-    description: "Learn how to email a research professor with a specific subject line, real personalization, and a direct ask for lab opportunities.",
-    keyword: "how to email research professor",
-    content: `<h2>If You Want Research, Do Not Send a Generic Email</h2>
-<p>If you searched "how to email research professor," the most important thing to know is this: research emails are different from normal professor emails. You are not just asking a quick class question. You are asking for the chance to join someone's lab, work on their projects, and take up their time.</p>
-<p>That means your email has to prove one thing quickly: you are not blasting the same message to every professor in the department. Professors respond to students who show genuine interest in their specific research. They ignore emails that feel copied, vague, or AI-generated.</p>
-<p>The email does not need to be fancy. It needs to be specific.</p>
+    title: "How to Email a Research Professor About Joining Their Lab",
+    description: "Learn how to email a research professor about joining their lab, with subject line examples, a practical email structure, what to mention, and how to follow up if they do not reply.",
+    keyword: "how to email a research professor",
+    content: `<h2>How Do You Email a Professor About Research?</h2>
+<p><strong>When emailing a professor about research, keep the message short and make it clear why you chose that particular professor.</strong> Mention a specific part of their work that interests you, briefly explain the background or skills you have that are relevant, and finish with a direct question about whether they are taking students.</p>
+<p>You do not need to write a miniature personal statement.</p>
+<p>A professor should be able to skim your email and understand three things fairly quickly: why you contacted them, why you might be a reasonable fit for their research, and what you are asking for.</p>
+<p>The harder part often comes before the email. You need to find someone whose research you are genuinely interested in. Once that is true, the message becomes much easier to write.</p>
 
-<h2>Step 1: Pick the Right Professor First</h2>
-<p>Before you write the email, make sure the professor is actually a good fit. Read their lab website. Look at their recent papers. Check whether they mention undergraduate researchers. If their website says they are not taking students, respect that.</p>
-<p>Do not email a professor just because they are famous or because their department sounds impressive. Email them because their work connects to something you genuinely want to learn. That genuine connection is what makes the email easier to write and more likely to work.</p>
-<p>If you need help finding people, start with our guide on <a href="/blog/how-to-find-research-positions">how to find research positions</a>. Finding the right professor is half the work.</p>
+<h2>What Should a Research Email to a Professor Include?</h2>
+<p>A research email can usually be built around three short sections.</p>
+<p><strong>First, explain why you are emailing this professor.</strong> Mention a paper, project, research question or area of their work that caught your attention.</p>
+<p><strong>Second, give them a little context about you.</strong> Mention your year of study, subject and the coursework, projects or skills that are most relevant to their research.</p>
+<p><strong>Third, ask the question.</strong> Are they currently taking undergraduate researchers? Do they expect to have an opening next semester? Would they be willing to speak briefly about possible ways to get involved?</p>
+<p>That is enough for a first email.</p>
 
-<h2>Step 2: Write a Subject Line That Feels Specific</h2>
-<p>The subject line should include who you are and the research area. Keep it clear.</p>
-<ul>
-<li>Undergrad interested in your cancer metabolism research</li>
-<li>Student interested in your machine learning lab</li>
-<li>Biology major asking about undergraduate research</li>
-<li>Potential undergrad researcher for your cognition lab</li>
-</ul>
-<p>Avoid "Research Opportunity Inquiry." It is not terrible, but it is forgettable. Professors see that subject line constantly. Specific subject lines get opened because they look like a real student wrote them for a real reason.</p>
+<h2>Find the Right Professor Before You Write the Email</h2>
+<p>Students often put a lot of effort into perfecting an email and much less effort into deciding who should receive it.</p>
+<p>It should be the other way around.</p>
+<p>If you are emailing a professor simply because they work in biology, computer science or psychology, it will be difficult to write anything more specific than "I am interested in your research."</p>
+<p>Start with the research question or area you care about instead.</p>
+<p>If you are interested in machine learning for healthcare, find researchers actually publishing in that area. If you care about memory formation, look for labs studying memory rather than emailing every neuroscience professor at your university.</p>
+<p>Then check the professor's lab website, recent publications and current projects.</p>
+<p>If you are still finding professors one faculty directory at a time, <a href="/app">Research Match</a> lets you search by research interest and see researchers whose published work overlaps with the topic you want to study.</p>
+<p>You can also read our guide on <a href="/blog/how-to-find-research-positions">how to find research positions</a> if you are still at the discovery stage.</p>
 
-<h2>Step 3: Open With Their Work, Not Your Resume</h2>
-<p>Most students start with themselves: "My name is..." That is not the strongest opening. Start with why you are emailing this professor.</p>
-<p>Reference one paper, project, method, or question from their lab. You do not need to fully understand the paper. Reading the abstract and introduction carefully is often enough to find one genuine point of interest.</p>
-<p>Good opening: "I read your lab's recent work on sleep disruption and memory consolidation, and I was interested in how you measured memory changes across multiple nights."</p>
-<p>Bad opening: "I am very passionate about your groundbreaking research."</p>
-<p>The first one proves you looked. The second one proves nothing.</p>
+<h2>How Much Research Should You Do Before Emailing a Professor?</h2>
+<p>You do not need to read everything the professor has published.</p>
+<p>Start with the lab website and look at two or three recent papers or projects that are closest to your interests.</p>
+<p>For a first pass, read the title and abstract. If the paper sounds particularly relevant, look at the introduction and conclusion as well.</p>
+<p>Your goal is not to prove that you can already understand the research at a graduate-student level.</p>
+<p>You are trying to work out what the professor is currently interested in and whether that work genuinely appeals to you.</p>
+<p>Ideally, you should be able to explain in one sentence what caught your attention.</p>
+<p>That sentence will often become the beginning of your email.</p>
 
-<h2>Step 4: Connect Your Background Briefly</h2>
-<p>After you mention their work, connect yourself in 2 or 3 sentences. This is not your full resume. It is just the background that helps them understand why you might be useful or trainable.</p>
-<p>You can mention relevant coursework, coding skills, lab skills, data experience, writing experience, or a project you did. If you have no experience yet, that is okay. Mention what you are learning and why you want to start.</p>
-<p>Professors do not expect undergrads to arrive as experts. They are looking for curiosity, reliability, and enough preparation to start learning.</p>
+<h2>What Subject Line Should You Use When Emailing a Research Professor?</h2>
+<p><strong>A good subject line should be specific enough that the professor immediately knows why you are writing.</strong></p>
+<p>For example:</p>
+<p><strong>Undergraduate interested in your memory research</strong></p>
+<p><strong>Summer research inquiry — computational biology</strong></p>
+<p><strong>Computer science student interested in your robotics lab</strong></p>
+<p><strong>Undergraduate research inquiry — cancer metabolism</strong></p>
+<p><strong>Student interested in your work on language development</strong></p>
+<p>You do not need a clever subject line.</p>
+<p>"Research Opportunity Inquiry" is not wrong, but it tells the professor very little. Adding the research area makes the email easier to place at a glance.</p>
 
-<h2>Step 5: Make One Clear Ask</h2>
-<p>End with one direct ask. Do not ask three different things at once. Good asks include:</p>
-<ul>
-<li>Are you taking undergraduate researchers this semester?</li>
-<li>Would you be open to a brief meeting about your lab's work?</li>
-<li>Is there someone in your lab I should contact about undergraduate opportunities?</li>
-</ul>
-<p>Include your availability if it helps. For example, "I could commit 8 to 10 hours per week this semester." That makes the opportunity feel more concrete.</p>
+<h2>How Should You Start an Email to a Research Professor?</h2>
+<p><strong>Start with why you are contacting them rather than spending the first paragraph introducing yourself.</strong></p>
+<p>You can still mention who you are, but the professor's research should appear early.</p>
+<p>For example:</p>
+<blockquote>Dear Professor Alvarez,<br><br>
+I came across your lab's recent work on how sleep disruption affects memory consolidation and was particularly interested in the way you compared memory performance across different stages of sleep.</blockquote>
+<p>Then introduce yourself:</p>
+<blockquote>I am a second-year psychology student and am currently taking cognitive neuroscience and behavioural statistics.</blockquote>
+<p>This gives the professor context without making them read through your academic biography before discovering why you contacted them.</p>
 
-<h2>A Strong Research Professor Email Example</h2>
-<blockquote>Dear Professor Alvarez,<br><br>I am a sophomore neuroscience major, and I read about your lab's work on how stress affects decision-making. I was especially interested in your recent study using behavioral tasks to separate risk preference from impulsivity. I have taken statistics and intro neuroscience, and I am currently learning R because I want to get better at analyzing behavioral data. I would love to ask whether your lab takes undergraduate researchers during the semester. I could commit about 8 hours per week if there is a possible fit.<br><br>Thank you,<br>Maya Chen</blockquote>
-<p>This email works because it is specific, short, and realistic. It does not pretend the student is an expert. It shows interest, preparation, and a clear ask.</p>
+<h2>How Specific Should You Be About the Professor's Research?</h2>
+<p>Specific enough to show that you actually looked at it.</p>
+<p>You do not need to summarise the entire paper back to the person who wrote it.</p>
+<p>A sentence such as:</p>
+<blockquote>I was interested in your recent work using machine learning to predict treatment response from clinical imaging data.</blockquote>
+<p>is usually enough to begin.</p>
+<p>If there was a particular method, result or question you genuinely found interesting, mention that too.</p>
+<p>What you want to avoid is vague praise:</p>
+<blockquote>I am deeply inspired by your groundbreaking and innovative research.</blockquote>
+<p>The problem is not that it sounds enthusiastic. The problem is that it could be sent to almost anyone.</p>
 
-<h2>What Not to Do</h2>
-<p>Do not send a massive paragraph about your life story. Do not attach five documents unless the professor asks for them. Do not use exaggerated flattery. Do not say you are interested in "any research opportunity available." That sounds like you care more about the resume line than the work.</p>
-<p>Also avoid AI-generated language. Professors have become very good at recognizing it. If your email sounds like every other AI-polished email, it will not stand out in a good way. Read our post on <a href="/blog/cold-email-mistakes">cold email mistakes</a> for the biggest deletion triggers.</p>
+<h2>What Should You Say About Yourself?</h2>
+<p>Your introduction should be brief and relevant to the research.</p>
+<p>Mention your year and field of study, then choose the one or two pieces of your background that are most useful for this particular professor.</p>
+<p>That could be:</p>
+<p>a course you have taken, a programming language you know, laboratory experience, statistics, a class project, previous research or subject knowledge that relates to their work.</p>
+<p>For example:</p>
+<blockquote>I am a second-year computer science student and have completed courses in probability and introductory machine learning. I have also been using PyTorch for a small computer vision project.</blockquote>
+<p>That gives the professor more useful information than saying you are "hardworking, passionate and eager to learn."</p>
 
-<h2>Should You Attach a Resume?</h2>
-<p>If you have a clean one-page resume, attaching it is fine. But the email should stand on its own. The professor should understand your interest without opening an attachment.</p>
-<p>If you do attach a resume, mention it lightly: "I attached a short resume in case helpful." Do not make the resume the center of the email. The center is still the match between your interest and their research.</p>
+<h2>How Do You Email a Research Professor With No Experience?</h2>
+<p><strong>You can still email professors even if you have never worked in a research lab before.</strong></p>
+<p>Do not try to disguise the fact that you are a beginner.</p>
+<p>Instead, mention the preparation you do have.</p>
+<p>You might write:</p>
+<blockquote>I have not worked in a research lab before, but I have completed coursework in genetics and molecular biology and would like to start gaining hands-on experience in this area.</blockquote>
+<p>Your first undergraduate research position has to come before your second one.</p>
+<p>Previous research experience can certainly help, but coursework, coding, statistics, laboratory classes and substantial class projects can all give a professor some idea of what you already know.</p>
+<p>For more ways to get started, see our guide on <a href="/blog/how-to-get-research-experience-undergrad">how to get research experience as an undergraduate</a>.</p>
 
-<h2>Follow Up Once</h2>
-<p>If you do not hear back after two weeks, follow up once. Keep it short and polite. Professors miss emails constantly, and many told us they appreciate one respectful follow-up.</p>
-<p>If there is still no reply, move on to the next professor. Silence is not a judgment of your ability. It usually means the professor is busy, not taking students, or buried in email.</p>
+<h2>How Should You Ask to Join a Professor's Lab?</h2>
+<p>Be direct.</p>
+<p>You do not need to write:</p>
+<blockquote>I humbly request that you kindly consider allowing me the privilege of contributing to your esteemed laboratory.</blockquote>
+<p>A much easier question to answer is:</p>
+<blockquote>Are you currently taking undergraduate researchers for the coming semester?</blockquote>
+<p>You could also ask:</p>
+<blockquote>Do you expect to have any opportunities for an undergraduate to get involved in your lab this summer?</blockquote>
+<p>Or:</p>
+<blockquote>Would you be open to a short conversation about possible undergraduate research opportunities in your group?</blockquote>
+<p>The professor should not have to reach the end of the email and wonder what you wanted.</p>
 
-<h2>The Real Goal</h2>
-<p>The goal is not to write the most impressive email. The goal is to make it easy for the professor to say, "This student actually looked at my work, seems serious, and is worth a conversation."</p>
-<p>That is why specificity beats polish. A simple human email about a real research interest will outperform a generic perfect-sounding message almost every time.</p>
+<h2>A Research Professor Email Example</h2>
+<p>Here is what the pieces can look like together:</p>
+<blockquote>Subject: Undergraduate interested in your decision-making research<br><br>
+
+Dear Professor Alvarez,<br><br>
+
+I came across your lab's recent work on how stress affects decision-making and was particularly interested in your study separating risk preference from impulsive behaviour.<br><br>
+
+I am a second-year neuroscience student and have taken introductory neuroscience and statistics. I am also learning R because I would like to become more comfortable working with behavioural data.<br><br>
+
+I wanted to ask whether you are currently taking undergraduate researchers for the coming semester. I could commit around eight hours per week and would be happy to send my CV if useful.<br><br>
+
+Best,<br>
+Maya Chen</blockquote>
+<p>The email is not especially elaborate, and that is the point.</p>
+<p>It tells the professor why Maya chose the lab, what preparation she has and what she wants to know.</p>
+
+<h2>How Long Should an Email to a Research Professor Be?</h2>
+<p><strong>A first email to a professor about research should generally be concise, often around 100 to 150 words.</strong></p>
+<p>There is no strict word limit, but the professor should be able to understand the message quickly.</p>
+<p>If your email is 400 words long, there is probably information that could move to your CV or wait until a later conversation.</p>
+<p>You do not need to explain every course you have taken, every research interest you have ever had or your entire plan for graduate school.</p>
+<p>The first email is there to start the conversation.</p>
+
+<h2>Should You Attach Your CV?</h2>
+<p><strong>It is usually reasonable to attach a concise academic CV when contacting a professor about research.</strong></p>
+<p>You do not need to make the professor open it to understand why you are emailing, though.</p>
+<p>The email should still stand on its own.</p>
+<p>You can simply write:</p>
+<blockquote>I have attached my CV in case it is useful.</blockquote>
+<p>Keep the filename straightforward, such as <strong>Maya_Chen_CV.pdf</strong>.</p>
+<p>If the lab website gives different instructions about documents or applications, follow those instead.</p>
+
+<h2>Should You Mention Your GPA?</h2>
+<p>Usually, your GPA does not need to appear in the body of the email unless the professor specifically asks for it or it provides particularly useful context.</p>
+<p>Your CV is generally a better place for it.</p>
+<p>If you only have one or two sentences to explain your preparation, a relevant course, project or technical skill may tell the professor more than your overall GPA.</p>
+<p>We cover this question in more detail in <a href="/blog/should-you-mention-gpa-emailing-professor">Should You Mention Your GPA When Emailing a Professor?</a>.</p>
+
+<h2>Should You Use Your University Email?</h2>
+<p><strong>If you have an active university email, it is usually the simplest account to use when contacting professors.</strong></p>
+<p>It immediately provides some academic context and identifies you as a student.</p>
+<p>A professional personal email is also fine, particularly if you have graduated or your university account is about to expire.</p>
+<p>The content of the message matters considerably more than whether the email comes from Gmail or a university domain.</p>
+<p>See our full guide on <a href="/blog/should-you-use-university-email-contacting-professors">whether you should use your university email when contacting professors</a>.</p>
+
+<h2>Should You Email Assistant Professors?</h2>
+<p>Yes.</p>
+<p>Do not restrict your search to full professors because you assume senior faculty offer better research opportunities.</p>
+<p>Assistant professors are independent researchers and may run their own labs, supervise students and be developing new projects.</p>
+<p>What matters more is whether their research fits your interests and whether they have the capacity to take another student.</p>
+<p>Our guide on <a href="/blog/should-you-contact-assistant-professors-for-research">whether you should contact assistant professors for research</a> explains the tradeoffs in more detail.</p>
+
+<h2>Can You Email a Professor at Another University?</h2>
+<p><strong>Yes. You can contact professors at universities you do not attend.</strong></p>
+<p>This is especially common for summer research, structured research programs and students whose own university does not have many researchers working in a particular area.</p>
+<p>Do not assume the professor can take external students, however. Institutional rules, funding and project requirements vary.</p>
+<p>Check the lab website first, then ask if the answer is not clear.</p>
+
+<h2>Should You Mention That You Want to Go to Graduate School?</h2>
+<p>You can, but it usually does not need to take up much space in the first email.</p>
+<p>Saying:</p>
+<blockquote>I am considering a PhD in cognitive neuroscience and would like to gain more research experience in the field.</blockquote>
+<p>can provide useful context.</p>
+<p>There is no need to explain your complete five-year academic plan.</p>
+<p>The professor is mainly deciding whether there is a research fit and an appropriate opportunity right now.</p>
+
+<h2>What Should You Avoid in a Research Email?</h2>
+<p>Avoid writing an email that could be sent unchanged to every professor in the department.</p>
+<p>Also avoid lengthy autobiographical introductions, exaggerated praise, unnecessary academic jargon and paragraphs explaining how prestigious you think the professor is.</p>
+<p>Do not claim to understand research you clearly do not understand.</p>
+<p>And do not tell a professor that you are willing to do "anything" simply to get research experience.</p>
+<p>It sounds less compelling than students often imagine because it suggests that the research itself is secondary.</p>
+<p>If you want a fuller list, read our guide to <a href="/blog/cold-email-mistakes">cold email mistakes when contacting professors</a>.</p>
+
+<h2>Should You Use an Email Template?</h2>
+<p>A template can help you remember the structure, but it should not supply every sentence.</p>
+<p>The more important parts of the email, particularly why you chose the professor, should come from your own reading of their work.</p>
+<p>You can use:</p>
+<p><strong>Why them → relevant background → clear ask</strong></p>
+<p>as the framework and then write the actual message normally.</p>
+<p>Our <a href="/blog/cold-email-professor-template">cold email professor template</a> includes several examples you can adapt without turning the email into a form letter.</p>
+
+<h2>When Is the Best Time to Email a Research Professor?</h2>
+<p>There is no magic hour that guarantees a reply.</p>
+<p>The time of year often matters more than whether you send your email at 9:03 AM or 10:17 AM.</p>
+<p>If you want to begin research in a particular semester, start contacting professors before that semester begins or early enough that they can think about projects and supervision.</p>
+<p>If you are looking for summer research, begin considerably earlier than the start of summer. Structured programs may close applications months in advance, and individual labs may also plan ahead.</p>
+<p>Try not to leave your first email until finals week or a few days before you hope to start.</p>
+
+<h2>What If the Professor Does Not Reply?</h2>
+<p><strong>If you receive no response, send one short follow-up after roughly one to two weeks.</strong></p>
+<p>You do not need to write another full email.</p>
+<p>For example:</p>
+<blockquote>Dear Professor Alvarez,<br><br>
+I wanted to follow up on my email below in case it got buried. I am still very interested in your lab's work on decision-making and would be grateful to know whether you might have room for an undergraduate researcher next semester.<br><br>
+Best,<br>
+Maya</blockquote>
+<p>If you still do not hear back, move on to other researchers.</p>
+<p>Academic inboxes are busy, and silence can mean the lab is full, funding is unavailable, the professor is travelling or your message simply arrived at a bad time.</p>
+<p>See our guide on <a href="/blog/how-to-follow-up-with-a-professor">how to follow up with a professor</a> for more examples.</p>
+
+<h2>What If the Professor Says There Is No Funding?</h2>
+<p>A lack of funding does not always mean the professor has no interest in working with you.</p>
+<p>They may simply be unable to pay another undergraduate researcher.</p>
+<p>You can ask whether undergraduate research grants, fellowships, academic credit or future projects might provide another route.</p>
+<p>You can also ask whether they know another researcher working on a similar topic.</p>
+<p>Do not automatically offer to work for free. Read <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a> before deciding what to ask next.</p>
+
+<h2>What If the Professor Says They Want to Meet?</h2>
+<p>That is when the conversation shifts.</p>
+<p>You no longer need to keep selling yourself through email. Instead, prepare to talk about why the research interests you, what you have done so far and what you hope to learn.</p>
+<p>Read a little more of the professor's work before the meeting and think of a few questions about the lab or project.</p>
+<p>You should also use the meeting to evaluate the opportunity yourself.</p>
+<p>Ask who would supervise you, what undergraduate researchers normally do and what the expected time commitment looks like.</p>
+<p>Getting an invitation to join a lab is useful, but it is still worth watching for <a href="/blog/research-lab-red-flags">research lab red flags before you say yes</a>.</p>
+
+<h2>The Email Matters, but the Match Matters More</h2>
+<p>Students understandably worry about the exact subject line, whether to mention GPA and whether "Best" or "Sincerely" is the better sign-off.</p>
+<p>Those details are relatively small.</p>
+<p>The strongest advantage you can give yourself is contacting someone whose work genuinely overlaps with what you want to study.</p>
+<p>If that match exists, you have something real to write about.</p>
+<p>You can mention a research question that actually caught your attention. You can explain why your coursework or skills connect to the project. And your email is far less likely to sound like something sent to 50 professors at once.</p>
+<p>Find the research first. Then write the email.</p>
+
+<h2>Frequently Asked Questions About Emailing Research Professors</h2>
+
+<h3>How do you email a professor asking for research?</h3>
+<p>Briefly explain why the professor's research interests you, mention the most relevant parts of your background, and ask directly whether they are taking undergraduate researchers or have opportunities available. Keep the first email concise.</p>
+
+<h3>How do you ask a professor to join their lab?</h3>
+<p>After mentioning your interest and relevant background, ask a simple question such as, "Are you currently taking undergraduate researchers for the coming semester?" There is no need for an elaborate request.</p>
+
+<h3>How long should an email to a research professor be?</h3>
+<p>A concise email of roughly 100 to 150 words is usually enough for initial outreach. The professor should be able to understand why you are contacting them and what you are asking without reading a long personal statement.</p>
+
+<h3>What should the subject line be when emailing a professor about research?</h3>
+<p>Use a clear subject line that mentions your status and research area, such as "Undergraduate interested in your neuroscience research" or "Summer research inquiry — computational biology."</p>
+
+<h3>Can I email a professor if I have no research experience?</h3>
+<p>Yes. Mention relevant coursework, programming, laboratory classes, statistics, class projects or other preparation. Undergraduate research is often where students gain their first formal research experience.</p>
+
+<h3>Should I attach my CV when emailing a professor?</h3>
+<p>It is generally reasonable to attach a concise academic CV unless the professor or lab provides different instructions. Your email should still explain your interest without requiring the professor to open the attachment.</p>
+
+<h3>Should I include my GPA when emailing a research professor?</h3>
+<p>Usually, your GPA can stay on your CV unless the professor asks for it or it provides important context. Relevant coursework and skills may be more useful in the body of a short research email.</p>
+
+<h3>Can I email a professor at another university about research?</h3>
+<p>Yes. Students can contact professors at other universities, particularly for summer research or opportunities unavailable at their home institution. Whether the professor can take external students depends on the university and project.</p>
+
+<h3>How much of a professor's research should I read before emailing?</h3>
+<p>Start with the lab website and one or two recent papers relevant to your interests. You do not need to understand every technical detail, but you should know enough to explain why you chose to contact that professor.</p>
+
+<h3>How long should I wait before following up with a professor?</h3>
+<p>Wait roughly one to two weeks before sending one brief follow-up. If there is still no response after that, continue contacting other researchers.</p>
+
+<h3>Is it okay to email multiple professors about research?</h3>
+<p>Yes. You should not make your entire search depend on one professor. Contact several researchers whose work genuinely interests you, but write each email individually rather than sending the same generic message to everyone.</p>
+
+<h3>What is the biggest mistake when emailing a research professor?</h3>
+<p>One of the biggest mistakes is sending a generic email that gives the professor no reason to believe you chose them specifically. Research the professor first and mention something real about their current work.</p>
 
 <div class="blog-cta">
-<h2>Find Research Professors Faster</h2>
-<p>Research Match helps you find professors by research interest, understand their papers in plain English, and draft a stronger email before you send it.</p>
-<a href="/app" class="btn-cta rm-search-btn">Try Research Match free</a>
+<h2>Find the Professor Before You Write the Email</h2>
+<p>Research Match helps you search for professors by the research topics you actually care about, understand their recent papers in plain English, and find a genuine angle for your outreach before you hit send.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
 </div>`,
-    relatedSlugs: ["how-to-email-a-professor", "how-to-email-a-professor-about-research", "best-time-to-email-professors"],
+    relatedSlugs: ["how-to-cold-email-a-professor", "cold-email-professor-template", "how-to-find-research-positions", "how-to-follow-up-with-a-professor"],
     datePublished: "2026-05-27",
   },
 {
