@@ -2083,51 +2083,291 @@ Best,<br>
   },
   {
     slug: "premed-research-experience",
-    title: "How to Get Research Experience for Med School Applications",
-    description: "Learn how to get research experience for med school applications. Covers clinical vs basic science research, how many hours you need, and how to find PIs in medical fields.",
-    keyword: "premed research experience",
-    content: `<h2>Does Research Really Matter for Med School?</h2>
-<p>Short answer: yes, especially if you are applying to competitive programs. According to AAMC data, the majority of successful applicants to top 20 medical schools have some research experience. It is not technically required, but not having it puts you at a disadvantage.</p>
-<p>Research shows admissions committees that you can think critically, work on open-ended problems, and contribute to scientific knowledge. It also shows intellectual curiosity beyond just checking boxes, which is something every admissions committee looks for.</p>
-<p>But here is the thing: quality matters way more than quantity. A deep, meaningful research experience where you actually learned something is worth infinitely more than logging hours in a lab where you just washed dishes.</p>
+    title: "How to Get Research Experience for Medical School as a Premed",
+    description: "Learn how to get research experience for medical school, including where premeds can find research, clinical vs basic science research, how many hours matter, and whether you need publications.",
+    keyword: "research experience for medical school",
+    content: `<h2>How Do You Get Research Experience for Medical School?</h2>
+<p><strong>The most practical way to get research experience as a premed is to find professors, physicians and research groups working on questions that genuinely interest you, then look for undergraduate positions in their labs or contact them directly.</strong></p>
+<p>You do not need to wait for a position with "premed research" in the title. Research that can be meaningful for a future medical school application happens across medical schools, hospitals, biology departments, public health programs, psychology labs, engineering departments and plenty of other places.</p>
+<p>It also does not have to involve discovering a new drug or working directly with patients.</p>
+<p>You might analyse clinical data, work with cell cultures, recruit study participants, review medical records, run statistical analyses, help with laboratory experiments or contribute to a public health project.</p>
+<p>The better question is not "What research looks best for medical school?" It is: <strong>What research would I actually be interested enough to stick with and understand?</strong></p>
 
-<h2>Clinical Research vs Basic Science Research</h2>
-<p>There are two main flavors of research for premeds: clinical research and basic science research. Both count, and neither is inherently better for med school applications.</p>
-<p><strong>Clinical research</strong> involves human subjects and is often done in hospital or clinic settings. Think clinical trials, retrospective chart reviews, patient surveys, or outcomes research. This is great because it connects directly to patient care and gives you clinical exposure at the same time.</p>
-<p><strong>Basic science research</strong> happens in a lab and involves things like cell cultures, animal models, molecular biology, or biochemistry. This is more traditional "bench research" and is valued because it shows you can do rigorous science.</p>
-<p>The best advice? Do whatever genuinely interests you. Admissions committees can tell the difference between a student who loved their research and one who was just going through the motions. If you are fascinated by genetics, do genetics research. If patient outcomes data excites you, do clinical research.</p>
+<h2>Do You Need Research Experience for Medical School?</h2>
+<p><strong>Research is not a universal requirement for medical school admission, but it can be an important part of an application, particularly if you are applying to schools with a strong research focus or considering an MD-PhD.</strong></p>
+<p>That distinction matters.</p>
+<p>Premeds sometimes hear that they "need research" and immediately start looking for anything that will give them a few hundred hours to put on an application.</p>
+<p>That approach misses much of the value.</p>
+<p>Research gives you experience dealing with questions that do not have answers at the back of a textbook. You learn how evidence is produced, how studies can go wrong, why scientific conclusions have limitations and how much work can sit behind a sentence in a medical paper.</p>
+<p>Those are useful things for a future physician to understand even if you never become a physician-scientist.</p>
 
-<h2>How Many Hours Do You Actually Need?</h2>
-<p>There is no magic number, but most successful applicants have at least 150-300 hours of research experience. That is roughly one semester of working 10 hours per week, or a full-time summer research experience.</p>
-<p>More important than hours is what you can say about your experience. Can you explain your project clearly? Do you understand why the research matters? Did you develop any skills? Can you talk about what you learned? If yes, your hours are sufficient.</p>
-<p>Some students do two or three years of research and cannot articulate what they did. Others do one summer and can give a compelling 5-minute explanation of their project and its significance. The second student looks better in interviews.</p>
+<h2>How Important Is Research for Medical School?</h2>
+<p>The importance of research depends partly on where you are applying and what kind of medical career interests you.</p>
+<p>If you are applying to heavily research-oriented medical schools, substantial research experience may strengthen your fit with what those institutions do.</p>
+<p>If you are interested in an MD-PhD, research becomes considerably more central because you are applying specifically for training as both a physician and researcher.</p>
+<p>For other applicants, research may be one meaningful activity among several.</p>
+<p>You should therefore avoid treating every premed applicant as though they need exactly the same extracurricular profile.</p>
+<p>Someone with years of meaningful community health work, clinical experience and service should not necessarily abandon those commitments simply because another applicant spent two years in a molecular biology lab.</p>
 
-<h2>Finding PIs in Medical Fields</h2>
-<p>If your university has a medical school, start there. Medical school faculty often do both clinical and basic science research, and many are happy to take on motivated premeds. Check the department websites for internal medicine, pediatrics, surgery, and whatever specialties interest you.</p>
-<p>If your university does not have a medical school, look at nearby academic medical centers. Many accept volunteer research students from other universities. You can also look at biology, chemistry, biomedical engineering, and public health departments at your own school.</p>
-<p>The most effective way to connect with a PI is through a cold email. We have a full guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor for research</a> that walks you through exactly what to write. The same principles apply whether you are emailing a basic science professor or a clinical researcher.</p>
+<h2>What Counts as Research Experience for Medical School?</h2>
+<p>Research is much broader than bench science.</p>
+<p>Depending on the project, undergraduate research could involve:</p>
+<p><strong>Basic science research</strong> involving cells, molecular biology, genetics, biochemistry, animal models or other laboratory methods.</p>
+<p><strong>Clinical research</strong> involving patients, treatments, medical records, clinical trials or health outcomes.</p>
+<p><strong>Translational research</strong> connecting discoveries from laboratory research with potential clinical applications.</p>
+<p><strong>Public health and epidemiology research</strong> investigating disease patterns, populations, health behaviours or healthcare interventions.</p>
+<p><strong>Computational research</strong> using programming, statistics, bioinformatics or machine learning to investigate biological or medical questions.</p>
+<p><strong>Behavioural or psychological research</strong> examining cognition, behaviour, mental health or patient experiences.</p>
+<p>The label matters less than what you actually did and understood.</p>
 
-<h2>Cold Emailing Tips Specific to Premeds</h2>
-<p>When you are emailing as a premed, do not lead with "I am a premed student looking for research to put on my med school application." Professors hear this constantly, and it signals that you are only interested in the experience as a resume line, not in the actual science.</p>
-<p>Instead, lead with genuine interest in the research. If you are emailing a cardiologist who studies heart failure, talk about what interests you about heart failure research specifically. Then mention you are interested in pursuing medicine, which connects naturally to why you want clinical or basic science exposure.</p>
-<blockquote>"The premeds who do best in my lab are the ones who are genuinely curious about the research, not the ones counting hours for their application. I can tell the difference on day one." -- MD-PhD, Department of Medicine</blockquote>
-<p>Also, be upfront about your time commitment. Clinical researchers especially appreciate knowing your schedule because they need to coordinate with patient appointments and data collection windows.</p>
+<h2>Clinical Research vs Basic Science Research: Which Is Better for Premeds?</h2>
+<p><strong>Neither clinical nor basic science research is automatically better for a medical school application.</strong></p>
+<p>Choose based on the questions and working environment that interest you.</p>
+<p>Basic science research might appeal to you if you enjoy biology or chemistry at a mechanistic level and want to understand how diseases work. You could find yourself culturing cells, performing assays, studying proteins or working with experimental models.</p>
+<p>Clinical research is closer to patient care but can look very different depending on the project. You might work on a clinical trial, analyse patient outcomes, review medical records or help recruit participants.</p>
+<p>There is also a large middle ground. Biomedical engineering, computational medicine, epidemiology and translational science do not fit neatly into the basic-versus-clinical distinction.</p>
+<p>Do not choose clinical research simply because you assume the word "clinical" will look better to a medical school.</p>
 
-<h2>Making the Most of Your Research Experience</h2>
-<p>Once you land a position, treat it like a real job. Show up on time, do what you are asked, and ask questions when you do not understand something. The goal is to learn, not to just be present.</p>
-<p>Keep a research journal. Write down what you did each week, what you learned, and any questions that came up. This will be invaluable when you are writing your med school application and need to describe your research experience in detail.</p>
-<p>Try to get involved deeply enough that you contribute to a publication, even if you are just doing data entry or literature searches. Having a poster presentation or a publication shows a higher level of involvement. But do not stress about this. Many successful med school applicants do not have publications.</p>
+<h2>Does Clinical Research Count as Clinical Experience?</h2>
+<p><strong>Do not automatically assume that clinical research will satisfy expectations around clinical experience.</strong></p>
+<p>A research project can take place in a hospital without involving meaningful interaction with patients.</p>
+<p>You might spend an entire summer analysing a dataset in an office inside a medical centre. That can be excellent research experience, but it is different from spending time directly observing or participating appropriately in patient-facing healthcare environments.</p>
+<p>Think about the experiences separately.</p>
+<p>Research can help you understand how medical knowledge is created. Clinical experiences can help you understand what practicing medicine and interacting with patients are actually like.</p>
+<p>Sometimes an activity provides elements of both, but you should be able to explain what you actually did rather than relying on the setting or job title.</p>
 
-<h2>Timeline for Premeds</h2>
-<p>Ideally, start research by the end of your sophomore year. This gives you enough time to build a meaningful experience before you apply to med school the summer after your junior year. If you are starting later, a full-time summer research experience can still be very effective.</p>
-<p>If you need help getting started, check out our complete guide on <a href="/blog/how-to-get-research-experience-undergrad">how to get research experience as an undergrad</a>. And read about <a href="/blog/undergraduate-research-benefits">why undergraduate research matters</a> beyond just med school applications.</p>
+<h2>Where Can Premeds Find Research Opportunities?</h2>
+<p>Start closer to home than you might expect.</p>
+<p>Search your university's biology, chemistry, neuroscience, psychology, biomedical engineering, computer science, statistics and public health departments.</p>
+<p>If your university has an affiliated medical school, search there too.</p>
+<p>Do not limit yourself to professors whose profiles explicitly say that they work with undergraduates. Some labs take students without advertising positions publicly.</p>
+<p>Look at the lab's website, recent publications and current members. If undergraduate researchers already appear on the team page, that is a useful sign that the lab has experience mentoring students at your level.</p>
+<p>If you are struggling to locate opportunities, our guide on <a href="/blog/how-to-find-research-positions">how to find research positions</a> covers the search process in more detail.</p>
+
+<h2>How to Find Medical School Professors Doing Research</h2>
+<p>Medical school faculty directories can be difficult to navigate because a single institution may have thousands of faculty members.</p>
+<p>Searching by department is one option, but searching by research question is usually better.</p>
+<p>Instead of deciding that you want to "research cardiology," narrow the question slightly.</p>
+<p>You might become interested in heart failure outcomes, cardiac imaging, congenital heart disease, cardiovascular genetics or machine learning for ECG analysis.</p>
+<p>Now you have something useful to search.</p>
+<p>With <a href="/app">Research Match</a>, you can search for professors based on the research topic you are interested in and look through their recent work before deciding who is actually worth contacting.</p>
+<p>This is much more efficient than sending generic emails to every physician listed under a hospital department.</p>
+
+<h2>Can You Do Research With a Physician?</h2>
+<p><strong>Yes. Physicians working at academic medical centres often conduct research alongside their clinical work.</strong></p>
+<p>Some run laboratories. Others lead clinical trials, outcomes research, epidemiological studies or projects based on patient data.</p>
+<p>Keep in mind that an academic physician's schedule can be very different from that of a professor whose work is primarily research.</p>
+<p>If you join their group, you may work more closely with a research coordinator, resident, fellow, graduate student or another member of the research team.</p>
+<p>That is not necessarily a disadvantage. What matters is whether somebody has the time and responsibility to supervise you properly.</p>
+
+<h2>Can You Do Research at a Hospital as an Undergraduate?</h2>
+<p>Yes, although opportunities and eligibility rules vary considerably between hospitals.</p>
+<p>Academic medical centres are the most obvious places to investigate because research is part of their mission.</p>
+<p>Look for undergraduate research programs, summer research programs, volunteer research assistant positions and individual faculty labs.</p>
+<p>Hospitals may have additional requirements because of patient privacy, health records, clinical environments or institutional research policies.</p>
+<p>Do not assume that contacting a physician automatically gives you permission to access patients or medical data. Formal onboarding and approvals may be required before you can begin.</p>
+
+<h2>Can You Get Premed Research Experience With No Experience?</h2>
+<p><strong>Yes. You do not need previous research experience to get your first research position.</strong></p>
+<p>That sounds obvious, but it is something students routinely worry about.</p>
+<p>If you have never worked in a lab, focus on the preparation you do have.</p>
+<p>Maybe you have completed biology and chemistry laboratory courses. Perhaps you know Python or R. You might have taken statistics, completed a substantial class project or developed an interest in a particular disease through your coursework.</p>
+<p>None of that makes you an experienced researcher. It does give a professor some idea of where you are starting from.</p>
+<p>Our guide on <a href="/blog/how-to-get-research-experience-undergrad">how to get research experience as an undergraduate</a> goes into more detail for students looking for their first position.</p>
+
+<h2>How Do You Email a Professor About Premed Research?</h2>
+<p>Do not open with:</p>
+<blockquote>I am a premed looking for research experience for my medical school application.</blockquote>
+<p>It may be true, but it gives the professor very little reason to choose you over the many other premeds who want exactly the same thing.</p>
+<p>Start with the research.</p>
+<p>For example:</p>
+<blockquote>Dear Professor Chen,<br><br>
+I came across your group's recent work on treatment resistance in acute myeloid leukemia and was particularly interested in how you are studying changes in signalling pathways after treatment.<br><br>
+I am a second-year biology student and have completed coursework in cell biology and genetics. I am hoping to gain my first research experience and am particularly interested in cancer biology.<br><br>
+I wanted to ask whether you are currently taking undergraduate researchers, or expect to have any opportunities in the coming semester. I would be happy to send my CV if useful.<br><br>
+Best,<br>
+[Your Name]</blockquote>
+<p>Your interest in medicine can certainly come up. It just should not be the only reason you can give for wanting to join that particular lab.</p>
+<p>For a more detailed structure, see <a href="/blog/how-to-email-a-research-professor">how to email a research professor about joining their lab</a>.</p>
+
+<h2>Should You Tell the Professor You're Premed?</h2>
+<p>There is nothing wrong with mentioning that you are considering medicine.</p>
+<p>The problem comes when "I'm premed" replaces an explanation of why you care about the research.</p>
+<p>A professor does not necessarily need another student who wants something for a medical school application. They need someone who can become useful to the research group.</p>
+<p>Instead of:</p>
+<blockquote>I am a premed student hoping to strengthen my application.</blockquote>
+<p>you might say:</p>
+<blockquote>I am considering medicine and have become particularly interested in cancer biology after taking molecular genetics this semester.</blockquote>
+<p>Now your career interest provides context without becoming the entire pitch.</p>
+
+<h2>How Many Research Hours Do You Need for Medical School?</h2>
+<p><strong>There is no universal number of research hours that you need for medical school.</strong></p>
+<p>This is an important correction to a lot of advice circulating online.</p>
+<p>Research is not a game where reaching 200 hours suddenly turns the experience into a strong extracurricular.</p>
+<p>Admissions readers can see the duration and intensity of an activity, but what you actually did matters too.</p>
+<p>A student who spent a year in a lab, gradually took responsibility for experiments and can thoughtfully discuss the project's limitations has a very different experience from someone who accumulated the same number of hours doing tasks they barely understood.</p>
+<p>Instead of asking how quickly you can reach a target number, ask whether you are staying long enough to understand the research and make a meaningful contribution.</p>
+
+<h2>How Long Should Premeds Stay in a Research Lab?</h2>
+<p>There is no mandatory duration, but research often becomes more interesting after the initial training period.</p>
+<p>During your first weeks or months, you may spend much of your time learning procedures, reading papers, getting comfortable with software or helping someone else with a project.</p>
+<p>If you stay longer, you may begin to understand why experiments are being designed a certain way and take ownership of more substantial work.</p>
+<p>That is one reason sustained research can be valuable.</p>
+<p>It does not mean you should remain for two years in a lab you dislike purely for your application. If the environment is poor or the research is completely wrong for you, it is reasonable to look elsewhere.</p>
+
+<h2>When Should You Start Research as a Premed?</h2>
+<p><strong>There is no single year when every premed needs to start research.</strong></p>
+<p>Starting during your first or second year gives you more time to develop within a lab, but starting later does not make the experience meaningless.</p>
+<p>A full-time summer project during your third year can still provide substantial exposure to research.</p>
+<p>The best time to start is when you have enough space in your schedule to commit properly.</p>
+<p>Do not overload your first semester at university with research, volunteering, clinical experience and every premed club you can find simply because you think you need to start accumulating activities immediately.</p>
+
+<h2>What If You're Starting Research Late?</h2>
+<p>Start from where you are.</p>
+<p>If you are already a junior, look at summer programs, professors with clearly defined undergraduate projects and research groups where your existing coursework gives you a useful starting point.</p>
+<p>You may not have three years to progress through a lab, but that does not prevent you from having a meaningful research experience.</p>
+<p>Do not try to compensate by emailing dozens of professors with a generic message.</p>
+<p>A smaller number of carefully chosen labs is usually a better place to begin.</p>
+
+<h2>Should You Do Research During the Semester or Summer?</h2>
+<p>Both can work well, but the experiences can feel quite different.</p>
+<p>Semester research allows you to remain with a group over a longer period while taking classes. The weekly commitment may be lower, but you have more time to see a project develop.</p>
+<p>Summer research can be much more concentrated. Working full-time for eight or ten weeks can give you enough uninterrupted time to learn techniques and make progress on a defined project.</p>
+<p>Structured summer research programs can be particularly useful if your home university has limited opportunities.</p>
+<p>If you are considering one, read our guide on <a href="/blog/what-is-an-reu-how-to-get-into-one">what an REU is and how to get into one</a>.</p>
+
+<h2>Do You Need a Publication for Medical School?</h2>
+<p><strong>No. You do not need to publish a research paper for your research experience to be meaningful.</strong></p>
+<p>Undergraduates have limited control over whether a project becomes a publication.</p>
+<p>A study can take years. Experiments fail. Papers get delayed. A project you contribute to during sophomore year might not be published until after you graduate.</p>
+<p>Authorship can be an excellent outcome when your contribution warrants it, but chasing a publication at any cost can lead you toward the wrong lab or project.</p>
+<p>Focus first on finding good mentorship and doing work you can actually understand.</p>
+
+<h2>Does a Poster Presentation Count as Research?</h2>
+<p>A poster is an output from research rather than a separate type of research experience.</p>
+<p>If your project gives you an opportunity to present at an undergraduate symposium, departmental meeting or academic conference, take it seriously.</p>
+<p>Preparing a poster forces you to work out what the project actually found, which methods matter and how to explain the results to somebody who has not spent months thinking about the same problem.</p>
+<p>That can be valuable preparation for discussing your research later.</p>
+
+<h2>What If You Don't Get Published?</h2>
+<p>Be able to explain what you did.</p>
+<p>What question was the project trying to answer? Why did it matter? What was your role? What went wrong? What did you learn about the research process?</p>
+<p>Those questions are worth thinking about whether or not your name eventually appears on a paper.</p>
+<p>You may discover that your most interesting story is an experiment that failed repeatedly and forced the team to rethink an assumption.</p>
+<p>Research is not valuable only when it produces a citation for your CV.</p>
+
+<h2>Should You Choose Research Based on Your Intended Medical Specialty?</h2>
+<p><strong>No. Premeds do not need to conduct research in the medical specialty they currently think they want to enter.</strong></p>
+<p>You have not even started medical school yet. Your interests may change substantially once you encounter different specialties clinically.</p>
+<p>If you currently think you want to become a cardiologist but find neuroscience research fascinating, do the neuroscience research.</p>
+<p>The skills you develop in asking questions, evaluating evidence and working through uncertainty are transferable.</p>
+
+<h2>Can Non-Medical Research Help With Medical School?</h2>
+<p>Yes.</p>
+<p>Your research does not necessarily need a disease name attached to it.</p>
+<p>Psychology, engineering, chemistry, computer science, sociology, economics and other fields can all involve serious research.</p>
+<p>What matters is what you actually contributed and what the experience taught you.</p>
+<p>If you have already spent two years doing meaningful environmental chemistry research, for example, you do not necessarily need to abandon it for a hospital project simply because you decide to apply to medical school.</p>
+
+<h2>Should You Do Machine Learning or AI Research as a Premed?</h2>
+<p>If you are genuinely interested in it, yes.</p>
+<p>Machine learning is increasingly used across biomedical research, from medical imaging and genomics to clinical prediction and drug discovery.</p>
+<p>A computational research experience can also give you useful skills in programming, statistics and data analysis.</p>
+<p>Do not choose AI simply because it currently sounds impressive. The same rule applies as with any research: you should be interested enough in the underlying question to understand what you are doing.</p>
+<p>If this is an area you want to explore, see our guide on <a href="/blog/machine-learning-research-opportunities-undergraduate">how to find machine learning research opportunities as an undergraduate</a>.</p>
+
+<h2>Should Premeds Do Paid or Volunteer Research?</h2>
+<p>Paid undergraduate research positions exist, as do research fellowships, summer stipends, academic-credit arrangements and volunteer roles.</p>
+<p>Do not assume that research must be unpaid because you are an undergraduate.</p>
+<p>If a professor is interested in having you join but says there is no funding, ask whether your university offers undergraduate research grants or fellowships.</p>
+<p>You should also think realistically about your own circumstances. Not every student can afford to volunteer ten or fifteen hours every week, and you should not feel that financial constraints make you less committed to medicine or research.</p>
+<p>See <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a> for more options.</p>
+
+<h2>How Do You Know If a Research Lab Is a Good Fit?</h2>
+<p>Getting an offer is only half the decision.</p>
+<p>Before joining, find out what you would actually be doing, who would supervise you and how much time the lab expects each week.</p>
+<p>If possible, talk to an undergraduate or graduate student already working there.</p>
+<p>Ask what happens when you get stuck and how often students meet with their mentors.</p>
+<p>A famous professor is not automatically a good undergraduate mentor, and a prestigious lab is not automatically the best place for you to learn.</p>
+<p>Our guide to <a href="/blog/research-lab-red-flags">research lab red flags</a> covers what to watch for before accepting an opportunity.</p>
+
+<h2>How to Make Your Premed Research Experience Meaningful</h2>
+<p>Once you join a lab, try to understand the project beyond the task immediately in front of you.</p>
+<p>If you are entering data, find out what question the data will help answer. If you are running an assay, understand why that assay was chosen. If you are writing code, understand what the researchers hope to learn from the analysis.</p>
+<p>Read some of the papers behind the project.</p>
+<p>Ask questions when appropriate.</p>
+<p>Keep notes on what you worked on, problems you encountered and things you learned. Months later, those notes can be much more useful than trying to reconstruct the experience from memory.</p>
+<p>The goal is to eventually be able to explain the research as someone who participated in it, rather than someone who happened to be in the room.</p>
+
+<h2>What If You Discover That You Don't Like Research?</h2>
+<p>That is useful information.</p>
+<p>You may discover that you enjoy reading medical research but dislike doing experiments. You might prefer patient-facing work to spending hours analysing data. Or you may find that you love research enough to consider an academic medical career.</p>
+<p>Research experience is valuable partly because it lets you test that interest while you are still an undergraduate.</p>
+<p>You do not need to force yourself to become a "research person" simply because you are premed.</p>
+
+<h2>A Practical Plan for Finding Premed Research</h2>
+<p>Start by choosing two or three areas you would genuinely like to know more about.</p>
+<p>They can be broad at first: cancer biology, neuroscience, infectious disease, health disparities, medical imaging or another topic that has caught your attention.</p>
+<p>Then find researchers working on those questions at your university, affiliated medical schools and nearby academic medical centres.</p>
+<p>Read enough of their recent work to decide whether you are actually interested. Check whether their lab works with undergraduates.</p>
+<p>Then contact the strongest matches individually.</p>
+<p>At the same time, investigate undergraduate research offices, summer programs and funding opportunities rather than relying entirely on cold email.</p>
+<p>Do not measure success by how quickly you can add "research" to your medical school checklist.</p>
+<p>Find somewhere you can stay long enough to learn how research actually works.</p>
+
+<h2>Frequently Asked Questions About Research Experience for Medical School</h2>
+
+<h3>Do you need research experience for medical school?</h3>
+<p>Research is not a universal requirement for medical school admission. However, it can strengthen an application and may be particularly important for applicants interested in research-intensive medical schools or MD-PhD programs.</p>
+
+<h3>How do premeds get research experience?</h3>
+<p>Premeds can find research through university laboratories, medical schools, academic hospitals, undergraduate research programs and summer programs. Students can also identify professors whose research interests them and contact those researchers directly.</p>
+
+<h3>How many research hours do you need for medical school?</h3>
+<p>There is no universal number of research hours required for medical school. The duration and depth of your involvement, what you contributed and how well you understand the research are more useful considerations than reaching an arbitrary hour target.</p>
+
+<h3>Is clinical research or basic science better for medical school?</h3>
+<p>Neither is automatically better. Clinical research may involve patient data, trials or outcomes, while basic science investigates biological mechanisms in laboratory settings. Choose research that genuinely interests you and offers good mentorship.</p>
+
+<h3>Does clinical research count as clinical experience?</h3>
+<p>Not automatically. Some clinical research involves direct interaction with patients, while other projects are entirely data-based. Describe the activity according to what you actually did rather than assuming that research in a hospital is necessarily patient-facing clinical experience.</p>
+
+<h3>Do you need a publication for medical school?</h3>
+<p>No. Undergraduate researchers do not need a publication for their research experience to be meaningful. Publications depend on the project timeline, results and your contribution, many of which are outside an undergraduate's control.</p>
+
+<h3>Can I get research experience with no previous research?</h3>
+<p>Yes. Professors understand that undergraduate students may be looking for their first research position. Relevant coursework, laboratory classes, statistics, programming and class projects can all help demonstrate preparation.</p>
+
+<h3>When should premeds start research?</h3>
+<p>There is no required year. Starting earlier can give you more time to develop within a lab, but students can also gain meaningful experience through later semester or full-time summer research.</p>
+
+<h3>Can you do research at a hospital as an undergraduate?</h3>
+<p>Yes. Academic hospitals and medical centres may offer undergraduate research programs or positions within individual research groups. Eligibility, training and access requirements vary by institution and project.</p>
+
+<h3>Does research have to be medical for med school?</h3>
+<p>No. Meaningful research in biology, psychology, chemistry, engineering, public health, computer science and other fields can develop relevant scientific and analytical skills. You should be prepared to explain what you learned from the experience.</p>
+
+<h3>Should premeds email professors for research?</h3>
+<p>Yes. Directly contacting professors can uncover opportunities that are never formally advertised. Research the professor first, mention something specific about their work and briefly explain the background you could bring to the lab.</p>
+
+<h3>Should I tell a professor that I am premed?</h3>
+<p>You can mention that you are interested in medicine, but it should not be your only reason for contacting the professor. Lead with genuine interest in their research and explain why their particular work caught your attention.</p>
+
+<h3>Can research make up for weak clinical experience?</h3>
+<p>Research and clinical experience demonstrate different things. Strong research does not necessarily replace opportunities to understand patient care and the practice of medicine, so avoid treating extracurricular activities as interchangeable boxes.</p>
+
+<h3>Is one summer of research enough for medical school?</h3>
+<p>A full-time summer can provide meaningful research experience, particularly if you become genuinely involved in a project. There is no universal minimum duration, although longer involvement may give you more time to develop independence and understand the research in greater depth.</p>
+
+<h3>What research is best for premed students?</h3>
+<p>The best research is usually a project that genuinely interests you, provides appropriate mentorship and allows you to understand and contribute to the work. It does not need to match your intended medical specialty or take place inside a hospital.</p>
 
 <div class="blog-cta">
-<h2>Find Your Professor Match</h2>
-<p>Research Match helps you find the right professor in 5 minutes. Search by interest, read their papers in plain English, and check your email before sending.</p>
-<a href="/app" class="btn-cta rm-search-btn">Try Research Match for free</a>
+<h2>Find Medical Researchers Worth Contacting</h2>
+<p>Research Match helps you search for professors by the medical or scientific questions you actually care about. Explore researchers, understand their recent papers in plain English, and build a shortlist of labs worth approaching instead of sending generic emails to every PI you can find.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find research professors with Research Match</a>
 </div>`,
-    relatedSlugs: ["how-to-get-research-experience-undergrad", "how-to-cold-email-a-professor", "undergraduate-research-benefits"],
+    relatedSlugs: ["how-to-get-research-experience-undergrad", "how-to-email-a-research-professor", "how-to-find-research-positions", "research-lab-red-flags"],
     datePublished: "2026-03-01",
   },
   {
