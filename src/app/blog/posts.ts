@@ -2895,7 +2895,6 @@ content: `<h2>Warm Introductions Help, But You Do Not Need One</h2>
     datePublished: "2026-05-27",
   },
   {
-
 {
     slug: "how-to-email-a-research-professor",
     title: "How to Email a Research Professor About Joining Their Lab",
