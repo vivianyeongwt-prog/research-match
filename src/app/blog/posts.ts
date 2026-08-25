@@ -2731,58 +2731,292 @@ Best,<br>
   },
   {
     slug: "summer-research-opportunities",
-    title: "How to Find Summer Research Opportunities in 2026",
-    description: "How to find summer research opportunities in 2026. Covers REU programs, cold emailing, university programs, timelines, and application strategies for students.",
-    keyword: "summer research opportunities 2026",
-    content: `<h2>Summer Is the Best Time for Research</h2>
-<p>Summer research is the gold standard for getting meaningful research experience. Without classes competing for your time, you can dedicate full days to a project and make real progress. Most professors prefer summer researchers for exactly this reason.</p>
-<p>Whether you are looking at formal programs or informal lab positions, the key is starting your search early. Most summer opportunities are locked in by March or April, which means you need to start planning now if you want options.</p>
+    title: "How to Find Summer Research Opportunities for Undergraduates in 2027",
+    description: "Looking for summer research opportunities in 2027? Learn where undergraduates can find REUs, university programs, paid research positions and professors to contact, plus when to start applying.",
+    keyword: "summer research opportunities 2027",
+    content: `<h2>How Do You Find Summer Research Opportunities for 2027?</h2>
+<p><strong>Undergraduates looking for summer research opportunities in 2027 should start searching in fall 2026 and use several routes at once: formal summer research programs, NSF REUs, programs at their own university, research positions at other institutions, and direct outreach to professors.</strong></p>
+<p>There is no single website containing every undergraduate research opportunity, which is one reason the process can feel surprisingly difficult.</p>
+<p>A professor might have funding for a summer student without advertising a position. A university might run its own undergraduate research fellowship that never appears when you search for internships. Another program might accept students from universities across the country.</p>
+<p>The best strategy is therefore not to wait for the perfect "summer research internship" listing to appear.</p>
+<p>Start with what you want to research, find the people and programs working on it, and build several possible routes into a lab.</p>
 
-<h2>The Timeline: Start in March-April (or Earlier)</h2>
-<p>Here is the timeline that works for most summer research opportunities in 2026.</p>
-<p><strong>November-December 2025:</strong> Research REU programs and formal summer programs. Make a list of 10-15 that interest you. Note their deadlines, which are usually in January or February.</p>
-<p><strong>January-February 2026:</strong> Submit REU and formal program applications. Start identifying professors you would like to cold email as a backup plan (or primary plan).</p>
-<p><strong>March 2026:</strong> Begin cold emailing professors for informal summer positions. This is the sweet spot: early enough that labs have not filled their spots yet, but late enough that professors are thinking about summer plans.</p>
-<p><strong>April 2026:</strong> Follow up on cold emails. Accept offers. By mid-April, most summer positions are filled. If you are still searching, widen your net to include more universities and more professors.</p>
-<p>If you are reading this and it is already late in the timeline, do not panic. Positions open up due to cancellations, and some professors make late decisions. But the earlier you start, the more options you have.</p>
+<h2>When Should You Start Applying for Summer 2027 Research?</h2>
+<p><strong>Start looking for summer 2027 research opportunities around October or November 2026.</strong></p>
+<p>You do not necessarily need to submit applications that early, but you should know what programs exist.</p>
+<p>Many structured summer programs open applications between November and January, with deadlines concentrated around January, February and March.</p>
+<p>A sensible 2027 timeline looks something like this:</p>
 
-<h2>REU Programs: The Structured Option</h2>
-<p>Research Experience for Undergraduates (REU) programs are NSF-funded summer research experiences at universities across the country. They typically run 8-10 weeks, provide a stipend of 5,000 to 7,000 dollars, and often cover housing and travel.</p>
-<p>REUs are excellent because they are structured. You get assigned a mentor, have a defined project, participate in professional development activities, and usually present your research at the end. They are also incredible for grad school applications because admissions committees know and respect REU programs.</p>
-<p>The catch is that REUs are competitive. Popular programs can have acceptance rates under 10 percent. Apply to at least 5-10 programs to improve your odds. You can find the full list at nsf.gov/crssprgm/reu.</p>
-<p>Pro tip: smaller and newer REU programs tend to be less competitive but offer equally good experiences. Do not only apply to the famous ones at MIT and Stanford. The REU at a state school might give you more hands-on time and a better mentor relationship.</p>
+<h3>September to October 2026: Explore</h3>
+<p>Decide which research areas interest you and begin identifying programs, labs and professors.</p>
+<p>Do not worry about creating a final list yet. This is the stage for figuring out what is available.</p>
 
-<h2>Cold Emailing for Summer Positions</h2>
-<p>Informal summer positions (meaning you just email a professor and ask to work in their lab for the summer) are actually more common than formal programs. Most undergrads who do summer research find their positions this way.</p>
-<p>The approach is the same as any cold email: be specific about the professor's research, explain your relevant background, and ask clearly about summer opportunities. Mention that you can commit full-time for the summer and specify the dates you are available.</p>
-<p>One important addition for summer emails: ask about funding. Some professors can pay summer researchers through their grants. Others can help you apply for university-funded summer research fellowships. And some positions are volunteer. It is okay to ask about this, but frame it as "I am interested regardless of funding, but I wanted to ask if there are any funding options available."</p>
-<p>For the full email strategy, read our guide on <a href="/blog/how-to-cold-email-a-professor">how to cold email a professor</a>.</p>
+<h3>November to December 2026: Build Your Shortlist</h3>
+<p>More 2027 program pages should begin appearing during this period.</p>
+<p>Create a shortlist and record each program's eligibility requirements, deadline, recommendation requirements, funding and research areas.</p>
+<p>This is also a good time to speak with professors who might write recommendation letters.</p>
 
-<h2>University Summer Research Programs</h2>
-<p>Many universities run their own summer research programs for undergrads, separate from NSF REUs. These are often less well-known but equally valuable. Check your university's undergraduate research office website for options.</p>
-<p>Some universities also offer summer research fellowships that provide funding for you to work in any lab on campus. These are competitive but worth applying for because they come with money and institutional support.</p>
-<p>Do not forget about summer research programs at other universities too. Many schools welcome students from outside their institution, especially for paid programs. A quick search for "[University name] summer undergraduate research" will usually turn up relevant programs.</p>
+<h3>January to February 2027: Application Season</h3>
+<p>This is likely to be one of the busiest periods for formal summer research applications.</p>
+<p>Submit your strongest-fit programs rather than waiting until every application is nearly due.</p>
+<p>At the same time, start identifying individual professors you could contact if formal programs do not work out.</p>
 
-<h2>For Early-Stage Students</h2>
-<p>Summer is often the most realistic time for <a href="/blog/research-opportunities-for-early-stage-students">students early in their research journey to do research</a>. You have more room to build a focused schedule, and professors are often more open to defined summer projects.</p>
-<p>Look for summer programs designed for students who are still building experience at nearby universities. Also consider cold emailing professors directly. Many professors who are not sure about a semester-long commitment may be open to a focused summer project, especially for computational or data-oriented work.</p>
+<h3>February to March 2027: Contact Professors Directly</h3>
+<p>If you want to arrange research outside a formal program, begin contacting professors about their summer plans.</p>
+<p>There is no universal date when professors decide whether they can take summer students. Some know months ahead; others will not know until funding and project plans become clearer.</p>
 
-<h2>Volunteering as a Starting Point</h2>
-<p>If you cannot find a paid summer position, offer to volunteer. Working for free is not ideal, but a summer of real research experience is worth far more than a summer of working a random job when it comes to your academic future.</p>
-<p>Volunteering also lowers the barrier for professors. They do not need to worry about funding, paperwork, or formal hiring. You just show up and start contributing. Many volunteers get offered paid positions in subsequent semesters.</p>
+<h3>April to May 2027: Keep Looking</h3>
+<p>Do not assume that every opportunity has disappeared because it is April.</p>
+<p>Some university programs have later deadlines, individual labs may still have openings, and positions can appear when another student declines an offer.</p>
+<p>Your options may be narrower, but "late" does not mean "impossible."</p>
 
-<h2>Making the Most of Your Summer</h2>
-<p>Once you have secured a summer research position, treat it seriously. Show up every day, be engaged, and push yourself to learn as much as possible. A summer of dedicated research can be worth more than a year of part-time work during the semester.</p>
-<p>Set goals with your mentor at the beginning of the summer. Aim to have something presentable by the end, whether that is a poster, a presentation, or a section of a paper. Having a tangible output makes the experience much more valuable for applications.</p>
-<p>For more guidance on finding research in general, check out our guide on <a href="/blog/how-to-find-research-opportunities">how to find research opportunities</a>. And if you need help getting started with the undergrad research experience overall, read our <a href="/blog/how-to-get-research-experience-undergrad">complete guide to getting research experience</a>.</p>
+<h2>What Types of Summer Research Opportunities Are Available?</h2>
+<p>Students often use "summer research program" to describe several quite different arrangements.</p>
+<p>You might join a structured cohort program where housing, mentorship and research projects are organised for you. You might receive a fellowship that funds you to work with a professor you find yourself. Or you might simply contact a professor and arrange to spend the summer working in their lab.</p>
+<p>Understanding these different routes makes the search much easier.</p>
+
+<h2>1. NSF Research Experiences for Undergraduates (REUs)</h2>
+<p><strong>REUs are structured undergraduate research opportunities supported by the U.S. National Science Foundation and hosted at universities and research institutions.</strong></p>
+<p>They exist across areas including computer science, biology, chemistry, mathematics, physics, engineering, social and behavioural sciences, geosciences and other NSF-supported disciplines.</p>
+<p>Individual REU Sites recruit their own students, so there is no single application that automatically applies you to every program.</p>
+<p>Programs commonly involve several weeks of full-time research with a faculty mentor. Depending on the site, participants may also receive a stipend and support for housing, meals or travel.</p>
+<p>Eligibility matters. NSF-funded REU participants are generally subject to citizenship or permanent-residency requirements, although universities may have other research programs funded separately with different eligibility rules.</p>
+<p>If you have never encountered REUs before, read our guide on <a href="/blog/what-is-an-reu-how-to-get-into-one">what an REU is and how to get into one</a>.</p>
+
+<h2>2. University Summer Undergraduate Research Programs</h2>
+<p>Do not limit your search to programs labelled REU.</p>
+<p>Universities run many of their own summer research programs, sometimes using institutional, philanthropic or departmental funding.</p>
+<p>Search for:</p>
+<p><strong>summer undergraduate research + [university]</strong></p>
+<p><strong>undergraduate research fellowship + [university]</strong></p>
+<p><strong>summer research program + [subject] + [university]</strong></p>
+<p><strong>undergraduate research internship + [university]</strong></p>
+<p>Some are restricted to students enrolled at that university, while others specifically recruit visiting students.</p>
+<p>Always read the eligibility section before spending hours preparing an application.</p>
+
+<h2>3. Research Programs at Your Own University</h2>
+<p>Your own campus is easy to overlook when lists of prestigious summer programs start circulating online.</p>
+<p>Check your undergraduate research office, honours college, academic departments and individual research centres.</p>
+<p>Your university may offer summer fellowships that pay students to work with faculty members on campus. In some cases, you first find a professor willing to supervise you and then apply together for funding.</p>
+<p>These opportunities can be especially useful because you may be able to continue the project after summer ends.</p>
+<p>Instead of treating summer as an isolated eight-week experience, you could potentially turn it into a year or more of sustained research.</p>
+
+<h2>4. Contact Professors Directly</h2>
+<p><strong>You do not need a formal summer program to do undergraduate research.</strong></p>
+<p>Individual professors may take students into their labs for the summer, sometimes using grant funding or university undergraduate research funding.</p>
+<p>Start by identifying professors whose research genuinely interests you.</p>
+<p>Read their lab websites and recent work. Check whether undergraduates already appear on the lab team.</p>
+<p>Then send a concise email asking whether they expect to have opportunities for undergraduate researchers during summer 2027.</p>
+<p>If you are still finding professors by opening faculty directories one by one, <a href="/app">Research Match</a> can help you search for researchers based on the topics you actually want to study and understand their recent work before you email them.</p>
+
+<h2>What Should a Summer Research Email Look Like?</h2>
+<p>The email does not need to be complicated.</p>
+<p>For example:</p>
+<blockquote>Subject: Summer 2027 undergraduate research inquiry — computational neuroscience<br><br>
+Dear Professor Patel,<br><br>
+I came across your group's recent work on computational models of decision-making and was particularly interested in your research using behavioural data to model changes in learning under uncertainty.<br><br>
+I am a second-year computer science student and have completed coursework in probability and introductory machine learning. I am looking for an opportunity to gain research experience during summer 2027 and wanted to ask whether you expect to take undergraduate researchers.<br><br>
+I would be available from late May through August and would be happy to send my CV if useful.<br><br>
+Best,<br>
+[Your Name]</blockquote>
+<p>The important part is that the email explains why you chose that professor rather than merely announcing that you need summer research.</p>
+<p>See our guide on <a href="/blog/how-to-email-a-research-professor">how to email a research professor</a> for a more detailed breakdown.</p>
+
+<h2>5. Summer Research at Medical Schools and Hospitals</h2>
+<p>If you are interested in medicine, biology, neuroscience or public health, expand your search beyond your undergraduate university.</p>
+<p>Academic medical centres can host undergraduate research in areas ranging from basic laboratory science to clinical outcomes, epidemiology, medical imaging and computational medicine.</p>
+<p>Some opportunities are organised into formal summer programs. Others sit within individual faculty research groups.</p>
+<p>If you are premed, do not assume you need a project with obvious patient contact for it to be worthwhile. Basic science, computational research and public health can all provide serious research experience.</p>
+<p>See our guide on <a href="/blog/premed-research-experience">how to get research experience for medical school</a> for more specific advice.</p>
+
+<h2>6. Machine Learning and Computer Science Summer Research</h2>
+<p>Students interested in AI and machine learning should search more broadly than "AI internship."</p>
+<p>Academic ML research may sit inside computer science, statistics, electrical engineering, robotics, computational biology, neuroscience or medical research groups.</p>
+<p>Search by the actual topic you want to investigate: computer vision, natural language processing, reinforcement learning, AI safety, interpretability, machine learning for science or another area.</p>
+<p>Many research opportunities will never have "machine learning internship" in their title.</p>
+<p>Our guide on <a href="/blog/machine-learning-research-opportunities-undergraduate">how to find machine learning research opportunities as an undergraduate</a> covers this search in more detail.</p>
+
+<h2>7. National Laboratories and Research Institutes</h2>
+<p>Universities are not the only places that conduct research.</p>
+<p>Depending on your field and eligibility, national laboratories, research institutes, museums, observatories and other research organisations may run undergraduate summer programs.</p>
+<p>These can be particularly relevant in fields where specialised equipment, datasets or facilities are concentrated outside conventional university departments.</p>
+<p>Again, start early. Formal institutional programs often operate on fixed application cycles rather than recruiting continuously.</p>
+
+<h2>8. Research Fellowships That Fund Your Own Project</h2>
+<p>Some undergraduate research programs do not assign you to a lab.</p>
+<p>Instead, you find a faculty mentor and propose a project, then apply for funding to support the work.</p>
+<p>This route requires more initiative, but it can also give you more control over what you study.</p>
+<p>Check whether your university has undergraduate research grants, summer fellowships, departmental awards or independent research funding.</p>
+<p>A professor who says "I'd be happy to work with you, but I don't have money for a summer student" may still be able to supervise you if you secure funding elsewhere.</p>
+
+<h2>Are Summer Research Opportunities Paid?</h2>
+<p><strong>Many summer undergraduate research programs provide funding, but not every research opportunity is paid.</strong></p>
+<p>Funding arrangements vary enormously.</p>
+<p>You might receive a program stipend, hourly pay from a professor's grant, a university fellowship, housing support or some combination of these.</p>
+<p>Other opportunities may offer academic credit rather than pay.</p>
+<p>Read the funding information carefully. A $6,000 stipend with free housing is financially different from a $6,000 stipend where you must pay for ten weeks of accommodation in an expensive city.</p>
+<p>Also check whether travel, meals and local transportation are included.</p>
+
+<h2>Should You Do Unpaid Summer Research?</h2>
+<p><strong>Do not assume you should automatically work for free simply because you want research experience.</strong></p>
+<p>First investigate whether funding is available through the lab, department, undergraduate research office or an external fellowship.</p>
+<p>If an unpaid opportunity is the only option, think about the actual value of the arrangement and whether it is financially realistic for you.</p>
+<p>Will you receive proper supervision? Are you learning research skills? Do you understand the project? Is the time commitment reasonable?</p>
+<p>An unpaid position that provides meaningful mentorship may make sense for some students. An arrangement where you spend an entire summer doing repetitive work with little training is a different proposition.</p>
+<p>If a professor tells you funding is the obstacle, see <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a>.</p>
+
+<h2>Can You Get Summer Research With No Previous Experience?</h2>
+<p><strong>Yes. Some undergraduate summer research programs are specifically designed to give students their first substantial research experience.</strong></p>
+<p>Do not assume that everyone applying already has publications and years of lab work.</p>
+<p>If you have no formal research experience, use the preparation you do have.</p>
+<p>Relevant coursework, laboratory classes, coding, statistics, class projects and independent work can all help demonstrate that you are ready to learn.</p>
+<p>You should also look at each program's stated goals. Some explicitly prioritise students who have limited access to research opportunities at their home institutions.</p>
+
+<h2>Can First-Year Students Apply for Summer Research?</h2>
+<p>Sometimes.</p>
+<p>Eligibility varies by program. Some accept students after their first year, while others target sophomores and juniors or require certain prerequisite courses.</p>
+<p>Do not reject yourself simply because you are early in your degree.</p>
+<p>Search specifically for programs open to first-year students and consider contacting professors at your own university as well.</p>
+<p>Your first summer can also be a useful time to build technical skills or join a lab that you can continue working with during the following academic year.</p>
+
+<h2>Can International Students Apply for Summer Research in the US?</h2>
+<p>Some programs accept international students and others do not.</p>
+<p>NSF-funded REU positions generally have citizenship or permanent-residency requirements for NSF-supported participants, so international students should not rely entirely on REU searches.</p>
+<p>Instead, also look for university-funded summer research programs, visiting undergraduate research programs and individual labs that explicitly accept international students.</p>
+<p>Check eligibility before applying because funding and visa requirements can differ substantially between programs.</p>
+
+<h2>How Competitive Are Summer Research Programs?</h2>
+<p>There is no useful acceptance rate that applies to undergraduate summer research as a whole.</p>
+<p>Some well-known programs receive far more qualified applicants than they can accept. Smaller programs may have different applicant pools, and individual professors may only be choosing one student for a particular project.</p>
+<p>This is why applying only to famous universities is risky.</p>
+<p>A less famous institution with a professor working directly on your research interests could give you a better experience than a prestigious program where your project is only loosely related to what you care about.</p>
+
+<h2>How Many Summer Research Programs Should You Apply To?</h2>
+<p>There is no magic number.</p>
+<p>Apply broadly enough that your summer does not depend on one extremely competitive program, but not so broadly that every application becomes generic.</p>
+<p>A smaller set of well-matched applications is usually more sensible than applying indiscriminately to dozens of programs.</p>
+<p>You can also diversify the way you search.</p>
+<p>For example, apply to several structured programs while simultaneously identifying professors you could contact directly.</p>
+<p>That gives you more than one route to a research position.</p>
+
+<h2>What Do Summer Research Applications Usually Require?</h2>
+<p>Requirements vary, but common materials include a CV or resume, transcript, statement of research interests, personal statement and one or more recommendation letters.</p>
+<p>Some programs ask you to identify faculty mentors or rank research projects.</p>
+<p>This is why starting early matters.</p>
+<p>You need time to investigate the projects rather than choosing three professor names the night before the deadline.</p>
+<p>Recommendation letters also require advance planning. Give your professors enough notice and send them the program details and deadline.</p>
+
+<h2>How Do You Write a Strong Summer Research Statement?</h2>
+<p>Do not spend the entire statement explaining that research is important.</p>
+<p>The selection committee already knows that.</p>
+<p>Explain what has led you toward the research area, what preparation you have and what you hope to learn from this particular program.</p>
+<p>Specificity matters.</p>
+<p>"I am passionate about artificial intelligence and hope to advance the future of technology" says very little.</p>
+<p>Explaining that a class project made you curious about why image classifiers fail under distribution shifts gives the reader something much more concrete.</p>
+<p>If the program lists faculty mentors, connect your interests to relevant work being done there.</p>
+
+<h2>Do You Need a High GPA for Summer Research?</h2>
+<p><strong>There is no universal GPA requirement for summer research.</strong></p>
+<p>Some programs set explicit minimums. Others consider academic performance alongside research interests, coursework, recommendations, previous opportunities and fit with the available projects.</p>
+<p>If you meet the stated eligibility requirements, do not automatically reject yourself because your GPA is not perfect.</p>
+<p>And if you are emailing an individual professor, GPA may be much less important than whether you have the skills needed for a particular project.</p>
+
+<h2>What If You Missed the REU Deadlines?</h2>
+<p>You still have options.</p>
+<p>Look at university-specific programs with later deadlines. Search your own institution's undergraduate research funding. Contact professors directly. Investigate nearby universities, hospitals and research institutes.</p>
+<p>Late openings can also happen when students decline offers or project funding changes.</p>
+<p>Your search may require more effort once formal application season has passed, but you should not assume summer research is completely closed.</p>
+
+<h2>Should You Contact Professors at Other Universities?</h2>
+<p>Yes, although you should check whether the institution allows visiting undergraduate researchers.</p>
+<p>If a professor's work strongly matches your interests, there is nothing inherently wrong with asking whether they take students from other universities during the summer.</p>
+<p>Be clear about where you study, your availability and whether you would need funding.</p>
+<p>Do not assume that a professor can provide housing or solve visa issues. Those practical questions become important if the initial conversation goes well.</p>
+
+<h2>How to Choose Between Two Summer Research Offers</h2>
+<p>Prestige should not be your only criterion.</p>
+<p>Ask what you will actually be doing.</p>
+<p>Who will supervise you? How often will you meet? Is the project already defined? Will you be part of lab meetings? What do previous undergraduates in the group usually work on?</p>
+<p>A well-known lab where you spend ten weeks doing a narrow task with almost no interaction may teach you less than a smaller lab where someone has the time to mentor you properly.</p>
+<p>Before accepting, it is also worth reading our guide to <a href="/blog/research-lab-red-flags">red flags to watch for before joining a research lab</a>.</p>
+
+<h2>How to Make the Most of Summer Research</h2>
+<p>Do not arrive expecting to produce a publication by August.</p>
+<p>Start by understanding the question your project is trying to answer.</p>
+<p>Read the background literature. Learn why your mentor chose the methods you are using. Keep notes on experiments, problems and decisions.</p>
+<p>Ask questions when you do not understand something.</p>
+<p>Research is full of results that do not behave the way anyone expected. Learning how your mentor responds when something fails is part of the experience.</p>
+<p>If the program ends with a poster or presentation, use it as an opportunity to work out whether you can explain the project clearly to someone outside the lab.</p>
+
+<h2>What Should You Do After Summer Research Ends?</h2>
+<p>Stay in touch with your mentor.</p>
+<p>If you attend the same university, ask whether there is a way to continue the project during the academic year.</p>
+<p>If you worked elsewhere, find out whether there are analyses, writing or meetings you can reasonably continue remotely.</p>
+<p>Do not force a project to continue simply for the sake of accumulating more months on your CV, but sustained involvement can become valuable if there is meaningful work left to do.</p>
+<p>You should also keep a record of what you worked on while the details are still fresh.</p>
+
+<h2>A Better Way to Search for Summer Research in 2027</h2>
+<p>Do not begin with a list of famous universities.</p>
+<p>Begin with the research.</p>
+<p>Choose a few topics you genuinely want to explore, then find professors, labs and summer programs working on those questions.</p>
+<p>Apply to structured programs where the fit is strong. Check what funding exists at your own university. Contact individual professors whose work interests you.</p>
+<p>And start before January if you can.</p>
+<p>The students with the most options are not necessarily the ones with the longest CVs. They are often the ones who gave themselves enough time to discover opportunities beyond the first page of search results.</p>
+
+<h2>Frequently Asked Questions About Summer Research Opportunities in 2027</h2>
+
+<h3>When should I apply for summer research 2027?</h3>
+<p>Start researching programs in fall 2026. Many formal summer programs open applications between November and January, with deadlines commonly falling between January and March. Individual labs may recruit on different timelines.</p>
+
+<h3>Where can undergraduates find summer research opportunities?</h3>
+<p>Look at NSF REUs, university undergraduate research offices, individual faculty labs, medical schools, research institutes, national laboratories and summer fellowship programs. You can also contact professors directly about opportunities that are not publicly advertised.</p>
+
+<h3>Are there paid summer research opportunities for undergraduates?</h3>
+<p>Yes. Funding may come through program stipends, faculty grants, university fellowships or hourly research employment. Housing and travel support vary, so compare the full funding package rather than only the advertised stipend.</p>
+
+<h3>Can I do summer research with no experience?</h3>
+<p>Yes. Some summer programs are designed specifically for students who have had limited previous access to research. Relevant coursework, projects, laboratory classes, programming and statistics can help demonstrate preparation.</p>
+
+<h3>What is an REU?</h3>
+<p>REU stands for Research Experiences for Undergraduates. NSF-supported REU Sites provide structured research experiences for undergraduate students at universities and research institutions across a range of disciplines.</p>
+
+<h3>How long are summer research programs?</h3>
+<p>Many structured programs run for roughly eight to ten weeks, although program length varies. Individual research arrangements with professors may have more flexible start and end dates.</p>
+
+<h3>Do summer research programs provide housing?</h3>
+<p>Some provide university housing, a housing allowance or housing assistance, while others expect students to arrange and pay for accommodation themselves. Check this carefully when comparing funding packages.</p>
+
+<h3>Can first-year students apply for summer research?</h3>
+<p>Some programs accept first-year students and others restrict eligibility by year of study or prerequisite coursework. Check individual program requirements rather than assuming you are too early to apply.</p>
+
+<h3>Can international students apply for US summer research programs?</h3>
+<p>Some can. Eligibility depends on the program and funding source. NSF-supported REU positions generally have citizenship or permanent-residency restrictions, while separately funded university programs may have different eligibility rules.</p>
+
+<h3>Do you need a high GPA for summer research?</h3>
+<p>Not universally. Some programs set minimum GPA requirements, while others consider academic preparation alongside research interests, recommendations and fit with available projects.</p>
+
+<h3>Can I email professors directly for summer research?</h3>
+<p>Yes. Direct outreach can uncover research opportunities that are never formally advertised. Research the professor's current work first and ask specifically whether they expect to take undergraduate researchers during summer 2027.</p>
+
+<h3>Is it too late to find summer research in April?</h3>
+<p>Not necessarily. Many formal programs may already have closed, but individual labs, university fellowships and later-deadline programs can still have opportunities. Positions can also reopen when previously selected students decline offers.</p>
+
+<h3>Should I apply to research programs outside my university?</h3>
+<p>Yes. Many summer research programs accept visiting undergraduates. Check eligibility, funding, housing and travel arrangements before applying.</p>
+
+<h3>How many summer research programs should I apply to?</h3>
+<p>There is no ideal number. Apply to enough programs that you are not relying on one highly competitive opportunity, while keeping each application specific to the program and research available there.</p>
+
+<h3>What should I do if I don't get into a summer research program?</h3>
+<p>Contact professors directly, investigate research at your own university, look for programs with later deadlines and check whether undergraduate research grants could fund an independent arrangement with a faculty mentor.</p>
 
 <div class="blog-cta">
-<h2>Find Your Professor Match</h2>
-<p>Research Match helps you find the right professor in 5 minutes. Search by interest, read their papers in plain English, and check your email before sending.</p>
-<a href="/app" class="btn-cta rm-search-btn">Try Research Match for free</a>
+<h2>Start Your Summer 2027 Research Search With the Researchers</h2>
+<p>Research Match helps you find professors based on the topics you actually want to study, understand their recent papers in plain English, and build a shortlist of researchers worth contacting for summer opportunities.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
 </div>`,
-    relatedSlugs: ["how-to-find-research-opportunities", "research-opportunities-for-early-stage-students", "how-to-get-research-experience-undergrad"],
-    datePublished: "2026-03-01",
+    relatedSlugs: ["what-is-an-reu-how-to-get-into-one", "how-to-find-research-positions", "how-to-email-a-research-professor", "how-to-get-research-experience-undergrad"],
+    datePublished: "2026-08-25",
   },
   {
     slug: "research-experience-for-phd-applications",
