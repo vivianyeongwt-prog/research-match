@@ -10,6 +10,287 @@ export interface BlogPost {
 
 export const posts: BlogPost[] = [
   {
+    slug: "research-opportunities-at-another-university",
+    title: "How to Find Research Opportunities at Another University",
+    description: "Can you do research at another university as an undergraduate? Learn how to find visiting research opportunities, contact professors at other schools, get funding, and improve your chances of being accepted.",
+    keyword: "research opportunities at another university",
+    content: `<h2>Can You Do Research at Another University as an Undergraduate?</h2>
+<p><strong>Yes. Undergraduates can do research at universities other than their own through summer research programs, visiting undergraduate programs, research fellowships, formal exchanges and, in some cases, by contacting professors directly.</strong></p>
+<p>You do not have to restrict your research search to the faculty directory at the university you attend.</p>
+<p>This is particularly useful if your school does not have many professors working in the area you want to explore. A student interested in computational neuroscience, for example, might discover that nobody at their university works on the specific problem they care about, while several labs at universities elsewhere do.</p>
+<p>The difficulty is that there is no universal system for becoming a visiting undergraduate researcher. Some universities have formal programs specifically designed for outside students. Other professors may be able to host visiting students individually, while some institutions do not allow informal visiting researchers at all.</p>
+<p>So the process starts with finding the right researcher, but it also requires checking whether there is actually a route for you to work with them.</p>
+
+<h2>Why Look for Research Outside Your Own University?</h2>
+<p>Your home university is usually the easiest place to start looking for research. You are already enrolled there, professors can verify who you are, and administrative requirements tend to be simpler.</p>
+<p>But easier does not necessarily mean better for every student.</p>
+<p>You might attend a smaller college with limited research facilities. Your university may have an excellent biology department but nobody studying the particular area of genetics that interests you. Perhaps you want to explore a field that sits between departments, such as computational medicine or human-computer interaction.</p>
+<p>Looking elsewhere dramatically expands the number of researchers you can consider.</p>
+<p>It can also expose you to a different research environment before graduate school. Spending a summer at another institution gives you a chance to see how another lab operates without committing to a graduate program there.</p>
+
+<h2>What Types of Research Opportunities Can You Find at Another University?</h2>
+<p>There are several routes, and they work quite differently.</p>
+<p>The easiest opportunities to navigate are usually formal visiting undergraduate programs. These have defined eligibility requirements, application deadlines, funding arrangements and dates.</p>
+<p>The less structured route is finding a professor yourself and asking whether there is a way to join their research group.</p>
+<p>Neither route is inherently better.</p>
+<p>A structured program can make housing, funding and administration considerably easier. Direct outreach gives you more freedom to search for researchers based on the exact work you want to do.</p>
+
+<h2>1. Apply to Summer Research Programs at Other Universities</h2>
+<p><strong>Summer research programs are one of the most straightforward ways to conduct research at another university.</strong></p>
+<p>Universities across the United States and elsewhere run programs that bring visiting undergraduates onto campus for several weeks of full-time research.</p>
+<p>Depending on the program, you might apply to a particular research area, rank potential faculty mentors or be matched with a project after admission.</p>
+<p>Many programs provide a stipend, and some also provide housing or travel assistance.</p>
+<p>Search for phrases such as:</p>
+<p><strong>summer undergraduate research program + [university]</strong></p>
+<p><strong>visiting undergraduate research + [university]</strong></p>
+<p><strong>summer research internship + [subject]</strong></p>
+<p><strong>undergraduate research fellowship + [university]</strong></p>
+<p>Do not assume that a program is only for students already enrolled at the host institution. Check the eligibility section.</p>
+<p>Our guide to <a href="/blog/summer-research-opportunities">summer research opportunities for undergraduates</a> explains where else to search and when to start applying.</p>
+
+<h2>2. Look for NSF REU Programs</h2>
+<p>If you are studying a STEM subject in the United States, Research Experiences for Undergraduates are worth knowing about.</p>
+<p><strong>NSF REU Sites are structured research programs hosted by universities and other research institutions, and a significant fraction of participants at an REU Site are expected to come from outside the host institution.</strong></p>
+<p>That makes them particularly relevant if your goal is to spend a summer conducting research somewhere other than your own university.</p>
+<p>REUs exist across NSF-supported areas including computer science, biology, chemistry, engineering, mathematics, physics, geosciences and social and behavioural sciences.</p>
+<p>Students apply to individual REU Sites rather than submitting one general application for every program.</p>
+<p>Eligibility restrictions apply to NSF-funded participants, so check the current requirements before building your summer plans around an REU.</p>
+<p>For a deeper explanation, see <a href="/blog/what-is-an-reu-how-to-get-into-one">what an REU is and how to get into one</a>.</p>
+
+<h2>3. Contact Professors at Other Universities Directly</h2>
+<p><strong>You can also email professors at universities you do not attend and ask about undergraduate research opportunities.</strong></p>
+<p>This route is less predictable because the professor needs more than an interesting project.</p>
+<p>They need to be willing to supervise you, have an appropriate project, and work at an institution that allows whatever visiting arrangement would be required.</p>
+<p>Funding, insurance, laboratory access, data access and institutional policies can all become relevant.</p>
+<p>That should not stop you from asking.</p>
+<p>It simply means the first email should be treated as the beginning of a conversation rather than an application to a position you know exists.</p>
+
+<h2>How Do You Find Professors at Other Universities?</h2>
+<p>This is where many students make the search unnecessarily difficult.</p>
+<p>They choose a list of prestigious universities and start opening department directories.</p>
+<p>Try reversing the process.</p>
+<p><strong>Start with the research question, then find the universities.</strong></p>
+<p>If you are interested in machine learning for protein design, search for researchers working on machine learning for protein design.</p>
+<p>If you are interested in memory consolidation during sleep, look for researchers publishing on sleep and memory.</p>
+<p>The professor whose work fits you best may be at a university you had never considered.</p>
+<p><a href="/app">Research Match</a> is designed around this approach. Instead of working through university directories one at a time, you can search by research interest, discover professors whose work overlaps with what you want to study, and understand their recent papers before deciding who is worth contacting.</p>
+
+<h2>Should You Only Contact Professors at Prestigious Universities?</h2>
+<p>No.</p>
+<p>If you search only Harvard, Stanford, MIT and a handful of similarly famous universities, you are narrowing your options for reasons that have little to do with the research itself.</p>
+<p>A professor at another institution may be doing work that fits your interests much more closely. They may also run a smaller group where an undergraduate can become meaningfully involved in a project.</p>
+<p>Research fit, mentorship and the project itself should carry more weight than the university name.</p>
+<p>This is especially important if you eventually want to apply to graduate school. You want experience doing research, not merely proximity to a famous university logo.</p>
+
+<h2>Should You Contact Assistant Professors at Other Universities?</h2>
+<p>Absolutely.</p>
+<p>Assistant professors can run their own research groups and supervise undergraduate researchers. Some are also in the process of establishing new labs and developing new projects.</p>
+<p>Do not automatically assume that the most senior professor in a department will provide the best undergraduate opportunity.</p>
+<p>An early-career professor whose research closely matches your interests may be a much more sensible person to contact.</p>
+<p>Read our guide on <a href="/blog/should-you-contact-assistant-professors-for-research">whether you should contact assistant professors for research</a> for more on this.</p>
+
+<h2>How Do You Email a Professor at Another University for Research?</h2>
+<p>Your email should answer one question particularly well: <strong>Why are you contacting this professor when you do not even attend their university?</strong></p>
+<p>The research itself should provide the answer.</p>
+<p>For example:</p>
+<blockquote>Subject: Visiting undergraduate interested in your computational neuroscience research<br><br>
+Dear Professor Ramirez,<br><br>
+I came across your group's recent work on modelling decision-making under uncertainty and was particularly interested in your use of behavioural data to test changes in learning strategy.<br><br>
+I am a second-year computer science student at [University]. My university has limited research in computational neuroscience, and I have been looking for opportunities to gain experience at the intersection of machine learning and cognition. I have completed coursework in probability and machine learning and currently use Python and PyTorch.<br><br>
+I wanted to ask whether you ever take visiting undergraduate researchers, particularly during the summer. I would be happy to send my CV and further information if useful.<br><br>
+Best,<br>
+[Your Name]</blockquote>
+<p>The email explains why you looked outside your university without turning the lack of opportunities at your school into the entire pitch.</p>
+<p>For more on the structure itself, read <a href="/blog/how-to-email-a-research-professor">how to email a research professor about joining their lab</a>.</p>
+
+<h2>Should You Mention Why You Are Looking Outside Your University?</h2>
+<p>If there is a genuine reason, yes.</p>
+<p>You might attend a liberal arts college without extensive laboratory facilities. Your university might not have anyone working in a particular niche. Or perhaps the professor you are contacting has developed a method you specifically want to learn.</p>
+<p>You can explain that in a sentence.</p>
+<p>What you should avoid is insulting your own university.</p>
+<p>There is no need to write that the professors at your school are not good enough or that you want experience at a "better" university.</p>
+<p>Keep the explanation about research fit.</p>
+
+<h2>Should You Ask for a Remote Research Position?</h2>
+<p>You can, if the work could realistically be done remotely.</p>
+<p>Computational research, literature-based projects, some forms of data analysis and certain theoretical projects may be more adaptable to remote work than experimental laboratory research.</p>
+<p>But do not assume that because a project uses a computer, the professor is willing or permitted to supervise a remote visiting student.</p>
+<p>You can ask:</p>
+<blockquote>If an in-person visiting position isn't possible, do you ever work with undergraduate researchers remotely on computational projects?</blockquote>
+<p>This gives the professor an easy way to tell you whether that arrangement exists.</p>
+
+<h2>Can You Do Research at Another University During the Semester?</h2>
+<p><strong>Potentially, yes, particularly if the other university is nearby or the project can be conducted remotely.</strong></p>
+<p>The practical difficulties are greater than during summer because you are still taking classes at your home institution.</p>
+<p>A nearby research university may nevertheless be realistic.</p>
+<p>If you attend a smaller college in a city with several universities and hospitals, expanding your search geographically can uncover research groups you would never find by looking only at your own department.</p>
+<p>Before committing, consider transportation and the actual weekly schedule. A lab that requires you to travel an hour each way for a four-hour shift may become difficult once exams begin.</p>
+
+<h2>Can You Do Research at Another University Over the Summer?</h2>
+<p><strong>Yes, and summer is often the easiest time to do it.</strong></p>
+<p>You are not trying to fit another university's research schedule around a full semester of classes, and many institutions already have administrative structures for summer undergraduate researchers.</p>
+<p>This could happen through an REU, another formal summer research program, a fellowship or an individual arrangement with a professor.</p>
+<p>If you want summer research, start searching months ahead rather than waiting until the semester ends.</p>
+
+<h2>Can You Get Paid to Do Research at Another University?</h2>
+<p>Yes.</p>
+<p>A formal program may provide a stipend. A professor may have grant funding for undergraduate researchers. Your own university might offer a fellowship that can be used for research elsewhere.</p>
+<p>Some programs also provide housing, meals or travel assistance.</p>
+<p>If a professor is interested but cannot fund you directly, investigate whether your home university has undergraduate research grants or summer fellowships.</p>
+<p>A conversation that begins with "I don't have funding for another student" does not always mean the project itself is impossible.</p>
+<p>Our guide on <a href="/blog/professor-said-no-funding-should-i-still-ask-to-join">what to do when a professor says they have no funding</a> explains some of the options.</p>
+
+<h2>Can Your Own University Fund Research Somewhere Else?</h2>
+<p>Sometimes.</p>
+<p>Undergraduate research offices may offer grants or fellowships that support student projects, including work conducted with researchers outside the home university.</p>
+<p>The rules vary considerably, so this is something worth asking about rather than assuming.</p>
+<p>Look for an undergraduate research office, honours program, fellowship office or departmental research coordinator.</p>
+<p>Ask specifically whether funding can be used for an external faculty mentor.</p>
+<p>This can be useful when you find a professor who is willing to supervise you but does not have money available for another undergraduate.</p>
+
+<h2>What About Housing and Travel?</h2>
+<p>This is one of the biggest differences between doing research at your own university and going elsewhere.</p>
+<p>Before accepting an opportunity, work out where you would live and who is paying for it.</p>
+<p>A summer stipend that initially sounds generous can look very different if you need to fund ten weeks of accommodation in an expensive city.</p>
+<p>Formal summer programs may provide university housing or a housing allowance. Individual professors are less likely to have a ready-made solution.</p>
+<p>Also consider flights, local transportation, meals and any fees associated with becoming a visiting researcher.</p>
+
+<h2>Do You Need Permission From Your Own University?</h2>
+<p>Not always, but check before assuming you do not.</p>
+<p>If you are simply taking a paid summer research position elsewhere, your home university may have little involvement.</p>
+<p>If you want academic credit, fellowship funding or the research to count toward an honours thesis, approval may be necessary.</p>
+<p>Talk to the relevant department or undergraduate research office before finalising the arrangement.</p>
+
+<h2>Will the Other University Let You Into the Lab?</h2>
+<p>This is a separate question from whether the professor wants you.</p>
+<p>Universities may have procedures for visiting researchers involving identification, safety training, insurance, background checks, data-security requirements or research ethics training.</p>
+<p>Labs working with human participants, medical information, animals or hazardous materials may have additional requirements.</p>
+<p>A professor saying "I'd be happy to have you" may therefore be the beginning rather than the end of the administrative process.</p>
+<p>Ask what needs to happen before you can formally join the group.</p>
+
+<h2>Can International Students Do Research at Another University?</h2>
+<p>Potentially, but eligibility can become more complicated.</p>
+<p>Formal programs may have citizenship, enrolment or visa restrictions. Funding sources can also affect eligibility.</p>
+<p>For example, NSF-supported REU participants must meet the program's citizenship or permanent-residency requirements.</p>
+<p>That does not mean international students cannot do research at other universities. It means they should also look at university-funded programs, individual labs and opportunities that explicitly accept international applicants.</p>
+<p>Always check the eligibility language rather than assuming that every undergraduate research program uses the same rules.</p>
+
+<h2>What If You Go to a Community College or Small University?</h2>
+<p><strong>Looking outside your institution can be particularly valuable if your home college has limited research infrastructure.</strong></p>
+<p>You are not necessarily at a disadvantage simply because your university does not operate dozens of research labs.</p>
+<p>In fact, some structured undergraduate research programs specifically aim to bring in students who have limited access to research at their home institutions.</p>
+<p>NSF's REU model, for example, requires REU Sites to recruit a significant fraction of participants from outside the host institution, with particular attention to students from institutions where research opportunities are limited.</p>
+<p>So do not interpret a lack of labs at your college as meaning research is unavailable to you.</p>
+<p>It means your search needs to extend beyond your own campus.</p>
+
+<h2>What If You Have No Previous Research Experience?</h2>
+<p>You can still apply.</p>
+<p>Some visiting undergraduate programs are designed precisely to give students substantial research experience.</p>
+<p>For direct outreach, explain the preparation you do have.</p>
+<p>That might include laboratory courses, statistics, programming, research methods, a substantial class project or subject-specific coursework.</p>
+<p>You do not need to pretend that a class laboratory makes you an experienced researcher.</p>
+<p>Simply give the professor enough information to understand where you are starting from.</p>
+<p>See <a href="/blog/how-to-get-research-experience-undergrad">how to get research experience as an undergraduate</a> if you are looking for your first position.</p>
+
+<h2>Is Research at Another University More Competitive?</h2>
+<p>It can be.</p>
+<p>Formal summer programs may receive applications from students across many universities, and a professor has fewer reasons to take on the administrative work of hosting an external student if there is no clear research fit.</p>
+<p>That makes specificity especially important.</p>
+<p>If your email essentially says, "Your university is prestigious and I need research experience," there is not much reason for that particular professor to respond.</p>
+<p>If you can explain why their recent project directly overlaps with something you want to study, the conversation is very different.</p>
+
+<h2>Should You Contact Multiple Professors at the Same University?</h2>
+<p>Yes, if their research genuinely interests you.</p>
+<p>Do not send the same email to an entire department.</p>
+<p>If three professors at one university independently match your interests, it is reasonable to contact all three with individually written emails.</p>
+<p>You also do not need to wait several weeks for one professor to reject you before contacting another.</p>
+<p>Your goal is to find a research fit, not to conduct your search one professor at a time.</p>
+
+<h2>What If the Professor Does Not Reply?</h2>
+<p>Send one polite follow-up after roughly one to two weeks.</p>
+<p>If there is still no response, continue your search.</p>
+<p>A professor at another institution may be interested in your background but simply unable to host an external student. They may not have funding, space or an appropriate project.</p>
+<p>Silence is frustrating, but it is not a reason to stop searching.</p>
+<p>Read <a href="/blog/how-to-follow-up-with-a-professor">how to follow up with a professor</a> if you are unsure what to send.</p>
+
+<h2>What If a Professor Says Yes?</h2>
+<p>Do not immediately book a flight.</p>
+<p>Find out what "yes" actually means.</p>
+<p>Ask what project you would work on, who would supervise you day to day, when you would start, how long you would stay and what weekly commitment is expected.</p>
+<p>Then clarify funding, housing and the university's visiting researcher requirements.</p>
+<p>If you are considering several opportunities, mentorship should be part of the decision. A professor's willingness to accept you does not automatically mean the lab will be a good environment.</p>
+<p>Before committing, look through our guide to <a href="/blog/research-lab-red-flags">research lab red flags to watch for before joining</a>.</p>
+
+<h2>Is Research at Another University Better for Graduate School?</h2>
+<p><strong>Research at another university is not automatically more impressive than research at your own university.</strong></p>
+<p>Do not travel across the country solely because you think an external university name will look better on your CV.</p>
+<p>The substance of the experience matters more.</p>
+<p>A year working closely with a professor at your own university, gradually taking responsibility for a project, may be much more valuable than spending six weeks doing a narrow task at a famous institution.</p>
+<p>On the other hand, an external opportunity can be extremely useful when it gives you access to research, methods or mentorship that you cannot find at home.</p>
+<p>Choose the opportunity for what you will actually learn and do.</p>
+
+<h2>A Practical Strategy for Finding Research at Another University</h2>
+<p>Do not start by making a list of universities.</p>
+<p>Make a list of research interests.</p>
+<p>Pick two or three topics you would genuinely like to explore and find researchers working on them. Look beyond the institutions you already know.</p>
+<p>Once you find a professor, investigate whether their university has a formal summer or visiting undergraduate program. A structured program may be the easiest route into the lab.</p>
+<p>If there is no obvious program, check the professor's lab website and consider contacting them directly.</p>
+<p>At the same time, look for external funding from your own university and relevant research fellowships.</p>
+<p>This gives you several possible routes instead of depending on a single cold email.</p>
+
+<h2>Frequently Asked Questions About Research at Another University</h2>
+
+<h3>Can I do research at a university I don't attend?</h3>
+<p>Yes. Students can conduct research at other universities through formal summer programs, visiting undergraduate programs, fellowships and individual arrangements with professors. Eligibility and administrative requirements vary by institution.</p>
+
+<h3>How do I find research opportunities at another university?</h3>
+<p>Search for visiting undergraduate and summer research programs, look at REU opportunities if eligible, and identify professors at other universities whose research matches your interests. You can also contact individual professors about opportunities that are not formally advertised.</p>
+
+<h3>Can I email a professor at another university for research?</h3>
+<p>Yes. Explain why their specific research interests you, briefly describe your relevant background, identify your home university and ask whether they ever take visiting undergraduate researchers.</p>
+
+<h3>Can I do research at another university over the summer?</h3>
+<p>Yes. Summer is a common time for visiting undergraduate research because universities offer structured programs and students can work full-time without fitting research around a normal class schedule.</p>
+
+<h3>Can I do research at another university during the semester?</h3>
+<p>Potentially. This is most practical when the university is nearby or the research can be conducted remotely. You will need to consider transportation, scheduling and any institutional requirements for visiting researchers.</p>
+
+<h3>Can I get paid for research at another university?</h3>
+<p>Yes. Funding can come from a summer research program, the host professor's grant, a fellowship or sometimes your home university. Funding arrangements vary considerably between opportunities.</p>
+
+<h3>Do I need research experience before applying to another university?</h3>
+<p>Not necessarily. Some undergraduate research programs welcome students with little or no previous formal research experience. Relevant coursework, laboratory classes, programming, statistics and class projects can help demonstrate preparation.</p>
+
+<h3>Can community college students do research at universities?</h3>
+<p>Yes. Some undergraduate research programs specifically recruit students from institutions where research opportunities are limited, including two-year colleges. Check each program's eligibility requirements.</p>
+
+<h3>Can international students do research at another US university?</h3>
+<p>Some opportunities accept international students and others have citizenship or residency restrictions because of their funding source. International students should check eligibility carefully and investigate university-funded programs and individual labs in addition to federally funded opportunities.</p>
+
+<h3>Should I contact multiple universities for research?</h3>
+<p>Yes. There is no reason to make your research search depend on one institution. Find researchers whose work genuinely matches your interests across several universities and pursue the strongest opportunities.</p>
+
+<h3>Is research at a prestigious university better for grad school?</h3>
+<p>Not automatically. The quality of the research experience, your contribution, the skills you develop and the relationship you build with your mentor can matter much more than the university name.</p>
+
+<h3>What should I ask before accepting research at another university?</h3>
+<p>Ask what project you will work on, who will supervise you, what hours are expected, whether the position is funded, whether housing or travel support is available and what administrative requirements apply to visiting students.</p>
+
+<h3>Can I do research remotely for another university?</h3>
+<p>Sometimes. Computational, theoretical and data-based projects may be more suitable for remote research than laboratory work. Whether a professor accepts remote undergraduate researchers depends on the project and university policies.</p>
+
+<h3>What if my university has very few research opportunities?</h3>
+<p>Expand your search to nearby universities, summer research programs, REUs, hospitals and research institutes. You can also ask whether your university offers funding that can be used to conduct research with an external faculty mentor.</p>
+
+<div class="blog-cta">
+<h2>Your Research Search Doesn't Have to Stop at Your University</h2>
+<p>Research Match helps you search for professors based on what you actually want to study, not just the faculty available on your campus. Discover researchers at other universities, understand their recent work in plain English, and find professors worth contacting about research opportunities.</p>
+<a href="/app" class="btn-cta rm-search-btn">Find professors with Research Match</a>
+</div>`,
+    relatedSlugs: ["summer-research-opportunities", "how-to-find-research-positions", "how-to-email-a-research-professor", "what-is-an-reu-how-to-get-into-one"],
+    datePublished: "2026-08-31",
+  },
+  {
     slug: "research-lab-red-flags",
     title: "Red Flags to Watch for Before Joining a Research Lab",
     description: "Learn the research lab red flags to watch for before joining. From poor mentorship and unclear expectations to authorship problems and unhealthy lab culture, here's what students should check first.",
